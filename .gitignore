@@ -7,3 +7,8 @@
 *.toc
 *.lof
 *.synctex.gz
+
+# IntelliJ
+.idea
+.DS_Store
+target/
