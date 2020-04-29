@@ -7,3 +7,16 @@
 [João Imperadeiro](https://github.com/JRI98)  
 [José Boticas](https://github.com/SacitobJose)  
 [Nelson Teixeira](https://github.com/Nelson198)  
+
+### Instalação
+
+* Ficheiro *.jar* relativo ao *spread*:
+
+```bash
+mvn install:install-file -Dfile=/path/to/spread-4.4.0.jar \
+                         -DgroupId=org.spread \
+                         -DartifactId=spread \
+                         -Dversion=4.4.0 \
+                         -Dpackaging=jar \
+                         -DgeneratePom=true
+```
