@@ -107,7 +107,7 @@ public class Supermarket {
             // TODO
         }, executor);
 
-        ms.registerHandler("confirmOrder", (address, bytes) -> {
+        ms.registerHandler("checkout", (address, bytes) -> {
             // TODO
         }, executor);
 
