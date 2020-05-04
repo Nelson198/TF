@@ -1,3 +1,5 @@
+import io.atomix.utils.net.Address;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -7,6 +9,10 @@ import java.io.InputStreamReader;
  */
 public class Client {
     private static final BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
+    private final HashMap<String, CartStub> carts = new HashMap<String, CartStub>();
+
+    ManagedMessagingService ms = new NettyMessagingService("supermarket", Address.from(Integer.parseInt(args[0])), new MessagingConfig());
+
 
     /**
      * clearTerminal
@@ -38,12 +44,12 @@ public class Client {
     private static void menu() throws IOException {
         while (true) {
             StringBuilder main = new StringBuilder();
-            main.append("Bem-vindo ao nosso supermercado. O que pretende realizar?\n")
-                .append("1 - Iniciar uma compra\n")
-                .append("2 - Consultar o preço de um produto\n")
-                .append("3 - Consultar a disponibilidade de um produto\n")
-                .append("4 - Confirmar uma encomenda\n")
-                .append("5 - Sair\n");
+            main.append("Welcome to our supermarket. Choose an option?\n")
+                .append("1 - Create a cart\n")
+                .append("2 - Check a product's price\n")
+                .append("3 - Check a product's availability\n")
+                .append("4 - Checkout\n")
+                .append("5 - Disconnect\n");
 
             clearTerminal();
             System.out.println(main.toString());
@@ -55,7 +61,11 @@ public class Client {
 
             switch (choice) {
                 case 1:
-                    System.out.println(1);
+                    System.out.println("Choose a name for your cart:\n");
+                    String name = stdin.readLine();
+                    // rever e acabar
+                    CartStub cart = new CartStub(conn);
+                    carts.put(name, cart);
                     break;
 
                 case 2:
