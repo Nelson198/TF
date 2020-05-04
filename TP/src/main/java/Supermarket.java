@@ -8,6 +8,9 @@ import spread.*;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -27,18 +30,21 @@ public class Supermarket {
     // Initialize the spread connection
     SpreadConnection c = new SpreadConnection();
 
+    // Database connection
+    Connection dbConnection;
+
     // Skeleton for the catalog
     Catalog catalog = new Catalog();
 
     // Skeletons for the carts
     HashMap<Integer, CartSkeleton> carts = new HashMap<Integer, CartSkeleton>();
 
-    public Supermarket(int port) throws SpreadException, UnknownHostException, ExecutionException, InterruptedException {
+    public Supermarket(String port) throws SpreadException, UnknownHostException, ExecutionException, InterruptedException {
         initializeSpread(port);
-        initializeAtomix(port);
+        initializeAtomix(Integer.parseInt(port));
     }
 
-    public void initializeSpread(int port) throws SpreadException, UnknownHostException {
+    public void initializeSpread(String port) throws SpreadException, UnknownHostException {
         // Initialize the spread connection
         SpreadConnection c = new SpreadConnection();
         c.connect(InetAddress.getByName("localhost"), 4803, port, false, true);
@@ -48,7 +54,18 @@ public class Supermarket {
         c.add(new AdvancedMessageListener() {
             @Override
             public void regularMessageReceived(SpreadMessage spreadMessage) {
-                // ... = aux.serializer.decode(spreadMessage.getData());
+                Message ms = aux.serializer.decode(spreadMessage.getData());
+                switch (ms.getType()) {
+                    case "database":
+                        DatabaseMessage dbMsg = (DatabaseMessage) ms;
+                        // ........ update the db file
+                        try {
+                            aux.dbConnection = DriverManager.getConnection("jdbc:hsqldb:file:supermarket" + port, "SA", "")
+                        } catch (SQLException exception) {
+                            exception.printStackTrace();
+                        }
+                        break;
+                }
             }
 
             @Override
@@ -79,6 +96,8 @@ public class Supermarket {
         // Initialize the messaging service and register messaging service handlers
         ManagedMessagingService ms = new NettyMessagingService("bank", Address.from(port), new MessagingConfig());
         ExecutorService executor = Executors.newFixedThreadPool(1);
+
+        Supermarket aux = this;
 
         ms.registerHandler("newCart", (address, bytes) -> {
             // TODO
@@ -113,7 +132,7 @@ public class Supermarket {
             System.exit(1);
         }
 
-        Supermarket si = new Supermarket(Integer.parseInt(args[0]));
+        Supermarket si = new Supermarket(args[0]);
 
         System.out.println("Server is running...");
 
