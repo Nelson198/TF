@@ -51,7 +51,7 @@ public class Client {
             int choice;
             do {
                 choice = readInt();
-            } while (choice < 1 || choice > 7);
+            } while (choice < 1 || choice > 5);
 
             switch (choice) {
                 case 1:

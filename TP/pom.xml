@@ -23,6 +23,16 @@
             <artifactId>atomix-utils</artifactId>
             <version>3.1.5</version>
         </dependency>
+        <dependency>
+            <groupId>io.atomix</groupId>
+            <artifactId>atomix-cluster</artifactId>
+            <version>3.1.5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hsqldb</groupId>
+            <artifactId>hsqldb</artifactId>
+            <version>2.5.0</version>
+        </dependency>
     </dependencies>
 
     <build>

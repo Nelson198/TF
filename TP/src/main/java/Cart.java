@@ -1,8 +1,7 @@
 /**
- * Cart
+ * Cart Interface
  */
-public class Cart {
-    public static void main(String[] args) {
-        
-    }
+public interface Cart {
+    // Acrescentar um produto ao carrinho de compras
+    public void addProduct(String idProduct);
 }
