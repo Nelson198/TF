@@ -2,6 +2,9 @@
  * Cart Interface
  */
 public interface Cart {
-    // Acrescentar um produto ao carrinho de compras
+    /**
+     * Add a product to the cart
+     * @param idProduct Product identifier
+     */
     public void addProduct(String idProduct);
 }

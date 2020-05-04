@@ -1,5 +1,3 @@
-import io.atomix.cluster.messaging.MessagingConfig;
-import io.atomix.cluster.messaging.impl.NettyMessagingService;
 import io.atomix.utils.net.Address;
 import io.atomix.utils.serializer.Serializer;
 import io.atomix.utils.serializer.SerializerBuilder;
@@ -24,6 +22,13 @@ public class CartStub {
     ExecutorService executor = Executors.newFixedThreadPool(1);
     CompletableFuture<Boolean> res;
 
+    /**
+     * Parameterized constructor
+     * @param ms Stub address
+     * @param serverAddress Server address
+     * @throws ExecutionException ExecutionException
+     * @throws InterruptedException InterruptedException
+     */
     public CartStub(ManagedMessagingService ms, Address serverAddress) throws ExecutionException, InterruptedException {
         // Initialize the messaging service
         this.ms = ms;
@@ -41,16 +46,29 @@ public class CartStub {
         ms.start().get();
     }
 
+    /**
+     * Add product
+     * @param idProduct Product's identifier
+     * @param qtd Product's quantity
+     */
     public void addProduct(String idProduct, int qtd) {
         CartUpdate toSend = new CartUpdate(idCart, idProduct, qtd);
         this.ms.sendAsync(serverAddress, "addProduct", this.serializer.encode(toSend));
     }
 
+    /**
+     * Remove product
+     * @param idProduct Product's identifier
+     * @param qtd Product's quantity
+     */
     public void removeProduct(String idProduct, int qtd) {
         CartUpdate toSend = new CartUpdate(idCart, idProduct, qtd);
         this.ms.sendAsync(serverAddress, "removeProduct", this.serializer.encode(toSend));
     }
 
+    /**
+     * Checkout
+     */
     public void checkout() {
         this.res = new CompletableFuture<>();
         this.ms.sendAsync(serverAddress, "checkout", this.serializer.encode(idCart));

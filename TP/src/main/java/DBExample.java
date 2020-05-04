@@ -4,7 +4,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+/**
+ * DBExample
+ */
 public class DBExample {
+    /**
+     * Get costumers
+     */
     public static void getCustomers() {
         Connection conn = null;
         String db = "jdbc:hsqldb:file:testDB";
