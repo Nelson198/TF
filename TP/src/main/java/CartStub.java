@@ -14,7 +14,7 @@ import java.util.concurrent.Executors;
 public class CartStub {
     String idCart;
 
-    Serializer serializer = new SerializerBuilder().addType(String.class).build();
+    Serializer serializer = new SerializerBuilder().addType(CartUpdate.class).addType(String.class).build();
 
     ManagedMessagingService ms;
     Address serverAddress;
@@ -70,7 +70,6 @@ public class CartStub {
      * Checkout
      */
     public void checkout() {
-        this.res = new CompletableFuture<>();
         this.ms.sendAsync(serverAddress, "checkout", this.serializer.encode(idCart));
     }
 }

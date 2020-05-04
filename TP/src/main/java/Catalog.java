@@ -32,4 +32,30 @@ public class Catalog {
         }
         return price;
     }
+
+    /**
+     * Get product's availability
+     * @param connection Connection
+     * @param idProduct Product's identifier
+     * @return
+     */
+    public boolean getAvailability(Connection connection, String idProduct) {
+        boolean availability = false;
+        try {
+            // Create and execute statement
+            Statement stmt = connection.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT amount FROM product WHERE id=" + idProduct);
+
+            // Get result from query
+            availability = rs.getInt("amount") > 0;
+
+            // Clean up
+            rs.close();
+            stmt.close();
+
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
+        return availability;
+    }
 }

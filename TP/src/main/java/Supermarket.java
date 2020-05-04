@@ -39,11 +39,25 @@ public class Supermarket {
     // Skeletons for the carts
     HashMap<Integer, CartSkeleton> carts = new HashMap<Integer, CartSkeleton>();
 
+    /**
+     * Parameterized constructor
+     * @param port Port
+     * @throws SpreadException SpreadException
+     * @throws UnknownHostException UnknownHostException
+     * @throws ExecutionException ExecutionException
+     * @throws InterruptedException InterruptedException
+     */
     public Supermarket(String port) throws SpreadException, UnknownHostException, ExecutionException, InterruptedException {
         initializeSpread(port);
         initializeAtomix(Integer.parseInt(port));
     }
 
+    /**
+     * initializeSpread
+     * @param port Port
+     * @throws SpreadException SpreadException
+     * @throws UnknownHostException UnknownHostException
+     */
     public void initializeSpread(String port) throws SpreadException, UnknownHostException {
         // Initialize the spread connection
         SpreadConnection c = new SpreadConnection();
@@ -92,6 +106,12 @@ public class Supermarket {
         g.join(c, "supermarket");
     }
 
+    /**
+     * initializeAtomix
+     * @param port Port
+     * @throws ExecutionException ExecutionException
+     * @throws InterruptedException InterruptedException
+     */
     public void initializeAtomix(int port) throws ExecutionException, InterruptedException {
         // Initialize the messaging service and register messaging service handlers
         ManagedMessagingService ms = new NettyMessagingService("bank", Address.from(port), new MessagingConfig());

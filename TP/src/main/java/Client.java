@@ -35,7 +35,7 @@ public class Client {
     /**
      * readInt
      * @return User's option
-     * @throws IOException
+     * @throws IOException IOException
      */
     private static int readInt() throws IOException {
         while (true) {
@@ -47,15 +47,20 @@ public class Client {
         }
     }
 
+    /**
+     * Cart's menu
+     * @param cartName cartName
+     * @throws IOException IOException
+     */
     private static void menuCart(String cartName) throws IOException {
         CartStub cs = carts.get(cartName);
         while(true) {
             StringBuilder cart = new StringBuilder();
             cart.append("What do you want to do?\n")
-                    .append("1 - Add product\n")
-                    .append("2 - Remove product\n")
-                    .append("3 - Checkout\n")
-                    .append("4 - Get back\n");
+                .append("1 - Add product\n")
+                .append("2 - Remove product\n")
+                .append("3 - Checkout\n")
+                .append("4 - Get back\n");
 
             clearTerminal();
             System.out.println(cart.toString());
@@ -87,8 +92,10 @@ public class Client {
     }
 
     /**
-     * menu
-     * @throws IOException
+     * Main menu
+     * @throws IOException IOException
+     * @throws ExecutionException ExecutionException
+     * @throws InterruptedException InterruptedException
      */
     private static void menu() throws IOException, ExecutionException, InterruptedException {
         while (true) {
