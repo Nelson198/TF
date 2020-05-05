@@ -12,13 +12,10 @@ import java.util.concurrent.Executors;
  * Cart Stub
  */
 public class CartStub {
-    String idCart;
-
+    String idCart; // ?
     Serializer serializer = new SerializerBuilder().addType(CartUpdate.class).addType(String.class).build();
-
     ManagedMessagingService ms;
     Address serverAddress;
-
     ExecutorService executor = Executors.newFixedThreadPool(1);
     CompletableFuture<Boolean> res;
 

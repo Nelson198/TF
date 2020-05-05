@@ -51,8 +51,8 @@ public class CartImpl implements Cart {
         if (!this.products.containsKey(idProduct)) {
             this.products.put(idProduct, 1);
         } else {
-            int quantity = this.products.get(idProduct);
-            this.products.put(idProduct, quantity + 1);
+            int amount = this.products.get(idProduct);
+            this.products.put(idProduct, amount + 1);
         }
     }
 }

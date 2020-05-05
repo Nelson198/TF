@@ -42,7 +42,7 @@ public class Client {
             try {
                 return Integer.parseInt(stdin.readLine());
             } catch (NumberFormatException exc) {
-                System.out.println("Por favor, introduza um número");
+                System.out.println("Please enter a number.");
             }
         }
     }
@@ -157,7 +157,7 @@ public class Client {
             servers.add(Address.from(Integer.parseInt(args[0])));
         }
         Random rand = new Random();
-        int server = rand.nextInt(args.length-1) + 1;
+        int server = rand.nextInt(args.length - 1) + 1;
         serverAddress = servers.get(server);
 
         ms = new NettyMessagingService("client", myAddress, new MessagingConfig());

@@ -4,7 +4,13 @@ import io.atomix.cluster.messaging.impl.NettyMessagingService;
 import io.atomix.utils.net.Address;
 import io.atomix.utils.serializer.Serializer;
 import io.atomix.utils.serializer.SerializerBuilder;
-import spread.*;
+
+import spread.AdvancedMessageListener;
+import spread.MembershipInfo;
+import spread.SpreadConnection;
+import spread.SpreadException;
+import spread.SpreadGroup;
+import spread.SpreadMessage;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -154,7 +160,7 @@ public class Supermarket {
 
         Supermarket si = new Supermarket(args[0]);
 
-        System.out.println("Server is running...");
+        System.out.println("Server is running on port " + args[0] + " ...");
 
         new CompletableFuture<>().get();
     }
