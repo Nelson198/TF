@@ -8,7 +8,7 @@ import java.sql.SQLException;
  */
 public class Catalog {
     /**
-     * Get catalog
+     * Get catalog information
      * @param connection Connection
      */
     public String getCatalog(Connection connection) {

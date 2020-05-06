@@ -48,6 +48,14 @@ public class CartSkeleton {
     }
 
     /**
+     * Get the connection to DB
+     * @return DB's connection
+     */
+    public Connection getConnection() {
+        return this.connection;
+    }
+
+    /**
      * Add a product to the cart
      * @param idProduct Product identifier
      */

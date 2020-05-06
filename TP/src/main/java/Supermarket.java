@@ -148,7 +148,9 @@ public class Supermarket {
         }, executor);
 
         ms.registerHandler("getCatalog", (address, bytes) -> {
-            // TODO
+            Connection c = aux.serializer.decode(bytes);
+            String res = catalog.getCatalog(c);
+            ms.sendAsync(address, "res", serializer.encode(res));
         }, executor);
 
         ms.registerHandler("getProduct", (address, bytes) -> {
