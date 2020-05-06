@@ -77,14 +77,20 @@ public class Supermarket {
             public void regularMessageReceived(SpreadMessage spreadMessage) {
                 Message ms = aux.serializer.decode(spreadMessage.getData());
                 switch (ms.getType()) {
-                    case "database":
-                        DatabaseMessage dbMsg = (DatabaseMessage) ms;
+                    case "db":
+                        DBMessage dbMsg = (DBMessage) ms;
                         // ........ update the db file
                         try {
                             aux.dbConnection = DriverManager.getConnection("jdbc:hsqldb:file:supermarket" + port, "SA", "");
                         } catch (SQLException exception) {
                             exception.printStackTrace();
                         }
+                        break;
+                    case "dbUpdate":
+                        DBUpdateMessage dbUpdateMessage = (DBUpdateMessage) ms;
+
+                        // ..... apply the query
+
                         break;
                 }
             }

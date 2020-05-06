@@ -1,20 +1,23 @@
+import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Cart Implementation
+ * Cart Skeleton
  */
-public class CartImpl implements Cart {
+public class CartSkeleton {
     private final String id;
-    private Map<String, Integer> products;
+    private final Map<String, Integer> products;
+    private final Connection connection;
 
     /**
      * Parameterized constructor
      * @param id Cart's identifier
      */
-    public CartImpl(String id) {
+    public CartSkeleton(String id, Connection connection) {
         this.id = id;
         this.products = new HashMap<>();
+        this.connection = connection;
     }
 
     /**
@@ -22,9 +25,10 @@ public class CartImpl implements Cart {
      * @param id Cart's identifier
      * @param products Cart's products
      */
-    public CartImpl(String id, Map<String, Integer> products) {
+    public CartSkeleton(String id, Map<String, Integer> products, Connection connection) {
         this.id = id;
         this.products = new HashMap<>(products);
+        this.connection = connection;
     }
 
     /**
