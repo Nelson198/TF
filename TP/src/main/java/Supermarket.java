@@ -18,6 +18,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -43,7 +45,7 @@ public class Supermarket {
     Catalog catalog = new Catalog();
 
     // Skeletons for the carts
-    HashMap<Integer, CartSkeleton> carts = new HashMap<Integer, CartSkeleton>();
+    Map<Integer, CartSkeleton> carts = new HashMap<>();
 
     /**
      * Parameterized constructor
@@ -72,7 +74,6 @@ public class Supermarket {
         Supermarket aux = this;
 
         c.add(new AdvancedMessageListener() {
-            @Override
             public void regularMessageReceived(SpreadMessage spreadMessage) {
                 Message ms = aux.serializer.decode(spreadMessage.getData());
                 switch (ms.getType()) {
@@ -80,7 +81,7 @@ public class Supermarket {
                         DatabaseMessage dbMsg = (DatabaseMessage) ms;
                         // ........ update the db file
                         try {
-                            aux.dbConnection = DriverManager.getConnection("jdbc:hsqldb:file:supermarket" + port, "SA", "")
+                            aux.dbConnection = DriverManager.getConnection("jdbc:hsqldb:file:supermarket" + port, "SA", "");
                         } catch (SQLException exception) {
                             exception.printStackTrace();
                         }
@@ -88,7 +89,6 @@ public class Supermarket {
                 }
             }
 
-            @Override
             public void membershipMessageReceived(SpreadMessage spreadMessage) {
                 MembershipInfo info = spreadMessage.getMembershipInfo();
                 if (info.isCausedByJoin()) {
@@ -120,7 +120,7 @@ public class Supermarket {
      */
     public void initializeAtomix(int port) throws ExecutionException, InterruptedException {
         // Initialize the messaging service and register messaging service handlers
-        ManagedMessagingService ms = new NettyMessagingService("bank", Address.from(port), new MessagingConfig());
+        ManagedMessagingService ms = new NettyMessagingService("supermarket", Address.from(port), new MessagingConfig());
         ExecutorService executor = Executors.newFixedThreadPool(1);
 
         Supermarket aux = this;
@@ -158,7 +158,7 @@ public class Supermarket {
             System.exit(1);
         }
 
-        Supermarket si = new Supermarket(args[0]);
+        Supermarket s = new Supermarket(args[0]);
 
         System.out.println("Server is running on port " + args[0] + " ...");
 
