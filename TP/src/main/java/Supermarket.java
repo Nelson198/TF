@@ -17,6 +17,7 @@ import java.net.UnknownHostException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -88,9 +89,14 @@ public class Supermarket {
                         break;
                     case "dbUpdate":
                         DBUpdateMessage dbUpdateMessage = (DBUpdateMessage) ms;
-
-                        // ..... apply the query
-
+                        String query = dbUpdateMessage.getQuery();
+                        try {
+                            aux.dbConnection = DriverManager.getConnection("jdbc:hsqldb:file:supermarket" + port, "SA", "");
+                            Statement s = aux.dbConnection.createStatement();
+                            s.executeUpdate(query);
+                        } catch (SQLException exception) {
+                            exception.printStackTrace();
+                        }
                         break;
                 }
             }
@@ -139,11 +145,11 @@ public class Supermarket {
             // TODO
         }, executor);
 
-        ms.registerHandler("checkout", (address, bytes) -> {
+        ms.registerHandler("removeProduct", (address, bytes) -> {
             // TODO
         }, executor);
 
-        ms.registerHandler("removeProduct", (address, bytes) -> {
+        ms.registerHandler("checkout", (address, bytes) -> {
             // TODO
         }, executor);
 
