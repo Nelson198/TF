@@ -6,16 +6,21 @@ import java.sql.SQLException;
 /**
  * Catalog
  */
-public class Catalog {
+public class CatalogSkeleton {
+    Connection connection;
+
+    public CatalogSkeleton(Connection connection) {
+        this.connection = connection;
+    }
+
     /**
      * Get catalog information
-     * @param connection Connection
      */
-    public String getCatalog(Connection connection) {
+    public String getCatalog() {
         String catalog = "";
         try {
             // Create and execute statement
-            Statement stmt = connection.createStatement();
+            Statement stmt = this.connection.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT * FROM product");
 
             // Get result from query
@@ -42,15 +47,14 @@ public class Catalog {
 
     /**
      * Get product's price
-     * @param connection Connection
      * @param idProduct Product's identifier
      * @return
      */
-    public double getPrice(Connection connection, String idProduct) {
+    public double getPrice(String idProduct) {
         double price = 0;
         try {
             // Create and execute statement
-            Statement stmt = connection.createStatement();
+            Statement stmt = this.connection.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT price FROM product WHERE id=" + idProduct);
 
             // Get result from query
@@ -67,15 +71,14 @@ public class Catalog {
 
     /**
      * Get product's availability
-     * @param connection Connection
      * @param idProduct Product's identifier
      * @return
      */
-    public boolean getAvailability(Connection connection, String idProduct) {
+    public boolean getAvailability(String idProduct) {
         boolean availability = false;
         try {
             // Create and execute statement
-            Statement stmt = connection.createStatement();
+            Statement stmt = this.connection.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT amount FROM product WHERE id=" + idProduct);
 
             // Get result from query

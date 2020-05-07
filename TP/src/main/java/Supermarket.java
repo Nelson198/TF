@@ -30,6 +30,9 @@ import java.util.concurrent.Executors;
  * Supermarket Implementation
  */
 public class Supermarket {
+    // Server port
+    String port;
+
     // Variable to store processes after which this one will be primary
     ArrayList<SpreadGroup> primaryAfter = new ArrayList<>();
 
@@ -42,11 +45,21 @@ public class Supermarket {
     // Database connection
     Connection dbConnection;
 
+    // Atomix connection
+    ManagedMessagingService ms;
+
     // Skeleton for the catalog
-    Catalog catalog = new Catalog();
+    CatalogSkeleton catalog;
 
     // Skeletons for the carts
     Map<Integer, CartSkeleton> carts = new HashMap<>();
+
+    // Queries that arrived between this server's connection and the reception of the DB
+    ArrayList<String> pendingQueries = new ArrayList<>();
+
+    // Client requests that are pending a response
+    int nextResponseID = 0;
+    HashMap<Integer, Address> pendingResponses = new HashMap<>();
 
     /**
      * Parameterized constructor
@@ -57,20 +70,18 @@ public class Supermarket {
      * @throws InterruptedException InterruptedException
      */
     public Supermarket(String port) throws SpreadException, UnknownHostException, ExecutionException, InterruptedException {
-        initializeSpread(port);
-        initializeAtomix(Integer.parseInt(port));
+        this.port = port;
     }
 
     /**
      * initializeSpread
-     * @param port Port
      * @throws SpreadException SpreadException
      * @throws UnknownHostException UnknownHostException
      */
-    public void initializeSpread(String port) throws SpreadException, UnknownHostException {
+    public void initializeSpread() throws SpreadException, UnknownHostException {
         // Initialize the spread connection
         SpreadConnection c = new SpreadConnection();
-        c.connect(InetAddress.getByName("localhost"), 4803, port, false, true);
+        c.connect(InetAddress.getByName("localhost"), 4803, this.port, false, true);
 
         Supermarket aux = this;
 
@@ -83,19 +94,39 @@ public class Supermarket {
                         // ........ update the db file
                         try {
                             aux.dbConnection = DriverManager.getConnection("jdbc:hsqldb:file:supermarket" + port, "SA", "");
-                        } catch (SQLException exception) {
+                            aux.dbConnection.setAutoCommit(true);
+
+                            for (String pq: aux.pendingQueries) {
+                                Statement s = aux.dbConnection.createStatement();
+                                s.executeUpdate(pq);
+                            }
+                            aux.pendingQueries = null;
+
+                            aux.catalog = new CatalogSkeleton(aux.dbConnection);
+
+                            initializeAtomix();
+                        } catch (Exception exception) {
                             exception.printStackTrace();
                         }
                         break;
                     case "dbUpdate":
                         DBUpdateMessage dbUpdateMessage = (DBUpdateMessage) ms;
                         String query = dbUpdateMessage.getQuery();
-                        try {
-                            aux.dbConnection = DriverManager.getConnection("jdbc:hsqldb:file:supermarket" + port, "SA", "");
-                            Statement s = aux.dbConnection.createStatement();
-                            s.executeUpdate(query);
-                        } catch (SQLException exception) {
-                            exception.printStackTrace();
+
+                        if (aux.dbConnection == null) {
+                            aux.pendingQueries.add(query);
+                        } else {
+                            try {
+                                Statement s = aux.dbConnection.createStatement();
+                                int res = s.executeUpdate(query);
+
+                                if (dbUpdateMessage.getServerToAnswer().equals(aux.port)) {
+                                    Address address = aux.pendingResponses.remove(dbUpdateMessage.getId());
+                                    aux.ms.sendAsync(address, "res", serializer.encode(res)); // TODO - figure out what to send to the client
+                                }
+                            } catch (SQLException exception) {
+                                exception.printStackTrace();
+                            }
                         }
                         break;
                 }
@@ -105,9 +136,20 @@ public class Supermarket {
                 MembershipInfo info = spreadMessage.getMembershipInfo();
                 if (info.isCausedByJoin()) {
                     if (info.getGroup().equals(c.getPrivateGroup())) {
-                        for (SpreadGroup member : info.getMembers()) {
-                            if (!member.equals(c.getPrivateGroup()))
-                                primaryAfter.add(member);
+                        if (info.getMembers().length == 1) {
+                            try {
+                                aux.dbConnection = DriverManager.getConnection("jdbc:hsqldb:file:supermarket" + port, "SA", "");
+                                aux.dbConnection.setAutoCommit(true);
+
+                                aux.catalog = new CatalogSkeleton(aux.dbConnection);
+                            } catch (SQLException exception) {
+                                exception.printStackTrace();
+                            }
+                        } else {
+                            for (SpreadGroup member : info.getMembers()) {
+                                if (!member.equals(c.getPrivateGroup()))
+                                    primaryAfter.add(member);
+                            }
                         }
                     } else if (primaryAfter.size() == 0) {
                         // TODO - send database (or updates) to new member
@@ -126,13 +168,12 @@ public class Supermarket {
 
     /**
      * initializeAtomix
-     * @param port Port
      * @throws ExecutionException ExecutionException
      * @throws InterruptedException InterruptedException
      */
-    public void initializeAtomix(int port) throws ExecutionException, InterruptedException {
+    public void initializeAtomix() throws ExecutionException, InterruptedException {
         // Initialize the messaging service and register messaging service handlers
-        ManagedMessagingService ms = new NettyMessagingService("supermarket", Address.from(port), new MessagingConfig());
+        this.ms = new NettyMessagingService("supermarket", Address.from(Integer.parseInt(this.port)), new MessagingConfig());
         ExecutorService executor = Executors.newFixedThreadPool(1);
 
         Supermarket aux = this;
@@ -155,7 +196,7 @@ public class Supermarket {
 
         ms.registerHandler("getCatalog", (address, bytes) -> {
             Connection c = aux.serializer.decode(bytes);
-            String res = catalog.getCatalog(c);
+            String res = catalog.getCatalog();
             ms.sendAsync(address, "res", serializer.encode(res));
         }, executor);
 
@@ -173,6 +214,7 @@ public class Supermarket {
         }
 
         Supermarket s = new Supermarket(args[0]);
+        s.initializeSpread();
 
         System.out.println("Server is running on port " + args[0] + " ...");
 

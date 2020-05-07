@@ -1,5 +1,13 @@
 public class DBUpdateMessage implements Message {
     private String query;
+    private int id;
+    private String serverToAnswer;
+
+    public DBUpdateMessage(String query, int id, String serverToAnswer) {
+        this.query = query;
+        this.id = id;
+        this.serverToAnswer = serverToAnswer;
+    }
 
     /**
      * Get DB update message type
@@ -15,5 +23,13 @@ public class DBUpdateMessage implements Message {
      */
     public String getQuery() {
         return this.query;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public String getServerToAnswer() {
+        return serverToAnswer;
     }
 }
