@@ -5,7 +5,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 /**
- * DBExample
+ * DB Example
  */
 public class DBExample {
     /**
