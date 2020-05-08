@@ -58,6 +58,10 @@ public class CartStub {
         // TODO - ....
     }
 
+    /**
+     * Get cart's products
+     * @return Cart's products
+     */
     public Map<String, Integer> getProducts() {
         // TODO - ....
         return new HashMap<>();

@@ -10,20 +10,26 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-/*
-    AtomixConnection - middleware that handles the connection from the client to the cluster; it handles the cases
-                       of when a server goes down.
-                       However, it does not contain logic related to the business logic.
-                       Given that the client is single-threaded, this middleware can only handle one operation at a time.
+/**
+ * AtomixConnection - middleware that handles the connection from the client to the cluster; it handles the cases
+ *                    of when a server goes down.
+ *                    However, it does not contain logic related to the business logic.
+ *                    Given that the client is single-threaded, this middleware can only handle one operation at a time.
  */
 public class ClientConnection {
-    ExecutorService executor;
-    ManagedMessagingService ms;
-    ArrayList<Address> servers;
-    Address currentServer;
+    private ExecutorService executor;
+    private ManagedMessagingService ms;
+    private ArrayList<Address> servers;
+    private Address currentServer;
+    private CompletableFuture<byte[]> res;
 
-    CompletableFuture<byte[]> res;
-
+    /**
+     * Parameterized constructor
+     * @param address Address
+     * @param servers Cluster's servers
+     * @throws ExecutionException ExecutionException
+     * @throws InterruptedException InterruptedException
+     */
     public ClientConnection(Address address, ArrayList<Address> servers) throws ExecutionException, InterruptedException {
         this.executor = Executors.newFixedThreadPool(1);
         this.servers = servers;
@@ -36,12 +42,22 @@ public class ClientConnection {
         this.ms.start().get();
     }
 
+    /**
+     * Register handler of a message with certain type
+     * @param type Message's type
+     */
     public void registerHandler(String type) {
         this.ms.registerHandler(type, (address, bytes) -> {
             res.complete(bytes);
         }, this.executor);
     }
 
+    /**
+     * Send and receive a message
+     * @param type Message's type
+     * @param message Message's content
+     * @return Reply message
+     */
     public byte[] sendAndReceive(String type, byte[] message) {
         this.res = new CompletableFuture<>();
 
