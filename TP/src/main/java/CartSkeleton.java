@@ -7,7 +7,7 @@ import java.util.Map;
  */
 public class CartSkeleton {
     private final String id;
-    private final Map<String, Integer> products;
+    private Map<String, Integer> products;
     private final Connection connection;
 
     /**

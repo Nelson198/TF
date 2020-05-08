@@ -4,17 +4,22 @@ import java.sql.Statement;
 import java.sql.SQLException;
 
 /**
- * Catalog
+ * Catalog Skeleton
  */
 public class CatalogSkeleton {
-    Connection connection;
+    private final Connection connection;
 
+    /**
+     * Parameterized constructor
+     * @param connection DB's connection
+     */
     public CatalogSkeleton(Connection connection) {
         this.connection = connection;
     }
 
     /**
      * Get catalog information
+     * @return Catalog information
      */
     public String getCatalog() {
         String catalog = "";
@@ -48,7 +53,7 @@ public class CatalogSkeleton {
     /**
      * Get product's price
      * @param idProduct Product's identifier
-     * @return
+     * @return Product's price
      */
     public double getPrice(String idProduct) {
         double price = 0;
@@ -72,7 +77,7 @@ public class CatalogSkeleton {
     /**
      * Get product's availability
      * @param idProduct Product's identifier
-     * @return
+     * @return Product's availability
      */
     public boolean getAvailability(String idProduct) {
         boolean availability = false;

@@ -94,16 +94,15 @@ public class Supermarket {
                         // ........ update the db file
                         try {
                             aux.dbConnection = DriverManager.getConnection("jdbc:hsqldb:file:supermarket" + port, "SA", "");
-                            aux.dbConnection.setAutoCommit(true);
+                            aux.dbConnection.setAutoCommit(true); // default
 
-                            for (String pq: aux.pendingQueries) {
+                            for (String pq : aux.pendingQueries) {
                                 Statement s = aux.dbConnection.createStatement();
                                 s.executeUpdate(pq);
                             }
                             aux.pendingQueries = null;
 
                             aux.catalog = new CatalogSkeleton(aux.dbConnection);
-
                             initializeAtomix();
                         } catch (Exception exception) {
                             exception.printStackTrace();

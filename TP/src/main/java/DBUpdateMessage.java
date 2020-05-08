@@ -1,11 +1,20 @@
+/**
+ * DB Update Message
+ */
 public class DBUpdateMessage implements Message {
+    private final int id;
     private String query;
-    private int id;
     private String serverToAnswer;
 
-    public DBUpdateMessage(String query, int id, String serverToAnswer) {
-        this.query = query;
+    /**
+     * Parameterized constructor
+     * @param query Query
+     * @param id Identifier
+     * @param serverToAnswer Server to answer
+     */
+    public DBUpdateMessage(int id, String query, String serverToAnswer) {
         this.id = id;
+        this.query = query;
         this.serverToAnswer = serverToAnswer;
     }
 
@@ -18,6 +27,14 @@ public class DBUpdateMessage implements Message {
     }
 
     /**
+     * Get DB update message identifier
+     * @return Message identifier
+     */
+    public int getId() {
+        return this.id;
+    }
+
+    /**
      * Get query
      * @return Query
      */
@@ -25,11 +42,11 @@ public class DBUpdateMessage implements Message {
         return this.query;
     }
 
-    public int getId() {
-        return id;
-    }
-
+    /**
+     * Get the server to answer
+     * @return Server to answer
+     */
     public String getServerToAnswer() {
-        return serverToAnswer;
+        return this.serverToAnswer;
     }
 }
