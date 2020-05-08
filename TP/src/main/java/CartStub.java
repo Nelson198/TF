@@ -1,47 +1,26 @@
-import io.atomix.utils.net.Address;
 import io.atomix.utils.serializer.Serializer;
 import io.atomix.utils.serializer.SerializerBuilder;
-import io.atomix.cluster.messaging.ManagedMessagingService;
-
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * Cart Stub
  */
 public class CartStub {
+    AtomixConnection connection;
+
     String idCart; // ?
+
+    // TODO - make a class for the serializers
     Serializer serializer = new SerializerBuilder().addType(CartUpdate.class).addType(String.class).build();
-    ManagedMessagingService ms;
-    Address serverAddress; // TODO - this can change if the server goes down
-    ExecutorService executor = Executors.newFixedThreadPool(1); // TODO - reuse across the client
-    CompletableFuture<Boolean> res;
 
     /**
      * Parameterized constructor
-     * @param ms Stub address
-     * @param serverAddress Server address
-     * @throws ExecutionException ExecutionException
-     * @throws InterruptedException InterruptedException
+     * @param connection Connection to the cluster
      */
-    public CartStub(ManagedMessagingService ms, Address serverAddress) throws ExecutionException, InterruptedException {
-        // Initialize the messaging service
-        this.ms = ms;
-        this.serverAddress = serverAddress;
+    public CartStub(AtomixConnection connection) {
+        this.connection = connection;
 
-        // TODO - this can't be done here, because we can have more than one cart
-        this.ms.registerHandler("res", (a, b) -> {
-            boolean res = serializer.decode(b);
-            this.res.complete(res);
-        }, this.executor);
-
-        this.ms.registerHandler("newCart", (a, b) -> {
-            idCart = serializer.decode(b);
-        }, this.executor);
-
-        ms.start().get();
+        this.connection.registerHandler("res");
+        this.connection.registerHandler("newCart");  // TODO - add the others
     }
 
     /**
@@ -51,7 +30,8 @@ public class CartStub {
      */
     public void addProduct(String idProduct, int qtd) {
         CartUpdate toSend = new CartUpdate(idCart, idProduct, qtd);
-        this.ms.sendAsync(serverAddress, "addProduct", this.serializer.encode(toSend));
+        byte[] res = this.connection.sendAndReceive("addProduct", this.serializer.encode(toSend));
+        // TODO - ....
     }
 
     /**
@@ -61,13 +41,15 @@ public class CartStub {
      */
     public void removeProduct(String idProduct, int qtd) {
         CartUpdate toSend = new CartUpdate(idCart, idProduct, qtd);
-        this.ms.sendAsync(serverAddress, "removeProduct", this.serializer.encode(toSend));
+        byte[] res = this.connection.sendAndReceive("removeProduct", this.serializer.encode(toSend));
+        // TODO - ....
     }
 
     /**
      * Checkout
      */
     public void checkout() {
-        this.ms.sendAsync(serverAddress, "checkout", this.serializer.encode(idCart));
+        byte[] res = this.connection.sendAndReceive("checkout", this.serializer.encode(idCart));
+        // TODO - ....
     }
 }

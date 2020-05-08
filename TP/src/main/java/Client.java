@@ -1,6 +1,3 @@
-import io.atomix.cluster.messaging.ManagedMessagingService;
-import io.atomix.cluster.messaging.MessagingConfig;
-import io.atomix.cluster.messaging.impl.NettyMessagingService;
 import io.atomix.utils.net.Address;
 
 import java.io.BufferedReader;
@@ -8,8 +5,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Random;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -21,9 +16,7 @@ public class Client {
     private static final HashMap<String, CartStub> carts = new HashMap<>();
     private static CatalogStub catalog;
 
-    private static ManagedMessagingService ms;
-    private static final List<Address> servers = new ArrayList<>();
-    private static Address serverAddress;
+    private static AtomixConnection connection;
 
     /**
      * clearTerminal
@@ -121,7 +114,7 @@ public class Client {
                     System.out.println("Choose a name for your cart: ");
                     String name = stdin.readLine();
                     // rever e acabar
-                    CartStub cart = new CartStub(ms, serverAddress);
+                    CartStub cart = new CartStub(connection);
                     carts.put(name, cart);
                     menuCart(name);
                     break;
@@ -152,18 +145,21 @@ public class Client {
     }
 
     public static void main(String[] args) throws IOException, ExecutionException, InterruptedException {
+        if (args.length < 2) {
+            System.out.println("The port of the client and the ports of at least one server were not specified");
+            System.exit(1);
+        }
+
         Address myAddress = Address.from(Integer.parseInt(args[0]));
 
+        ArrayList<Address> servers = new ArrayList<>();
         for (int i = 1; i < args.length; i++) {
-            servers.add(Address.from(Integer.parseInt(args[0])));
+            servers.add(Address.from(Integer.parseInt(args[i])));
         }
-        Random rand = new Random();
-        int server = rand.nextInt(args.length - 1) + 1;
-        serverAddress = servers.get(server);
 
-        ms = new NettyMessagingService("client", myAddress, new MessagingConfig());
+        connection = new AtomixConnection(myAddress, servers);
 
-        catalog = new CatalogStub(ms, myAddress);
+        catalog = new CatalogStub(connection);
 
         menu();
     }
