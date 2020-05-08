@@ -79,15 +79,15 @@ public class CatalogSkeleton {
      * @param idProduct Product's identifier
      * @return Product's availability
      */
-    public boolean getAvailability(String idProduct) {
-        boolean availability = false;
+    public int getAvailability(String idProduct) {
+        int availability = 0;
         try {
             // Create and execute statement
             Statement stmt = this.connection.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT amount FROM product WHERE id=" + idProduct);
 
             // Get result from query
-            availability = rs.getInt("amount") > 0;
+            availability = rs.getInt("amount");
 
             // Clean up
             rs.close();

@@ -5,7 +5,7 @@ import io.atomix.utils.serializer.SerializerBuilder;
  * Catalog Stub
  */
 public class CatalogStub {
-    AtomixConnection connection;
+    ClientConnection connection;
 
     // TODO - make a class for the serializers
     Serializer serializer = new SerializerBuilder().build();
@@ -14,11 +14,24 @@ public class CatalogStub {
      * Parameterized constructor
      * @param connection Connection to the cluster
      */
-    public CatalogStub(AtomixConnection connection) {
+    public CatalogStub(ClientConnection connection) {
         this.connection = connection;
 
         this.connection.registerHandler("catalogRes"); // TODO - add the others
     }
 
-    // TODO - add the methods needed
+    public String getCatalog() {
+        // TODO
+        return null;
+    }
+
+    public double getPrice(String idProduct) {
+        // TODO
+        return 0.0;
+    }
+
+    public int getAvailability(String idProduct) {
+        // TODO
+        return 0;
+    }
 }

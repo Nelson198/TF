@@ -7,27 +7,16 @@ import java.util.Map;
  */
 public class CartSkeleton {
     private final String id;
-    private Map<String, Integer> products;
+
     private final Connection connection;
 
     /**
      * Parameterized constructor
      * @param id Cart's identifier
+     * @param connection Connection to the DB
      */
     public CartSkeleton(String id, Connection connection) {
         this.id = id;
-        this.products = new HashMap<>();
-        this.connection = connection;
-    }
-
-    /**
-     * Parameterized constructor
-     * @param id Cart's identifier
-     * @param products Cart's products
-     */
-    public CartSkeleton(String id, Map<String, Integer> products, Connection connection) {
-        this.id = id;
-        this.products = new HashMap<>(products);
         this.connection = connection;
     }
 
@@ -44,27 +33,23 @@ public class CartSkeleton {
      * @return Cart's products
      */
     public Map<String, Integer> getProducts() {
-        return new HashMap<>(this.products);
-    }
-
-    /**
-     * Get the connection to DB
-     * @return DB's connection
-     */
-    public Connection getConnection() {
-        return this.connection;
+        // TODO - call the DB
+        return new HashMap<>();
     }
 
     /**
      * Add a product to the cart
      * @param idProduct Product identifier
      */
-    public void addProduct(String idProduct) {
-        if (!this.products.containsKey(idProduct)) {
-            this.products.put(idProduct, 1);
-        } else {
-            int amount = this.products.get(idProduct);
-            this.products.put(idProduct, amount + 1);
-        }
+    public void addProduct(String idProduct, int quantity) {
+        // TODO - call the DB
+    }
+
+    /**
+     * Remove a product from the cart
+     * @param idProduct Product identifier
+     */
+    public void removeProduct(String idProduct) {
+        // TODO - call the DB
     }
 }

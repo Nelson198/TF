@@ -1,11 +1,14 @@
 import io.atomix.utils.serializer.Serializer;
 import io.atomix.utils.serializer.SerializerBuilder;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Cart Stub
  */
 public class CartStub {
-    AtomixConnection connection;
+    ClientConnection connection;
 
     String idCart; // ?
 
@@ -16,11 +19,13 @@ public class CartStub {
      * Parameterized constructor
      * @param connection Connection to the cluster
      */
-    public CartStub(AtomixConnection connection) {
+    public CartStub(ClientConnection connection) {
         this.connection = connection;
 
         this.connection.registerHandler("res");
         this.connection.registerHandler("newCart");  // TODO - add the others
+
+        // TODO - get ID from server
     }
 
     /**
@@ -51,5 +56,10 @@ public class CartStub {
     public void checkout() {
         byte[] res = this.connection.sendAndReceive("checkout", this.serializer.encode(idCart));
         // TODO - ....
+    }
+
+    public Map<String, Integer> getProducts() {
+        // TODO - ....
+        return new HashMap<>();
     }
 }

@@ -16,7 +16,7 @@ import java.util.concurrent.Executors;
                        However, it does not contain logic related to the business logic.
                        Given that the client is single-threaded, this middleware can only handle one operation at a time.
  */
-public class AtomixConnection {
+public class ClientConnection {
     ExecutorService executor;
     ManagedMessagingService ms;
     ArrayList<Address> servers;
@@ -24,7 +24,7 @@ public class AtomixConnection {
 
     CompletableFuture<byte[]> res;
 
-    public AtomixConnection(Address address, ArrayList<Address> servers) throws ExecutionException, InterruptedException {
+    public ClientConnection(Address address, ArrayList<Address> servers) throws ExecutionException, InterruptedException {
         this.executor = Executors.newFixedThreadPool(1);
         this.servers = servers;
 

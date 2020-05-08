@@ -16,7 +16,7 @@ public class Client {
     private static final HashMap<String, CartStub> carts = new HashMap<>();
     private static CatalogStub catalog;
 
-    private static AtomixConnection connection;
+    private static ClientConnection connection;
 
     /**
      * clearTerminal
@@ -157,7 +157,7 @@ public class Client {
             servers.add(Address.from(Integer.parseInt(args[i])));
         }
 
-        connection = new AtomixConnection(myAddress, servers);
+        connection = new ClientConnection(myAddress, servers);
 
         catalog = new CatalogStub(connection);
 
