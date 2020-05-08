@@ -19,6 +19,7 @@ public class Client {
     private static final BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
 
     private static final HashMap<String, CartStub> carts = new HashMap<>();
+    private static CatalogStub catalog;
 
     private static ManagedMessagingService ms;
     private static final List<Address> servers = new ArrayList<>();
@@ -161,6 +162,9 @@ public class Client {
         serverAddress = servers.get(server);
 
         ms = new NettyMessagingService("client", myAddress, new MessagingConfig());
+
+        catalog = new CatalogStub(ms, myAddress);
+
         menu();
     }
 }

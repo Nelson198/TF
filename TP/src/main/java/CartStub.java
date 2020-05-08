@@ -15,8 +15,8 @@ public class CartStub {
     String idCart; // ?
     Serializer serializer = new SerializerBuilder().addType(CartUpdate.class).addType(String.class).build();
     ManagedMessagingService ms;
-    Address serverAddress;
-    ExecutorService executor = Executors.newFixedThreadPool(1);
+    Address serverAddress; // TODO - this can change if the server goes down
+    ExecutorService executor = Executors.newFixedThreadPool(1); // TODO - reuse across the client
     CompletableFuture<Boolean> res;
 
     /**
@@ -31,6 +31,7 @@ public class CartStub {
         this.ms = ms;
         this.serverAddress = serverAddress;
 
+        // TODO - this can't be done here, because we can have more than one cart
         this.ms.registerHandler("res", (a, b) -> {
             boolean res = serializer.decode(b);
             this.res.complete(res);
