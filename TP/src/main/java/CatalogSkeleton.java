@@ -43,7 +43,6 @@ public class CatalogSkeleton {
             // Clean up
             rs.close();
             stmt.close();
-
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
@@ -55,15 +54,15 @@ public class CatalogSkeleton {
      * @param idProduct Product's identifier
      * @return Product's price
      */
-    public double getPrice(String idProduct) {
-        double price = 0;
+    public float getPrice(String idProduct) {
+        float price = 0;
         try {
             // Create and execute statement
             Statement stmt = this.connection.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT price FROM product WHERE id=" + idProduct);
 
             // Get result from query
-            price = rs.getDouble("price");
+            price = rs.getFloat("price");
 
             // Clean up
             rs.close();

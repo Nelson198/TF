@@ -23,7 +23,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -55,7 +54,7 @@ public class Supermarket {
     CatalogSkeleton catalog;
 
     // Skeletons for the carts
-    Map<Integer, CartSkeleton> carts = new HashMap<>();
+    HashMap<Integer, CartSkeleton> carts = new HashMap<>();
 
     // Queries that arrived between this server's connection and the reception of the DB
     ArrayList<String> pendingQueries = new ArrayList<>();
@@ -63,12 +62,8 @@ public class Supermarket {
     /**
      * Parameterized constructor
      * @param port Port
-     * @throws SpreadException SpreadException
-     * @throws UnknownHostException UnknownHostException
-     * @throws ExecutionException ExecutionException
-     * @throws InterruptedException InterruptedException
      */
-    public Supermarket(String port) throws SpreadException, UnknownHostException, ExecutionException, InterruptedException {
+    public Supermarket(String port) {
         this.port = port;
     }
 

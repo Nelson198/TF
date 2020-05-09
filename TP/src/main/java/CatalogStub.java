@@ -20,16 +20,30 @@ public class CatalogStub {
         this.connection.registerHandler("catalogRes"); // TODO - add the others
     }
 
+    /**
+     * Get catalog information
+     * @return Catalog information
+     */
     public String getCatalog() {
         // TODO
         return null;
     }
 
-    public double getPrice(String idProduct) {
+    /**
+     * Get product's price
+     * @param idProduct Product's identifier
+     * @return Product's price
+     */
+    public float getPrice(String idProduct) {
         // TODO
-        return 0.0;
+        return 0;
     }
 
+    /**
+     * Get product's availability
+     * @param idProduct
+     * @return Product's availability
+     */
     public int getAvailability(String idProduct) {
         // TODO
         return 0;
