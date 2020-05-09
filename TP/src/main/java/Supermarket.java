@@ -1,3 +1,6 @@
+import Messages.DBContent;
+import Messages.DBUpdate;
+import Messages.Message;
 import io.atomix.cluster.messaging.ManagedMessagingService;
 import io.atomix.cluster.messaging.MessagingConfig;
 import io.atomix.cluster.messaging.impl.NettyMessagingService;
@@ -40,7 +43,7 @@ public class Supermarket {
     Serializer serializer = new SerializerBuilder().build();
 
     // Initialize the spread connection
-    SpreadConnection c = new SpreadConnection();
+    SpreadConnection connection = new SpreadConnection();
 
     // Database connection
     Connection dbConnection;
@@ -56,10 +59,6 @@ public class Supermarket {
 
     // Queries that arrived between this server's connection and the reception of the DB
     ArrayList<String> pendingQueries = new ArrayList<>();
-
-    // Client requests that are pending a response
-    int nextResponseID = 0;
-    HashMap<Integer, Address> pendingResponses = new HashMap<>();
 
     /**
      * Parameterized constructor
@@ -80,20 +79,20 @@ public class Supermarket {
      */
     public void initializeSpread() throws SpreadException, UnknownHostException {
         // Initialize the spread connection
-        SpreadConnection c = new SpreadConnection();
-        c.connect(InetAddress.getByName("localhost"), 4803, this.port, false, true);
+        this.connection = new SpreadConnection();
+        this.connection.connect(InetAddress.getByName("localhost"), 4803, this.port, false, true);
 
         Supermarket aux = this;
 
-        c.add(new AdvancedMessageListener() {
+        this.connection.add(new AdvancedMessageListener() {
             public void regularMessageReceived(SpreadMessage spreadMessage) {
                 Message ms = aux.serializer.decode(spreadMessage.getData());
                 switch (ms.getType()) {
                     case "db":
-                        DBMessage dbMsg = (DBMessage) ms;
+                        DBContent dbMsg = (DBContent) ms;
                         // ........ update the db file
                         try {
-                            aux.dbConnection = DriverManager.getConnection("jdbc:hsqldb:file:supermarket" + port, "SA", "");
+                            aux.dbConnection = DriverManager.getConnection("jdbc:hsqldb:file:supermarket" + port + "?allowMultiQueries=true", "SA", "");
                             aux.dbConnection.setAutoCommit(true); // default
 
                             for (String pq : aux.pendingQueries) {
@@ -109,8 +108,8 @@ public class Supermarket {
                         }
                         break;
                     case "dbUpdate":
-                        DBUpdateMessage dbUpdateMessage = (DBUpdateMessage) ms;
-                        String query = dbUpdateMessage.getQuery();
+                        DBUpdate dbUpdate = (DBUpdate) ms;
+                        String query = dbUpdate.getQuery();
 
                         if (aux.dbConnection == null) {
                             aux.pendingQueries.add(query);
@@ -119,9 +118,8 @@ public class Supermarket {
                                 Statement s = aux.dbConnection.createStatement();
                                 int res = s.executeUpdate(query);
 
-                                if (dbUpdateMessage.getServerToAnswer().equals(aux.port)) {
-                                    Address address = aux.pendingResponses.remove(dbUpdateMessage.getId());
-                                    aux.ms.sendAsync(address, "res", serializer.encode(res)); // TODO - figure out what to send to the client
+                                if (dbUpdate.getServer().equals(aux.port)) {
+                                    aux.ms.sendAsync(Address.from(dbUpdate.getClient()), "res", serializer.encode(res)); // TODO - figure out what to send to the client
                                 }
                             } catch (SQLException exception) {
                                 exception.printStackTrace();
@@ -134,10 +132,10 @@ public class Supermarket {
             public void membershipMessageReceived(SpreadMessage spreadMessage) {
                 MembershipInfo info = spreadMessage.getMembershipInfo();
                 if (info.isCausedByJoin()) {
-                    if (info.getGroup().equals(c.getPrivateGroup())) {
+                    if (info.getGroup().equals(aux.connection.getPrivateGroup())) {
                         if (info.getMembers().length == 1) {
                             try {
-                                aux.dbConnection = DriverManager.getConnection("jdbc:hsqldb:file:supermarket" + port, "SA", "");
+                                aux.dbConnection = DriverManager.getConnection("jdbc:hsqldb:file:supermarket" + port + "?allowMultiQueries=true", "SA", "");
                                 aux.dbConnection.setAutoCommit(true);
 
                                 aux.catalog = new CatalogSkeleton(aux.dbConnection);
@@ -146,7 +144,7 @@ public class Supermarket {
                             }
                         } else {
                             for (SpreadGroup member : info.getMembers()) {
-                                if (!member.equals(c.getPrivateGroup()))
+                                if (!member.equals(aux.connection.getPrivateGroup()))
                                     primaryAfter.add(member);
                             }
                         }
@@ -162,7 +160,7 @@ public class Supermarket {
         });
 
         SpreadGroup g = new SpreadGroup();
-        g.join(c, "supermarket");
+        g.join(this.connection, "supermarket");
     }
 
     /**
@@ -178,19 +176,23 @@ public class Supermarket {
         Supermarket aux = this;
 
         ms.registerHandler("newCart", (address, bytes) -> {
-            // TODO
+            DBUpdate dbu = new DBUpdate("INSERT INTO carts VALUES ()", aux.connection.getPrivateGroup().toString(), address.toString()); // TODO - query
+            aux.sendCluster(aux.serializer.encode(dbu));
         }, executor);
 
         ms.registerHandler("addProduct", (address, bytes) -> {
-            // TODO
+            DBUpdate dbu = new DBUpdate("UPDATE carts SET ... WHERE id=...", aux.connection.getPrivateGroup().toString(), address.toString()); // TODO - query
+            aux.sendCluster(aux.serializer.encode(dbu));
         }, executor);
 
         ms.registerHandler("removeProduct", (address, bytes) -> {
-            // TODO
+            DBUpdate dbu = new DBUpdate("UPDATE carts SET ... WHERE id=...", aux.connection.getPrivateGroup().toString(), address.toString()); // TODO - query
+            aux.sendCluster(aux.serializer.encode(dbu));
         }, executor);
 
         ms.registerHandler("checkout", (address, bytes) -> {
-            // TODO
+            DBUpdate dbu = new DBUpdate("UPDATE carts SET ... WHERE id=...", aux.connection.getPrivateGroup().toString(), address.toString()); // TODO - query
+            aux.sendCluster(aux.serializer.encode(dbu));
         }, executor);
 
         ms.registerHandler("getCatalog", (address, bytes) -> {
@@ -199,11 +201,19 @@ public class Supermarket {
             ms.sendAsync(address, "res", serializer.encode(res));
         }, executor);
 
-        ms.registerHandler("getProduct", (address, bytes) -> {
-            // TODO
-        }, executor);
-
         ms.start().get();
+    }
+
+    public void sendCluster(byte[] message) {
+        SpreadMessage m = new SpreadMessage();
+        m.addGroup("supermarket");
+        m.setData(serializer.encode(message));
+        m.setSafe();
+        try {
+            this.connection.multicast(m);
+        } catch (SpreadException e) {
+            e.printStackTrace();
+        }
     }
 
     public static void main(String[] args) throws InterruptedException, SpreadException, ExecutionException, UnknownHostException {

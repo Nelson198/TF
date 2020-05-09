@@ -1,7 +1,9 @@
+package Messages;
+
 /**
- * DB Message
+ * DB Messages.Message
  */
-public class DBMessage implements Message {
+public class DBContent implements Message {
     // ..... contents of the database
 
     /**

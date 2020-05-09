@@ -11,8 +11,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /*
-    AtomixConnection - middleware that handles the connection from the client to the cluster; it handles the cases
-                       of when a server goes down.
+    ClientConnection - Middleware that handles the network connection of a client to the cluster.
+                       It handles the cases of when a server goes down.
                        However, it does not contain logic related to the business logic.
                        Given that the client is single-threaded, this middleware can only handle one operation at a time.
  */

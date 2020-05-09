@@ -1,3 +1,4 @@
+import Messages.CartUpdate;
 import io.atomix.utils.serializer.Serializer;
 import io.atomix.utils.serializer.SerializerBuilder;
 
