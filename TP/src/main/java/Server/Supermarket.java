@@ -1,7 +1,13 @@
 package Server;
 
-import Messages.*;
+import Messages.CartUpdate;
+import Messages.Checkout;
+import Messages.DBContent;
+import Messages.DBUpdate;
+import Messages.Message;
+import Messages.ProductGet;
 import Types.Product;
+
 import io.atomix.cluster.messaging.ManagedMessagingService;
 import io.atomix.cluster.messaging.MessagingConfig;
 import io.atomix.cluster.messaging.impl.NettyMessagingService;
@@ -30,7 +36,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * Server.Supermarket Implementation
+ * Supermarket Implementation
  */
 public class Supermarket {
     // Server port
@@ -69,7 +75,7 @@ public class Supermarket {
     }
 
     /**
-     * initializeSpread
+     * Initialize Spread connection
      * @throws SpreadException SpreadException
      * @throws UnknownHostException UnknownHostException
      */
@@ -178,7 +184,7 @@ public class Supermarket {
     }
 
     /**
-     * initializeAtomix
+     * Initialize Atomix connection
      * @throws ExecutionException ExecutionException
      * @throws InterruptedException InterruptedException
      */
@@ -222,7 +228,12 @@ public class Supermarket {
         ms.start().get();
     }
 
-    // TODO - move to ServerConnection
+    /**
+     * Multicast a message to the cluster
+     * @param message Message
+     *
+     * TODO - move to ServerConnection
+     */
     public void sendCluster(byte[] message) {
         SpreadMessage m = new SpreadMessage();
         m.addGroup("supermarket");

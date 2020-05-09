@@ -1,6 +1,7 @@
 package Client;
 
 import Middleware.ClientConnection;
+
 import io.atomix.utils.serializer.Serializer;
 import io.atomix.utils.serializer.SerializerBuilder;
 

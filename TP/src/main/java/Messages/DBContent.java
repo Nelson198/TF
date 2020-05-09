@@ -1,7 +1,7 @@
 package Messages;
 
 /**
- * DB Messages.Message
+ * DB Message
  */
 public class DBContent implements Message {
     // ..... contents of the database

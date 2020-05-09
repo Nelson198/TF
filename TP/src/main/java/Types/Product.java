@@ -1,7 +1,7 @@
 package Types;
 
 /**
- * Types.Product
+ * Product
  */
 public class Product {
     private final String id;
@@ -12,11 +12,11 @@ public class Product {
 
     /**
      * Parameterized constructor
-     * @param id Types.Product's identifier
-     * @param name Types.Product's name
-     * @param description Types.Product's description
-     * @param price Types.Product's price
-     * @param quantity Types.Product's quantity
+     * @param id Product's identifier
+     * @param name Product's name
+     * @param description Product's description
+     * @param price Product's price
+     * @param quantity Product's quantity
      */
     public Product(String id, String name, String description, float price, int quantity) {
         this.id = id;
@@ -28,7 +28,7 @@ public class Product {
 
     /**
      * Parameterized constructor
-     * @param p Types.Product
+     * @param p Product
      */
     public Product(Product p) {
         this.id = p.getId();
@@ -40,7 +40,7 @@ public class Product {
 
     /**
      * Get the product's identifier
-     * @return Types.Product's identifier
+     * @return Product's identifier
      */
     public String getId() {
         return this.id;
@@ -48,7 +48,7 @@ public class Product {
 
     /**
      * Get the product's name
-     * @return Types.Product's name
+     * @return Product's name
      */
     public String getName() {
         return this.name;
@@ -56,7 +56,7 @@ public class Product {
 
     /**
      * Get the product's description
-     * @return Types.Product's description
+     * @return Product's description
      */
     public String getDescription() {
         return this.description;
@@ -64,7 +64,7 @@ public class Product {
 
     /**
      * Get the product's price
-     * @return Types.Product's price
+     * @return Product's price
      */
     public float getPrice() {
         return this.price;
@@ -72,7 +72,7 @@ public class Product {
 
     /**
      * Get the product's quantity
-     * @return Types.Product's quantity
+     * @return Product's quantity
      */
     public int getQuantity() {
         return quantity;

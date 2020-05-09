@@ -1,7 +1,7 @@
 package Messages;
 
 /**
- * Messages.Message Interface
+ * Message Interface
  */
 public interface Message {
     String getType();

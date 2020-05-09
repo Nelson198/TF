@@ -44,6 +44,10 @@ public class CartUpdate implements Message {
         return this.amount;
     }
 
+    /**
+     * Get "updateCart" message type
+     * @return Message type
+     */
     public String getType() {
         return "updateCart";
     }
