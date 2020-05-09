@@ -9,16 +9,19 @@ public class DBUpdate implements Message {
     private final String server; // TODO - should be SpreadGroup, but the serializer complains
     private final String client; // TODO - should be Address, but the serializer complains
 
+    private final String secondaryType;
+
     /**
      * Parameterized constructor
      * @param query Query
      * @param server Server to answer from
      * @param client Client.Client to answer to
      */
-    public DBUpdate(String query, String client, String server) {
+    public DBUpdate(String query, String client, String server, String secondaryType) {
         this.query = query;
         this.client = client;
         this.server = server;
+        this.secondaryType = secondaryType;
     }
 
     /**
@@ -27,6 +30,14 @@ public class DBUpdate implements Message {
      */
     public String getType() {
         return "dbUpdate";
+    }
+
+    /**
+     * Get DB update message secondary type
+     * @return Messages.Message secondary type
+     */
+    public String getSecondaryType() {
+        return secondaryType;
     }
 
     /**

@@ -1,5 +1,6 @@
 package Server;
 
+import Messages.DBUpdate;
 import io.atomix.utils.serializer.Serializer;
 import io.atomix.utils.serializer.SerializerBuilder;
 
@@ -21,7 +22,9 @@ public class TimerThread extends Thread {
     public void run() {
         try {
             Thread.sleep(TMAX * 1000);
-            this.connection.sendCluster(serializer.encode("DELETE FROM cart WHERE id=" +  cartID));
+
+            DBUpdate dbu = new DBUpdate("DELETE FROM cart WHERE id=" +  cartID, null, null, "deleteCart"); // TODO - query
+            this.connection.sendCluster(serializer.encode(dbu));
         } catch (Exception e) {
             e.printStackTrace();
         }

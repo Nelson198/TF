@@ -86,58 +86,58 @@ public class Supermarket {
         this.connection.add(new AdvancedMessageListener() {
             public void regularMessageReceived(SpreadMessage spreadMessage) {
                 Message ms = aux.serializer.decode(spreadMessage.getData());
-                switch (ms.getType()) {
-                    case "db":
-                        DBContent dbMsg = (DBContent) ms;
-                        // ........ update the db file
-                        try {
-                            aux.dbConnection = DriverManager.getConnection("jdbc:hsqldb:file:supermarket" + port + "?allowMultiQueries=true", "SA", "");
-                            aux.dbConnection.setAutoCommit(true); // default
+                if (ms.getType().equals("db")) {
+                    DBContent dbMsg = (DBContent) ms;
+                    // ........ update the db file
+                    try {
+                        aux.dbConnection = DriverManager.getConnection("jdbc:hsqldb:file:supermarket" + port + "?allowMultiQueries=true", "SA", "");
+                        aux.dbConnection.setAutoCommit(true); // default
 
-                            for (String pq : aux.pendingQueries) {
-                                Statement s = aux.dbConnection.createStatement();
-                                s.executeUpdate(pq);
-                            }
-                            aux.pendingQueries = null;
-
-                            aux.catalog = new CatalogSkeleton(aux.dbConnection);
-                            initializeAtomix();
-                        } catch (Exception exception) {
-                            exception.printStackTrace();
+                        for (String pq : aux.pendingQueries) {
+                            Statement s = aux.dbConnection.createStatement();
+                            s.executeUpdate(pq);
                         }
-                        break;
-                    case "dbUpdate":
-                        DBUpdate dbUpdate = (DBUpdate) ms;
-                        String query = dbUpdate.getQuery();
+                        aux.pendingQueries = null;
 
-                        if (aux.dbConnection == null) {
-                            aux.pendingQueries.add(query);
-                        } else {
-                            try {
-                                Statement s = aux.dbConnection.createStatement();
-                                int res = s.executeUpdate(query);
+                        aux.catalog = new CatalogSkeleton(aux.dbConnection);
+                        initializeAtomix();
+                    } catch (Exception exception) {
+                        exception.printStackTrace();
+                    }
+                } else if (ms.getType().equals("dbUpdate")) {
+                    DBUpdate dbUpdate = (DBUpdate) ms;
+                    String query = dbUpdate.getQuery();
 
-                                if (false) { // TODO - only execute this when there is a cart creation
+                    if (aux.dbConnection == null) {
+                        aux.pendingQueries.add(query);
+                    } else {
+                        try {
+                            Statement s = aux.dbConnection.createStatement();
+                            int res = s.executeUpdate(query);
+
+                            switch (dbUpdate.getSecondaryType()) {
+                                case "newCart":
                                     aux.carts.put(res, new CartSkeleton(Integer.toString(res), aux.dbConnection));
-                                }
-
-                                if (false) { // TODO - only execute this when there is a cart deletion
-                                    aux.carts.remove(res);
-                                }
-
-                                if (dbUpdate.getServer().equals(aux.port)) {
-                                    if (false) { // TODO - only execute this when there is a cart creation
+                                    if (dbUpdate.getServer().equals(aux.port)) {
                                         Thread timer = new TimerThread(res, aux);
                                         timer.start();
                                     }
-
-                                    aux.ms.sendAsync(Address.from(dbUpdate.getClient()), "res", serializer.encode(res)); // TODO - figure out what to send to the client
-                                }
-                            } catch (SQLException exception) {
-                                exception.printStackTrace();
+                                    break;
+                                case "deleteCart":
+                                    aux.carts.remove(res);
+                                    break;
+                                case "checkout":
+                                    aux.carts.remove(res);
+                                    break;
                             }
+
+                            if (dbUpdate.getServer().equals(aux.port)) {
+                                aux.ms.sendAsync(Address.from(dbUpdate.getClient()), "res", serializer.encode(res)); // TODO - figure out what to send to the client
+                            }
+                        } catch (SQLException exception) {
+                            exception.printStackTrace();
                         }
-                        break;
+                    }
                 }
             }
 
@@ -190,24 +190,23 @@ public class Supermarket {
 
         Supermarket aux = this;
 
-        // TODO - maybe make these handlers send an object of a specific class instead of a DBUpdate (or find a way to distinguish them when they arrive to the cliuster)
         ms.registerHandler("newCart", (address, bytes) -> {
-            DBUpdate dbu = new DBUpdate("INSERT INTO cart VALUES ()", aux.connection.getPrivateGroup().toString(), address.toString()); // TODO - query
+            DBUpdate dbu = new DBUpdate("INSERT INTO cart VALUES ()", aux.connection.getPrivateGroup().toString(), address.toString(), "newCart"); // TODO - query
             aux.sendCluster(aux.serializer.encode(dbu));
         }, executor);
 
         ms.registerHandler("addProduct", (address, bytes) -> {
-            DBUpdate dbu = new DBUpdate("UPDATE cart SET ... WHERE id=...", aux.connection.getPrivateGroup().toString(), address.toString()); // TODO - query
+            DBUpdate dbu = new DBUpdate("UPDATE cart SET ... WHERE id=...", aux.connection.getPrivateGroup().toString(), address.toString(), "addProduct"); // TODO - query
             aux.sendCluster(aux.serializer.encode(dbu));
         }, executor);
 
         ms.registerHandler("removeProduct", (address, bytes) -> {
-            DBUpdate dbu = new DBUpdate("UPDATE cart SET ... WHERE id=...", aux.connection.getPrivateGroup().toString(), address.toString()); // TODO - query
+            DBUpdate dbu = new DBUpdate("UPDATE cart SET ... WHERE id=...", aux.connection.getPrivateGroup().toString(), address.toString(), "removeProduct"); // TODO - query
             aux.sendCluster(aux.serializer.encode(dbu));
         }, executor);
 
         ms.registerHandler("checkout", (address, bytes) -> {
-            DBUpdate dbu = new DBUpdate("UPDATE cart SET ... WHERE id=...", aux.connection.getPrivateGroup().toString(), address.toString()); // TODO - query
+            DBUpdate dbu = new DBUpdate("UPDATE cart SET ... WHERE id=...", aux.connection.getPrivateGroup().toString(), address.toString(), "checkout"); // TODO - query
             aux.sendCluster(aux.serializer.encode(dbu));
         }, executor);
 
