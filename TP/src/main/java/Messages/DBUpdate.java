@@ -13,7 +13,7 @@ public class DBUpdate implements Message {
      * Parameterized constructor
      * @param query Query
      * @param server Server to answer from
-     * @param client Client to answer to
+     * @param client Client.Client to answer to
      */
     public DBUpdate(String query, String client, String server) {
         this.query = query;
@@ -47,7 +47,7 @@ public class DBUpdate implements Message {
 
     /**
      * Get the client to which to answer
-     * @return Client to answer to
+     * @return Client.Client to answer to
      */
     public String getClient() {
         return this.client;

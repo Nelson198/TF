@@ -1,3 +1,5 @@
+package Server;
+
 import Messages.DBContent;
 import Messages.DBUpdate;
 import Messages.Message;
@@ -29,7 +31,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * Supermarket Implementation
+ * Server.Supermarket Implementation
  */
 public class Supermarket {
     // Server port

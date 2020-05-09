@@ -1,3 +1,5 @@
+package Server;
+
 import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Map;

@@ -1,3 +1,6 @@
+package Client;
+
+import Middleware.ClientConnection;
 import io.atomix.utils.net.Address;
 
 import java.io.BufferedReader;
@@ -8,7 +11,7 @@ import java.util.HashMap;
 import java.util.concurrent.ExecutionException;
 
 /**
- * Client
+ * Client.Client
  */
 public class Client {
     private static final BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));

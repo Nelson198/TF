@@ -1,3 +1,5 @@
+package Middleware;
+
 import io.atomix.cluster.messaging.ManagedMessagingService;
 import io.atomix.cluster.messaging.MessagingConfig;
 import io.atomix.cluster.messaging.impl.NettyMessagingService;
@@ -11,7 +13,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /*
-    ClientConnection - Middleware that handles the network connection of a client to the cluster.
+    Middleware.ClientConnection - Middleware that handles the network connection of a client to the cluster.
                        It handles the cases of when a server goes down.
                        However, it does not contain logic related to the business logic.
                        Given that the client is single-threaded, this middleware can only handle one operation at a time.
