@@ -27,9 +27,9 @@ public class CartStub {
         this.connection = connection;
 
         this.connection.registerHandler("res");
-        this.connection.registerHandler("newCart");  // TODO - add the others
 
-        // TODO - get ID from server
+        byte[] res = this.connection.sendAndReceive("newCart", null);
+        this.idCart = serializer.decode(res);
     }
 
     /**
@@ -39,7 +39,7 @@ public class CartStub {
      */
     public void addProduct(String idProduct, int qtd) {
         CartUpdate toSend = new CartUpdate(idCart, idProduct, qtd);
-        byte[] res = this.connection.sendAndReceive("addProduct", this.serializer.encode(toSend));
+        byte[] res = this.connection.sendAndReceive("updateProduct", this.serializer.encode(toSend));
         // TODO - ....
     }
 
@@ -50,7 +50,7 @@ public class CartStub {
      */
     public void removeProduct(String idProduct, int qtd) {
         CartUpdate toSend = new CartUpdate(idCart, idProduct, qtd);
-        byte[] res = this.connection.sendAndReceive("removeProduct", this.serializer.encode(toSend));
+        byte[] res = this.connection.sendAndReceive("updateProduct", this.serializer.encode(toSend));
         // TODO - ....
     }
 

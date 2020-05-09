@@ -1,9 +1,6 @@
 package Server;
 
-import Messages.DBContent;
-import Messages.DBUpdate;
-import Messages.Message;
-import Messages.ProductGet;
+import Messages.*;
 import Types.Product;
 import io.atomix.cluster.messaging.ManagedMessagingService;
 import io.atomix.cluster.messaging.MessagingConfig;
@@ -58,7 +55,7 @@ public class Supermarket {
     CatalogSkeleton catalog;
 
     // Skeletons for the carts
-    HashMap<Integer, CartSkeleton> carts = new HashMap<>();
+    HashMap<String, CartSkeleton> carts = new HashMap<>();
 
     // Queries that arrived between this server's connection and the reception of the DB
     ArrayList<String> pendingQueries = new ArrayList<>();
@@ -117,7 +114,7 @@ public class Supermarket {
 
                             switch (dbUpdate.getSecondaryType()) {
                                 case "newCart":
-                                    aux.carts.put(res, new CartSkeleton(Integer.toString(res), aux.dbConnection));
+                                    aux.carts.put(Integer.toString(res), new CartSkeleton(Integer.toString(res), aux.dbConnection));
                                     if (dbUpdate.getServer().equals(aux.port)) {
                                         Thread timer = new TimerThread(res, aux);
                                         timer.start();
@@ -144,15 +141,17 @@ public class Supermarket {
             public void membershipMessageReceived(SpreadMessage spreadMessage) {
                 MembershipInfo info = spreadMessage.getMembershipInfo();
                 if (info.isCausedByJoin()) {
-                    if (info.getGroup().equals(aux.connection.getPrivateGroup())) {
+                    if (info.getJoined().equals(aux.connection.getPrivateGroup())) {
                         if (info.getMembers().length == 1) {
                             try {
                                 aux.dbConnection = DriverManager.getConnection("jdbc:hsqldb:file:supermarket" + port + "?allowMultiQueries=true", "SA", "");
                                 aux.dbConnection.setAutoCommit(true);
 
                                 aux.catalog = new CatalogSkeleton(aux.dbConnection);
-                            } catch (SQLException exception) {
-                                exception.printStackTrace();
+
+                                initializeAtomix();
+                            } catch (Exception e) {
+                                e.printStackTrace();
                             }
                         } else {
                             for (SpreadGroup member : info.getMembers()) {
@@ -195,17 +194,16 @@ public class Supermarket {
             aux.sendCluster(aux.serializer.encode(dbu));
         }, executor);
 
-        ms.registerHandler("addProduct", (address, bytes) -> {
+        ms.registerHandler("updateCart", (address, bytes) -> {
+            CartUpdate cu = aux.serializer.decode(bytes);
+
             DBUpdate dbu = new DBUpdate("UPDATE cart SET ... WHERE id=...", aux.connection.getPrivateGroup().toString(), address.toString(), "addProduct"); // TODO - query
             aux.sendCluster(aux.serializer.encode(dbu));
         }, executor);
 
-        ms.registerHandler("removeProduct", (address, bytes) -> {
-            DBUpdate dbu = new DBUpdate("UPDATE cart SET ... WHERE id=...", aux.connection.getPrivateGroup().toString(), address.toString(), "removeProduct"); // TODO - query
-            aux.sendCluster(aux.serializer.encode(dbu));
-        }, executor);
-
         ms.registerHandler("checkout", (address, bytes) -> {
+            Checkout co = aux.serializer.decode(bytes);
+
             DBUpdate dbu = new DBUpdate("UPDATE cart SET ... WHERE id=...", aux.connection.getPrivateGroup().toString(), address.toString(), "checkout"); // TODO - query
             aux.sendCluster(aux.serializer.encode(dbu));
         }, executor);

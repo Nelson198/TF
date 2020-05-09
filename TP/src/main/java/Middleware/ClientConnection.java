@@ -40,7 +40,7 @@ public class ClientConnection {
         int server = rand.nextInt(servers.size());
         this.currentServer = servers.get(server);
 
-        this.ms = new NettyMessagingService("client", address, new MessagingConfig());
+        this.ms = new NettyMessagingService("supermarket", address, new MessagingConfig());
         this.ms.start().get();
     }
 
@@ -66,7 +66,7 @@ public class ClientConnection {
         this.ms.sendAsync(this.currentServer, type, message);
 
         try {
-            return this.res.get(); // TODO - handle these error better
+            return this.res.get(); // TODO - handle these exceptions better (switch servers)
         } catch (Exception e) {
             e.printStackTrace();
         }
