@@ -3,6 +3,7 @@ package Server;
 import Messages.DBContent;
 import Messages.DBUpdate;
 import Messages.Message;
+import Messages.ProductGet;
 import Types.Product;
 import io.atomix.cluster.messaging.ManagedMessagingService;
 import io.atomix.cluster.messaging.MessagingConfig;
@@ -116,7 +117,20 @@ public class Supermarket {
                                 Statement s = aux.dbConnection.createStatement();
                                 int res = s.executeUpdate(query);
 
+                                if (false) { // TODO - only execute this when there is a cart creation
+                                    aux.carts.put(res, new CartSkeleton(Integer.toString(res), aux.dbConnection));
+                                }
+
+                                if (false) { // TODO - only execute this when there is a cart deletion
+                                    aux.carts.remove(res);
+                                }
+
                                 if (dbUpdate.getServer().equals(aux.port)) {
+                                    if (false) { // TODO - only execute this when there is a cart creation
+                                        Thread timer = new TimerThread(res, aux);
+                                        timer.start();
+                                    }
+
                                     aux.ms.sendAsync(Address.from(dbUpdate.getClient()), "res", serializer.encode(res)); // TODO - figure out what to send to the client
                                 }
                             } catch (SQLException exception) {
@@ -153,6 +167,9 @@ public class Supermarket {
                     primaryAfter.remove(info.getDisconnected());
                 } else if (info.isCausedByLeave()) {
                     primaryAfter.remove(info.getLeft());
+                } else if (info.isCausedByNetwork()) {
+                    // TODO - deal with network partitions
+                    //        see info.getMyVirtualSynchronySet(), info.getStayed(), info.getVirtualSynchronySets()
                 }
             }
         });
@@ -173,35 +190,42 @@ public class Supermarket {
 
         Supermarket aux = this;
 
+        // TODO - maybe make these handlers send an object of a specific class instead of a DBUpdate (or find a way to distinguish them when they arrive to the cliuster)
         ms.registerHandler("newCart", (address, bytes) -> {
-            DBUpdate dbu = new DBUpdate("INSERT INTO carts VALUES ()", aux.connection.getPrivateGroup().toString(), address.toString()); // TODO - query
+            DBUpdate dbu = new DBUpdate("INSERT INTO cart VALUES ()", aux.connection.getPrivateGroup().toString(), address.toString()); // TODO - query
             aux.sendCluster(aux.serializer.encode(dbu));
         }, executor);
 
         ms.registerHandler("addProduct", (address, bytes) -> {
-            DBUpdate dbu = new DBUpdate("UPDATE carts SET ... WHERE id=...", aux.connection.getPrivateGroup().toString(), address.toString()); // TODO - query
+            DBUpdate dbu = new DBUpdate("UPDATE cart SET ... WHERE id=...", aux.connection.getPrivateGroup().toString(), address.toString()); // TODO - query
             aux.sendCluster(aux.serializer.encode(dbu));
         }, executor);
 
         ms.registerHandler("removeProduct", (address, bytes) -> {
-            DBUpdate dbu = new DBUpdate("UPDATE carts SET ... WHERE id=...", aux.connection.getPrivateGroup().toString(), address.toString()); // TODO - query
+            DBUpdate dbu = new DBUpdate("UPDATE cart SET ... WHERE id=...", aux.connection.getPrivateGroup().toString(), address.toString()); // TODO - query
             aux.sendCluster(aux.serializer.encode(dbu));
         }, executor);
 
         ms.registerHandler("checkout", (address, bytes) -> {
-            DBUpdate dbu = new DBUpdate("UPDATE carts SET ... WHERE id=...", aux.connection.getPrivateGroup().toString(), address.toString()); // TODO - query
+            DBUpdate dbu = new DBUpdate("UPDATE cart SET ... WHERE id=...", aux.connection.getPrivateGroup().toString(), address.toString()); // TODO - query
             aux.sendCluster(aux.serializer.encode(dbu));
         }, executor);
 
         ms.registerHandler("getCatalog", (address, bytes) -> {
-            Connection c = aux.serializer.decode(bytes);
             ArrayList<Product> res = catalog.getCatalog();
+            ms.sendAsync(address, "res", serializer.encode(res));
+        }, executor);
+
+        ms.registerHandler("getProduct", (address, bytes) -> {
+            ProductGet pg = aux.serializer.decode(bytes);
+            Product res = catalog.getProduct(pg.getId());
             ms.sendAsync(address, "res", serializer.encode(res));
         }, executor);
 
         ms.start().get();
     }
 
+    // TODO - move to ServerConnection
     public void sendCluster(byte[] message) {
         SpreadMessage m = new SpreadMessage();
         m.addGroup("supermarket");

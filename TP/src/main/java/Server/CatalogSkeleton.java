@@ -92,4 +92,28 @@ public class CatalogSkeleton {
         }
         return availability;
     }
+
+    /**
+     * Get product info
+     * @param idProduct Product's identifier
+     * @return Product info
+     */
+    public Product getProduct(String idProduct) {
+        Product res = null;
+        try {
+            // Create and execute statement
+            Statement stmt = this.connection.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT * FROM product WHERE id=" + idProduct);
+
+            // Get result from query
+            res = new Product(rs.getString("id"), rs.getString("name"), rs.getString("description"), rs.getFloat("price"), rs.getInt("amount"));
+
+            // Clean up
+            rs.close();
+            stmt.close();
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
+        return res;
+    }
 }
