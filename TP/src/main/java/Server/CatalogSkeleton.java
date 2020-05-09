@@ -1,9 +1,9 @@
 package Server;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.sql.SQLException;
+import Types.Product;
+
+import java.sql.*;
+import java.util.ArrayList;
 
 /**
  * Catalog Skeleton
@@ -23,24 +23,18 @@ public class CatalogSkeleton {
      * Get catalog information
      * @return Catalog information
      */
-    public String getCatalog() {
-        String catalog = "";
+    public ArrayList<Product> getCatalog() {
+        ArrayList<Product> res = new ArrayList<>();
         try {
             // Create and execute statement
             Statement stmt = this.connection.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT * FROM product");
 
             // Get result from query
-            StringBuilder sb = new StringBuilder("Product ID\tName\tDescription\tPrice\tAmount");
             while(rs.next()) {
-                sb.append(rs.getString("id"))
-                  .append(rs.getString("name"))
-                  .append(rs.getString("description"))
-                  .append(rs.getDouble("price"))
-                  .append(rs.getInt("amount"))
-                  .append("\n");
+                Product p = new Product(rs.getString("id"), rs.getString("name"), rs.getString("description"), rs.getFloat("price"), rs.getInt("amount"));
+                res.add(p);
             }
-            catalog = sb.toString();
 
             // Clean up
             rs.close();
@@ -48,7 +42,7 @@ public class CatalogSkeleton {
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
-        return catalog;
+        return res;
     }
 
     /**

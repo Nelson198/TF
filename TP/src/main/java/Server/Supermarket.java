@@ -3,6 +3,7 @@ package Server;
 import Messages.DBContent;
 import Messages.DBUpdate;
 import Messages.Message;
+import Types.Product;
 import io.atomix.cluster.messaging.ManagedMessagingService;
 import io.atomix.cluster.messaging.MessagingConfig;
 import io.atomix.cluster.messaging.impl.NettyMessagingService;
@@ -194,7 +195,7 @@ public class Supermarket {
 
         ms.registerHandler("getCatalog", (address, bytes) -> {
             Connection c = aux.serializer.decode(bytes);
-            String res = catalog.getCatalog();
+            ArrayList<Product> res = catalog.getCatalog();
             ms.sendAsync(address, "res", serializer.encode(res));
         }, executor);
 
