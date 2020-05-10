@@ -195,6 +195,8 @@ public class Supermarket {
 
         Supermarket aux = this;
 
+        // Cart
+
         ms.registerHandler("newCart", (address, bytes) -> {
             DBUpdate dbu = new DBUpdate("INSERT INTO cart VALUES ()", aux.connection.getPrivateGroup().toString(), address.toString(), "newCart"); // TODO - query
             aux.sendCluster(aux.serializer.encode(dbu));
@@ -214,6 +216,8 @@ public class Supermarket {
             aux.sendCluster(aux.serializer.encode(dbu));
         }, executor);
 
+        // Catalog
+
         ms.registerHandler("getCatalog", (address, bytes) -> {
             ArrayList<Product> res = catalog.getCatalog();
             ms.sendAsync(address, "res", serializer.encode(res));
@@ -222,6 +226,18 @@ public class Supermarket {
         ms.registerHandler("getProduct", (address, bytes) -> {
             ProductGet pg = aux.serializer.decode(bytes);
             Product res = catalog.getProduct(pg.getId());
+            ms.sendAsync(address, "res", serializer.encode(res));
+        }, executor);
+
+        ms.registerHandler("getPrice", (address, bytes) -> {
+            String idProduct = aux.serializer.decode(bytes);
+            float res = catalog.getPrice(idProduct);
+            ms.sendAsync(address, "res", serializer.encode(res));
+        }, executor);
+
+        ms.registerHandler("getAvailability", (address, bytes) -> {
+            String idProduct = aux.serializer.decode(bytes);
+            int res = catalog.getAvailability(idProduct);
             ms.sendAsync(address, "res", serializer.encode(res));
         }, executor);
 

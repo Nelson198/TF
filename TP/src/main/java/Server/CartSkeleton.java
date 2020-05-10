@@ -2,7 +2,6 @@ package Server;
 
 import java.sql.Connection;
 import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Cart Skeleton
@@ -33,7 +32,7 @@ public class CartSkeleton {
      * Get the cart's products
      * @return Cart's products
      */
-    public Map<String, Integer> getProducts() {
+    public HashMap<String, Integer> getProducts() {
         // TODO - call the DB
         return new HashMap<>();
     }

@@ -9,10 +9,10 @@ import io.atomix.utils.serializer.SerializerBuilder;
  * Catalog Stub
  */
 public class CatalogStub {
-    ClientConnection connection;
+    private ClientConnection connection;
 
     // TODO - make a class for the serializers
-    Serializer serializer = new SerializerBuilder().build();
+    private Serializer serializer = new SerializerBuilder().build();
 
     /**
      * Parameterized constructor
@@ -30,6 +30,7 @@ public class CatalogStub {
      */
     public String getCatalog() {
         // TODO
+        this.connection.sendAndReceive("getCatalog", null);
         return null;
     }
 
@@ -40,6 +41,7 @@ public class CatalogStub {
      */
     public float getPrice(String idProduct) {
         // TODO
+        this.connection.sendAndReceive("getPrice", this.serializer.encode(idProduct));
         return 0;
     }
 
@@ -50,6 +52,7 @@ public class CatalogStub {
      */
     public int getAvailability(String idProduct) {
         // TODO
+        this.connection.sendAndReceive("getAvailability", this.serializer.encode(idProduct));
         return 0;
     }
 }

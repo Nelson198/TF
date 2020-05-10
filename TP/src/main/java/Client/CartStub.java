@@ -7,15 +7,13 @@ import io.atomix.utils.serializer.Serializer;
 import io.atomix.utils.serializer.SerializerBuilder;
 
 import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Cart Stub
  */
 public class CartStub {
     ClientConnection connection;
-
-    String idCart; // ?
+    String idCart;
 
     // TODO - make a class for the serializers
     Serializer serializer = new SerializerBuilder().addType(CartUpdate.class).addType(String.class).build();
@@ -39,7 +37,7 @@ public class CartStub {
      * @param qtd Product's quantity
      */
     public void addProduct(String idProduct, int qtd) {
-        CartUpdate toSend = new CartUpdate(idCart, idProduct, qtd);
+        CartUpdate toSend = new CartUpdate(this.idCart, idProduct, qtd);
         byte[] res = this.connection.sendAndReceive("updateProduct", this.serializer.encode(toSend));
         // TODO - ....
     }
@@ -50,7 +48,7 @@ public class CartStub {
      * @param qtd Product's quantity
      */
     public void removeProduct(String idProduct, int qtd) {
-        CartUpdate toSend = new CartUpdate(idCart, idProduct, qtd);
+        CartUpdate toSend = new CartUpdate(this.idCart, idProduct, qtd);
         byte[] res = this.connection.sendAndReceive("updateProduct", this.serializer.encode(toSend));
         // TODO - ....
     }
@@ -59,7 +57,7 @@ public class CartStub {
      * Checkout
      */
     public void checkout() {
-        byte[] res = this.connection.sendAndReceive("checkout", this.serializer.encode(idCart));
+        byte[] res = this.connection.sendAndReceive("checkout", this.serializer.encode(this.idCart));
         // TODO - ....
     }
 
@@ -67,7 +65,7 @@ public class CartStub {
      * Get cart's products
      * @return Cart's products
      */
-    public Map<String, Integer> getProducts() {
+    public HashMap<String, Integer> getProducts() {
         // TODO - ....
         return new HashMap<>();
     }
