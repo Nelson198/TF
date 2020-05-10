@@ -75,6 +75,6 @@ public class Product {
      * @return Product's quantity
      */
     public int getQuantity() {
-        return quantity;
+        return this.quantity;
     }
 }

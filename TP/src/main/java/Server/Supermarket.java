@@ -6,6 +6,7 @@ import Messages.DBContent;
 import Messages.DBUpdate;
 import Messages.Message;
 import Messages.ProductGet;
+import Serializer.ServerSerializer;
 import Types.Product;
 
 import io.atomix.cluster.messaging.ManagedMessagingService;
@@ -13,7 +14,6 @@ import io.atomix.cluster.messaging.MessagingConfig;
 import io.atomix.cluster.messaging.impl.NettyMessagingService;
 import io.atomix.utils.net.Address;
 import io.atomix.utils.serializer.Serializer;
-import io.atomix.utils.serializer.SerializerBuilder;
 
 import spread.AdvancedMessageListener;
 import spread.MembershipInfo;
@@ -46,7 +46,7 @@ public class Supermarket {
     ArrayList<SpreadGroup> primaryAfter = new ArrayList<>();
 
     // Serializer for the messages sent between servers
-    Serializer serializer = new SerializerBuilder().build();
+    ServerSerializer serializer = new ServerSerializer();
 
     // Initialize the spread connection
     SpreadConnection connection = new SpreadConnection();
@@ -88,7 +88,8 @@ public class Supermarket {
 
         this.connection.add(new AdvancedMessageListener() {
             public void regularMessageReceived(SpreadMessage spreadMessage) {
-                Message ms = aux.serializer.decode(spreadMessage.getData());
+                Serializer s = aux.serializer.getSerializer();
+                Message ms = s.decode(spreadMessage.getData());
                 if (ms.getType().equals("db")) {
                     DBContent dbMsg = (DBContent) ms;
                     // ........ update the db file
@@ -97,8 +98,8 @@ public class Supermarket {
                         aux.dbConnection.setAutoCommit(true); // default
 
                         for (String pq : aux.pendingQueries) {
-                            Statement s = aux.dbConnection.createStatement();
-                            s.executeUpdate(pq);
+                            Statement st = aux.dbConnection.createStatement();
+                            st.executeUpdate(pq);
                         }
                         aux.pendingQueries = null;
 
@@ -115,8 +116,8 @@ public class Supermarket {
                         aux.pendingQueries.add(query);
                     } else {
                         try {
-                            Statement s = aux.dbConnection.createStatement();
-                            int res = s.executeUpdate(query);
+                            Statement st = aux.dbConnection.createStatement();
+                            int res = st.executeUpdate(query);
 
                             switch (dbUpdate.getSecondaryType()) {
                                 case "newCart":
@@ -135,7 +136,7 @@ public class Supermarket {
                             }
 
                             if (dbUpdate.getServer().equals(aux.port)) {
-                                aux.ms.sendAsync(Address.from(dbUpdate.getClient()), "res", serializer.encode(res)); // TODO - figure out what to send to the client
+                                aux.ms.sendAsync(Address.from(dbUpdate.getClient()), "res", s.encode(res)); // TODO - figure out what to send to the client
                             }
                         } catch (SQLException exception) {
                             exception.printStackTrace();
@@ -194,51 +195,52 @@ public class Supermarket {
         ExecutorService executor = Executors.newFixedThreadPool(1);
 
         Supermarket aux = this;
+        Serializer s = aux.serializer.getSerializer();
 
         // Cart
 
         ms.registerHandler("newCart", (address, bytes) -> {
             DBUpdate dbu = new DBUpdate("INSERT INTO cart VALUES ()", aux.connection.getPrivateGroup().toString(), address.toString(), "newCart"); // TODO - query
-            aux.sendCluster(aux.serializer.encode(dbu));
+            aux.sendCluster(s.encode(dbu));
         }, executor);
 
         ms.registerHandler("updateCart", (address, bytes) -> {
-            CartUpdate cu = aux.serializer.decode(bytes);
+            CartUpdate cu = s.decode(bytes);
 
             DBUpdate dbu = new DBUpdate("UPDATE cart SET ... WHERE id=...", aux.connection.getPrivateGroup().toString(), address.toString(), "addProduct"); // TODO - query
-            aux.sendCluster(aux.serializer.encode(dbu));
+            aux.sendCluster(s.encode(dbu));
         }, executor);
 
         ms.registerHandler("checkout", (address, bytes) -> {
-            Checkout co = aux.serializer.decode(bytes);
+            Checkout co = s.decode(bytes);
 
             DBUpdate dbu = new DBUpdate("UPDATE cart SET ... WHERE id=...", aux.connection.getPrivateGroup().toString(), address.toString(), "checkout"); // TODO - query
-            aux.sendCluster(aux.serializer.encode(dbu));
+            aux.sendCluster(s.encode(dbu));
         }, executor);
 
         // Catalog
 
         ms.registerHandler("getCatalog", (address, bytes) -> {
             ArrayList<Product> res = catalog.getCatalog();
-            ms.sendAsync(address, "res", serializer.encode(res));
+            ms.sendAsync(address, "res", s.encode(res));
         }, executor);
 
         ms.registerHandler("getProduct", (address, bytes) -> {
-            ProductGet pg = aux.serializer.decode(bytes);
+            ProductGet pg = s.decode(bytes);
             Product res = catalog.getProduct(pg.getId());
-            ms.sendAsync(address, "res", serializer.encode(res));
+            ms.sendAsync(address, "res", s.encode(res));
         }, executor);
 
         ms.registerHandler("getPrice", (address, bytes) -> {
-            String idProduct = aux.serializer.decode(bytes);
+            String idProduct = s.decode(bytes);
             float res = catalog.getPrice(idProduct);
-            ms.sendAsync(address, "res", serializer.encode(res));
+            ms.sendAsync(address, "res", s.encode(res));
         }, executor);
 
         ms.registerHandler("getAvailability", (address, bytes) -> {
-            String idProduct = aux.serializer.decode(bytes);
+            String idProduct = s.decode(bytes);
             int res = catalog.getAvailability(idProduct);
-            ms.sendAsync(address, "res", serializer.encode(res));
+            ms.sendAsync(address, "res", s.encode(res));
         }, executor);
 
         ms.start().get();
@@ -251,9 +253,12 @@ public class Supermarket {
      * TODO - move to ServerConnection
      */
     public void sendCluster(byte[] message) {
+        Supermarket aux = this;
+        Serializer s = aux.serializer.getSerializer();
+
         SpreadMessage m = new SpreadMessage();
         m.addGroup("supermarket");
-        m.setData(serializer.encode(message));
+        m.setData(s.encode(message));
         m.setSafe();
         try {
             this.connection.multicast(m);

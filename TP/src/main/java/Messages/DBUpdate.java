@@ -37,7 +37,7 @@ public class DBUpdate implements Message {
      * @return Message secondary type
      */
     public String getSecondaryType() {
-        return secondaryType;
+        return this.secondaryType;
     }
 
     /**
