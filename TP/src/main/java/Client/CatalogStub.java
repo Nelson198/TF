@@ -12,7 +12,7 @@ public class CatalogStub {
     private ClientConnection connection;
 
     // TODO - make a class for the serializers
-    private Serializer serializer = new SerializerBuilder().build();
+    private Serializer serializer = new SerializerBuilder().addType(String.class).addType(Float.class).addType(Integer.class).build();
 
     /**
      * Parameterized constructor
@@ -29,9 +29,9 @@ public class CatalogStub {
      * @return Catalog information
      */
     public String getCatalog() {
-        // TODO
-        this.connection.sendAndReceive("getCatalog", null);
-        return null;
+        byte[] res = this.connection.sendAndReceive("getCatalog", null);
+        String catalog = this.serializer.decode(res);
+        return catalog;
     }
 
     /**
@@ -40,9 +40,9 @@ public class CatalogStub {
      * @return Product's price
      */
     public float getPrice(String idProduct) {
-        // TODO
-        this.connection.sendAndReceive("getPrice", this.serializer.encode(idProduct));
-        return 0;
+        byte[] res = this.connection.sendAndReceive("getPrice", this.serializer.encode(idProduct));
+        float price = this.serializer.decode(res);
+        return price;
     }
 
     /**
@@ -51,8 +51,8 @@ public class CatalogStub {
      * @return Product's availability
      */
     public int getAvailability(String idProduct) {
-        // TODO
-        this.connection.sendAndReceive("getAvailability", this.serializer.encode(idProduct));
-        return 0;
+        byte[] res = this.connection.sendAndReceive("getAvailability", this.serializer.encode(idProduct));
+        int availability = this.serializer.decode(res);
+        return availability;
     }
 }
