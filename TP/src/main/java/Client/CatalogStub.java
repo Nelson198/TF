@@ -42,13 +42,13 @@ public class CatalogStub {
     }
 
     /**
-     * Get product's availability
+     * Get product's amount
      * @param idProduct Product's identifier
-     * @return Product's availability
+     * @return Product's amount
      */
-    public int getAvailability(String idProduct) {
+    public int getAmount(String idProduct) {
         byte[] res = this.connection.sendAndReceive("getAvailability", this.serializer.encode(idProduct));
-        int availability = this.serializer.decode(res);
-        return availability;
+        int amount = this.serializer.decode(res);
+        return amount;
     }
 }

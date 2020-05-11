@@ -171,7 +171,7 @@ public class Client {
                     clearTerminal();
                     System.out.print("Insert the product's code: ");
                     productId = stdin.readLine();
-                    int amount = catalog.getAvailability(productId);
+                    int amount = catalog.getAmount(productId);
                     System.out.println("We have " + amount + " available at the moment");
                     break;
 
