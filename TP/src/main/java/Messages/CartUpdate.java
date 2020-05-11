@@ -3,7 +3,7 @@ package Messages;
 /**
  * Cart Update
  */
-public class CartUpdate implements Message {
+public class CartUpdate {
     private final String idCart;
     private final String idProduct;
     private final int amount;
@@ -42,13 +42,5 @@ public class CartUpdate implements Message {
      */
     public int getAmount() {
         return this.amount;
-    }
-
-    /**
-     * Get "updateCart" message type
-     * @return Message type
-     */
-    public String getType() {
-        return "updateCart";
     }
 }

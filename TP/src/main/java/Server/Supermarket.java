@@ -93,14 +93,15 @@ public class Supermarket {
                     DBContent dbMsg = (DBContent) ms;
                     // ........ update the db file
                     try {
-                        aux.dbConnection = DriverManager.getConnection("jdbc:hsqldb:file:supermarket" + port, "SA", "");
-                        aux.dbConnection.setAutoCommit(true); // default
+                        aux.dbConnection = DriverManager.getConnection("jdbc:hsqldb:file:supermarket" + port, "sa", "");
 
-                        // TODO - create DB tables
+                        Statement stm = aux.dbConnection.createStatement();
+                        stm.executeUpdate("CREATE TABLE cart (id INT AUTO_INCREMENT PRIMARY KEY)");
+                        stm.executeUpdate("CREATE TABLE product (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(100), description VARCHAR(100), price FLOAT, amount INT)");
+                        stm.executeUpdate("CREATE TABLE cartProduct (id INT AUTO_INCREMENT PRIMARY KEY, idProduct FOREIGN KEY REFERENCES product(id), amount INT)");
 
                         for (String pq : aux.pendingQueries) {
-                            Statement st = aux.dbConnection.createStatement();
-                            st.executeUpdate(pq);
+                            stm.executeUpdate(pq);
                         }
                         aux.pendingQueries = null;
 
@@ -202,7 +203,7 @@ public class Supermarket {
         // Cart
 
         ms.registerHandler("newCart", (address, bytes) -> {
-            DBUpdate dbu = new DBUpdate("INSERT INTO cart VALUES ()", aux.connection.getPrivateGroup().toString(), address.toString(), "newCart"); // TODO - query
+            DBUpdate dbu = new DBUpdate("INSERT INTO cart () VALUES ()", aux.connection.getPrivateGroup().toString(), address.toString(), "newCart"); // TODO - query
             aux.sendCluster(aux.serializer.encode(dbu));
         }, executor);
 
@@ -266,7 +267,7 @@ public class Supermarket {
     public void sendCluster(byte[] message) {
         SpreadMessage m = new SpreadMessage();
         m.addGroup("supermarket");
-        m.setData(this.serializer.encode(message));
+        m.setData(message);
         m.setSafe();
         try {
             this.connection.multicast(m);
