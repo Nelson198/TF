@@ -89,6 +89,8 @@ public class Client {
                     clearTerminal();
                     System.out.print("Please insert the product's code: ")
                     String idProduct = stdin.readLine();
+                    System.out.print("Specify a quantity to remove (press a to remove all): ")
+                    int qtd = readInt();
                     cs.addProduct(idProduct, qtd);
                     break;
 
