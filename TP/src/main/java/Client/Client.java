@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.concurrent.ExecutionException;
 
 /**
- * Client.Client
+ * Client
  */
 public class Client {
     private static final BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
@@ -72,17 +72,16 @@ public class Client {
 
             switch (choice) {
                 case 1:
-                    ArrayList<Product> productList = new ArrayList<>();
-                    productList = cs.getProducts();
+                    ArrayList<Product> productList = cs.getProducts();
 
                     StringBuilder prods = new StringBuilder();
                     prods.append("This cart has:\n");
                     for (Product p : productList) {
-                        prods.append("\t" + p.getDescription() + " " + p.getQuantity());
+                        prods.append("\t").append(p.getDescription()).append(" ").append(p.getQuantity());
                     }
 
                     clearTerminal();
-                    System.out.println(cart.toString());
+                    System.out.println(prods.toString());
 
                     break;
 
@@ -172,7 +171,7 @@ public class Client {
                     clearTerminal();
                     System.out.print("Insert the product's code: ");
                     productId = stdin.readLine();
-                    int amount = catalog.getAvailability(productId);
+                    int amount = catalog.getAmount(productId);
                     System.out.println("We have " + amount + " available at the moment");
                     break;
 
