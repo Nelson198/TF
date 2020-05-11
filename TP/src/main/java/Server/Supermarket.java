@@ -1,5 +1,6 @@
 package Server;
 
+import Helpers.Product;
 import Helpers.Serializers;
 import Messages.CartUpdate;
 import Messages.Checkout;
@@ -7,7 +8,6 @@ import Messages.DBContent;
 import Messages.DBUpdate;
 import Messages.Message;
 import Messages.ProductGet;
-import Helpers.Product;
 
 import io.atomix.cluster.messaging.ManagedMessagingService;
 import io.atomix.cluster.messaging.MessagingConfig;
@@ -93,8 +93,10 @@ public class Supermarket {
                     DBContent dbMsg = (DBContent) ms;
                     // ........ update the db file
                     try {
-                        aux.dbConnection = DriverManager.getConnection("jdbc:hsqldb:file:supermarket" + port + "?allowMultiQueries=true", "SA", "");
+                        aux.dbConnection = DriverManager.getConnection("jdbc:hsqldb:file:supermarket" + port, "SA", "");
                         aux.dbConnection.setAutoCommit(true); // default
+
+                        // TODO - create DB tables
 
                         for (String pq : aux.pendingQueries) {
                             Statement st = aux.dbConnection.createStatement();
@@ -116,11 +118,10 @@ public class Supermarket {
                     } else {
                         try {
                             Statement st = aux.dbConnection.createStatement();
-                            int res = st.executeUpdate(query);
+                            int res = st.executeUpdate(query); // TODO : put the generated key in res
 
                             switch (dbUpdate.getSecondaryType()) {
                                 case "newCart":
-                                    // TODO : check "res"
                                     aux.carts.put(Integer.toString(res), new CartSkeleton(Integer.toString(res), aux.dbConnection));
                                     if (dbUpdate.getServer().equals(aux.port)) {
                                         Thread timer = new TimerThread(res, aux);
@@ -129,13 +130,13 @@ public class Supermarket {
                                     break;
                                 case "deleteCart":
                                 case "checkout":
-                                    // TODO : check "res"
                                     aux.carts.remove(res);
                                     break;
                             }
 
                             if (dbUpdate.getServer().equals(aux.port)) {
-                                aux.ms.sendAsync(Address.from(dbUpdate.getClient()), "res", aux.serializer.encode(res)); // TODO - figure out what to send to the client
+                                // TODO - figure out what to send to the client
+                                aux.ms.sendAsync(Address.from(dbUpdate.getClient()), "res", aux.serializer.encode(res));
                             }
                         } catch (SQLException exception) {
                             exception.printStackTrace();
@@ -150,7 +151,7 @@ public class Supermarket {
                     if (info.getJoined().equals(aux.connection.getPrivateGroup())) {
                         if (info.getMembers().length == 1) {
                             try {
-                                aux.dbConnection = DriverManager.getConnection("jdbc:hsqldb:file:supermarket" + port + "?allowMultiQueries=true", "SA", "");
+                                aux.dbConnection = DriverManager.getConnection("jdbc:hsqldb:file:supermarket" + port, "SA", "");
                                 aux.dbConnection.setAutoCommit(true);
 
                                 aux.catalog = new CatalogSkeleton(aux.dbConnection);
@@ -195,6 +196,9 @@ public class Supermarket {
 
         Supermarket aux = this;
 
+        // Query's constructor
+        StringBuilder sb = new StringBuilder();
+
         // Cart
 
         ms.registerHandler("newCart", (address, bytes) -> {
@@ -204,15 +208,24 @@ public class Supermarket {
 
         ms.registerHandler("updateCart", (address, bytes) -> {
             CartUpdate cu = aux.serializer.decode(bytes);
+            String query = sb.append("IF EXISTS (SELECT * FROM cart WHERE id=").append(cu.getIdProduct()).append(") THEN\n")
+                             .append("UPDATE cart SET amount = amount + 1").append("WHERE id=").append(cu.getIdProduct()).append(";\n")
+                             .append("ELSE\n")
+                             .append("INSERT INTO cart VALUES(").append(cu.getIdProduct()).append(", ").append(cu.getAmount()).append(");\n")
+                             .append("END IF;")
+                             .toString();
 
-            DBUpdate dbu = new DBUpdate("UPDATE cart SET ... WHERE id=...", aux.connection.getPrivateGroup().toString(), address.toString(), "addProduct"); // TODO - query
+            DBUpdate dbu = new DBUpdate(query, aux.connection.getPrivateGroup().toString(), address.toString(), "addProduct");
             aux.sendCluster(aux.serializer.encode(dbu));
+            sb.setLength(0);
         }, executor);
 
         ms.registerHandler("checkout", (address, bytes) -> {
             Checkout co = aux.serializer.decode(bytes);
+            // TODO - query
+            String query = "UPDATE cart SET ... WHERE id=" + co.getId();
 
-            DBUpdate dbu = new DBUpdate("UPDATE cart SET ... WHERE id=...", aux.connection.getPrivateGroup().toString(), address.toString(), "checkout"); // TODO - query
+            DBUpdate dbu = new DBUpdate(query, aux.connection.getPrivateGroup().toString(), address.toString(), "checkout");
             aux.sendCluster(aux.serializer.encode(dbu));
         }, executor);
 

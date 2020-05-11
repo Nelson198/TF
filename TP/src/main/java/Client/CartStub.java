@@ -23,9 +23,7 @@ public class CartStub {
     public CartStub(ClientConnection connection) {
         this.connection = connection;
 
-        this.connection.registerHandler("res");
-
-        byte[] res = this.connection.sendAndReceive("newCart", null);
+        byte[] res = this.connection.sendAndReceive("newCart", serializer.encode(null));
         this.idCart = this.serializer.decode(res);
     }
 

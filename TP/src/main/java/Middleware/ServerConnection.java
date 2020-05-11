@@ -9,4 +9,16 @@ public class ServerConnection {
     public ServerConnection() {
 
     }
+
+    /*
+    /**
+     * Register handler of a message with certain type
+     * @param type Message's type
+     *./
+    public void registerHandler(String type) {
+        this.ms.registerHandler(type, (address, bytes) -> {
+            res.complete(bytes);
+        }, this.executor);
+    }
+    */
 }

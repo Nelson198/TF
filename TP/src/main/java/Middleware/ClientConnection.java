@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
@@ -19,7 +18,6 @@ import java.util.concurrent.Executors;
  *                    Given that the client is single-threaded, this middleware can only handle one operation at a time.
  */
 public class ClientConnection {
-    private ExecutorService executor;
     private ManagedMessagingService ms;
     private ArrayList<Address> servers;
     private Address currentServer;
@@ -33,7 +31,6 @@ public class ClientConnection {
      * @throws InterruptedException InterruptedException
      */
     public ClientConnection(Address address, ArrayList<Address> servers) throws ExecutionException, InterruptedException {
-        this.executor = Executors.newFixedThreadPool(1);
         this.servers = servers;
 
         Random rand = new Random();
@@ -41,17 +38,12 @@ public class ClientConnection {
         this.currentServer = servers.get(server);
 
         this.ms = new NettyMessagingService("supermarket", address, new MessagingConfig());
-        this.ms.start().get();
-    }
 
-    /**
-     * Register handler of a message with certain type
-     * @param type Message's type
-     */
-    public void registerHandler(String type) {
-        this.ms.registerHandler(type, (address, bytes) -> {
-            res.complete(bytes);
-        }, this.executor);
+        this.ms.registerHandler("res", (address1, bytes) -> {
+            this.res.complete(bytes);
+        }, Executors.newFixedThreadPool(1));
+
+        this.ms.start().get();
     }
 
     /**
