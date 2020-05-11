@@ -52,7 +52,8 @@ public class CartStub {
      * Checkout
      */
     public void checkout() {
-        this.connection.sendAndReceive("checkout", this.serializer.encode(this.idCart));
+        Checkout co = new Checkout(this.idCart);
+        this.connection.sendAndReceive("checkout", this.serializer.encode(co));
     }
 
     /**

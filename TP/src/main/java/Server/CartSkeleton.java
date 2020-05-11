@@ -38,8 +38,8 @@ public class CartSkeleton {
      * Get the cart's products
      * @return Cart's products
      */
-    public ArrayList<Product> getProducts() {
-        ArrayList<Helpers.Product> res = new ArrayList<>();
+    public List<Product> getProducts() {
+        List<Helpers.Product> res = new ArrayList<>();
         try {
             // Create and execute statement
             Statement stmt = this.connection.createStatement();

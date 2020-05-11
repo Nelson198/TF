@@ -201,6 +201,7 @@ public class Supermarket {
         StringBuilder sb = new StringBuilder();
 
         // Cart
+        // TODO - transfer this code to skeleton
 
         ms.registerHandler("newCart", (address, bytes) -> {
             DBUpdate dbu = new DBUpdate("INSERT INTO cart () VALUES ()", aux.connection.getPrivateGroup().toString(), address.toString(), "newCart"); // TODO - query
@@ -229,6 +230,12 @@ public class Supermarket {
             DBUpdate dbu = new DBUpdate(query, aux.connection.getPrivateGroup().toString(), address.toString(), "checkout");
             aux.sendCluster(aux.serializer.encode(dbu));
         }, executor);
+
+        ms.registerHandler("getProducts", (address, bytes) -> {
+            String idCart = aux.serializer.decode(bytes);
+            List<Product> res = new ArrayList<>(carts.get(idCart).getProducts());
+            ms.sendAsync(address, "res", aux.serializer.encode(res));
+        })
 
         // Catalog
 
