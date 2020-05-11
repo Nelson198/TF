@@ -3,7 +3,7 @@ package Messages;
 /**
  * Checkout
  */
-public class Checkout implements Message {
+public class Checkout {
     private final String id;
 
     /**
@@ -20,13 +20,5 @@ public class Checkout implements Message {
      */
     public String getId() {
         return this.id;
-    }
-
-    /**
-     * Get "checkout" message type
-     * @return Message type
-     */
-    public String getType() {
-        return "checkout";
     }
 }
