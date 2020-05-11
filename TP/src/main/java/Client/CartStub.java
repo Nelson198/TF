@@ -1,12 +1,13 @@
 package Client;
 
+import Helpers.Product;
 import Helpers.Serializers;
 import Messages.CartUpdate;
 import Middleware.ClientConnection;
 
 import io.atomix.utils.serializer.Serializer;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 
 /**
  * Cart Stub
@@ -58,8 +59,9 @@ public class CartStub {
      * Get cart's products
      * @return Cart's products
      */
-    public HashMap<String, Integer> getProducts() {
-        // TODO - ....
-        return new HashMap<>();
+    public ArrayList<Product> getProducts() {
+        byte[] res = this.connection.sendAndReceive("getProducts", this.serializer.encode(this.idCart));
+        ArrayList<Product> productList = this.serializer.decode(res);
+        return productList;
     }
 }

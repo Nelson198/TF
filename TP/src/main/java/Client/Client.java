@@ -1,5 +1,6 @@
 package Client;
 
+import Helpers.Product;
 import Middleware.ClientConnection;
 
 import io.atomix.utils.net.Address;
@@ -55,10 +56,11 @@ public class Client {
         while(true) {
             StringBuilder cart = new StringBuilder();
             cart.append("What do you want to do?\n")
-                .append("1 - Add product\n")
-                .append("2 - Remove product\n")
-                .append("3 - Checkout\n")
-                .append("4 - Get back\n");
+                .append("1 - Get products\n")
+                .append("2 - Add product\n")
+                .append("3 - Remove product\n")
+                .append("4 - Checkout\n")
+                .append("5 - Get back\n");
 
             clearTerminal();
             System.out.println(cart.toString());
@@ -66,24 +68,48 @@ public class Client {
             int choice;
             do {
                 choice = readInt();
-            } while (choice < 1 || choice > 4);
+            } while (choice < 1 || choice > 5);
 
             switch (choice) {
                 case 1:
-                    // por concluir
-                    // cs.addProduct(idProduct, qtd);
+                    ArrayList<Product> productList = new ArrayList<>();
+                    productList = cs.getProducts();
+
+                    StringBuilder prods = new StringBuilder();
+                    prods.append("This cart has:\n");
+                    for (Product p : productList) {
+                        prods.append("\t" + p.getDescription() + " " + p.getQuantity());
+                    }
+
+                    clearTerminal();
+                    System.out.println(cart.toString());
+
                     break;
 
                 case 2:
-                    // por concluir
-                    // cs.removeProduct(idProduct);
+                    System.out.print("Please insert the product's code: ");
+                    String idProduct = stdin.readLine();
+                    System.out.print("Specify a quantity to remove (press a to remove all): ");
+                    int amount = readInt();
+                    cs.addProduct(idProduct, amount);
                     break;
 
                 case 3:
-                    cs.checkout();
+                    System.out.print("Please insert the product's code: ");
+                    idProduct = stdin.readLine();
+                    System.out.print("Specify a quantity to remove (press a to remove all): ");
+                    String qtd = stdin.readLine();
+                    if (qtd.equals("a"))
+                        cs.removeProduct(idProduct, Integer.MAX_VALUE);
+                    else
+                        cs.removeProduct(idProduct, Integer.parseInt(qtd));
                     break;
 
                 case 4:
+                    cs.checkout();
+                    break;
+
+                case 5:
                     return;
             }
         }
@@ -98,7 +124,7 @@ public class Client {
     private static void menu() throws IOException, ExecutionException, InterruptedException {
         while (true) {
             StringBuilder main = new StringBuilder();
-            main.append("Welcome to our supermarket. Choose an option?\n")
+            main.append("Welcome to our supermarket. Choose an option:\n")
                 .append("\t1 - Create a cart\n")
                 .append("\t2 - Check/Update a cart\n")
                 .append("\t3 - Check a product's price\n")
@@ -115,7 +141,9 @@ public class Client {
 
             switch (choice) {
                 case 1:
-                    System.out.println("Choose a name for your cart: ");
+                    clearTerminal();
+                    System.out.println(3);
+                    System.out.print("Choose a name for your cart: ");
                     String name = stdin.readLine();
                     CartStub cart = new CartStub(connection);
                     carts.put(name, cart);
@@ -123,7 +151,8 @@ public class Client {
                     break;
 
                 case 2:
-                    System.out.println("Choose a cart to check/update:\n");
+                    clearTerminal();
+                    System.out.println("Choose a cart to check/update: ");
                     for (String c : carts.keySet()) {
                         System.out.println("\t" + c);
                     }
@@ -132,11 +161,19 @@ public class Client {
                     break;
 
                 case 3:
-                    System.out.println(3);
+                    clearTerminal();
+                    System.out.print("Insert the product's code: ");
+                    String productId = stdin.readLine();
+                    float price = catalog.getPrice(productId);
+                    System.out.println("This product will cost you €" + price);
                     break;
 
                 case 4:
-                    System.out.println(4);
+                    clearTerminal();
+                    System.out.print("Insert the product's code: ");
+                    productId = stdin.readLine();
+                    int amount = catalog.getAvailability(productId);
+                    System.out.println("We have " + amount + " available at the moment");
                     break;
 
                 case 5:

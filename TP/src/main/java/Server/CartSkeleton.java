@@ -1,13 +1,19 @@
 package Server;
 
+import Helpers.Product;
+
 import java.sql.Connection;
-import java.util.HashMap;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.ResultSet;
+
+import java.util.ArrayList;
 
 /**
  * Cart Skeleton
  */
 public class CartSkeleton {
-    private final String id;
+    private final String idCart;
     private final Connection connection;
 
     /**
@@ -16,7 +22,7 @@ public class CartSkeleton {
      * @param connection Connection to the DB
      */
     public CartSkeleton(String id, Connection connection) {
-        this.id = id;
+        this.idCart = id;
         this.connection = connection;
     }
 
@@ -24,17 +30,35 @@ public class CartSkeleton {
      * Get the cart's identifier
      * @return Cart's identifier
      */
-    public String getId() {
-        return this.id;
+    public String getIdCart() {
+        return this.idCart;
     }
 
     /**
      * Get the cart's products
      * @return Cart's products
      */
-    public HashMap<String, Integer> getProducts() {
-        // TODO - call the DB
-        return new HashMap<>();
+    public ArrayList<Product> getProducts() {
+        ArrayList<Helpers.Product> res = new ArrayList<>();
+        try {
+            // Create and execute statement
+            Statement stmt = this.connection.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT * FROM cart WHERE idCart=" + this.idCart); // TODO - confirm query
+
+            // Get result from query
+            while(rs.next()) {
+                Product p = new Product(rs.getString("id"), rs.getString("name"), rs.getString("description"), rs.getFloat("price"), rs.getInt("amount"));
+                res.add(p);
+            }
+
+            // Clean up
+            rs.close();
+            stmt.close();
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
+
+        return res;
     }
 
     /**
@@ -42,14 +66,34 @@ public class CartSkeleton {
      * @param idProduct Product identifier
      */
     public void addProduct(String idProduct, int quantity) {
-        // TODO - call the DB
+        try {
+            // Create and execute statement
+            Statement stmt = this.connection.createStatement();
+            ResultSet rs = stmt.executeQuery("UPDATE cart SET ... WHERE idCart=" + this.idCart); // TODO - query
+
+            // Clean up
+            rs.close();
+            stmt.close();
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
     }
 
-    /**
+    /* TODO - confirm query
      * Remove a product from the cart
      * @param idProduct Product identifier
      */
     public void removeProduct(String idProduct) {
-        // TODO - call the DB
+        try {
+            // Create and execute statement
+            Statement stmt = this.connection.createStatement();
+            ResultSet rs = stmt.executeQuery("DELETE FROM cart WHERE id=" + this.idCart + " AND idProduct=" + idProduct); // TODO - confirm query
+
+            // Clean up
+            rs.close();
+            stmt.close();
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
     }
 }
