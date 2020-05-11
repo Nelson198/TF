@@ -36,8 +36,7 @@ public class CartStub {
      */
     public void addProduct(String idProduct, int qtd) {
         CartUpdate toSend = new CartUpdate(this.idCart, idProduct, qtd);
-        byte[] res = this.connection.sendAndReceive("updateProduct", this.serializer.encode(toSend));
-        // TODO - ....
+        this.connection.sendAndReceive("updateProduct", this.serializer.encode(toSend));
     }
 
     /**
@@ -47,16 +46,14 @@ public class CartStub {
      */
     public void removeProduct(String idProduct, int qtd) {
         CartUpdate toSend = new CartUpdate(this.idCart, idProduct, qtd);
-        byte[] res = this.connection.sendAndReceive("updateProduct", this.serializer.encode(toSend));
-        // TODO - ....
+        this.connection.sendAndReceive("updateProduct", this.serializer.encode(toSend));
     }
 
     /**
      * Checkout
      */
     public void checkout() {
-        byte[] res = this.connection.sendAndReceive("checkout", this.serializer.encode(this.idCart));
-        // TODO - ....
+        this.connection.sendAndReceive("checkout", this.serializer.encode(this.idCart));
     }
 
     /**

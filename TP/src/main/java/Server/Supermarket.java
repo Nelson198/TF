@@ -120,6 +120,7 @@ public class Supermarket {
 
                             switch (dbUpdate.getSecondaryType()) {
                                 case "newCart":
+                                    // TODO : check "res"
                                     aux.carts.put(Integer.toString(res), new CartSkeleton(Integer.toString(res), aux.dbConnection));
                                     if (dbUpdate.getServer().equals(aux.port)) {
                                         Thread timer = new TimerThread(res, aux);
@@ -127,9 +128,8 @@ public class Supermarket {
                                     }
                                     break;
                                 case "deleteCart":
-                                    aux.carts.remove(res);
-                                    break;
                                 case "checkout":
+                                    // TODO : check "res"
                                     aux.carts.remove(res);
                                     break;
                             }
