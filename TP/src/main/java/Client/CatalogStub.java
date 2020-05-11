@@ -18,8 +18,6 @@ public class CatalogStub {
      */
     public CatalogStub(ClientConnection connection) {
         this.connection = connection;
-
-        this.connection.registerHandler("res");
     }
 
     /**

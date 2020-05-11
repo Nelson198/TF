@@ -117,10 +117,9 @@ public class Client {
                 case 1:
                     System.out.println("Choose a name for your cart: ");
                     String name = stdin.readLine();
-                    // rever e acabar
                     CartStub cart = new CartStub(connection);
                     carts.put(name, cart);
-                    menuCart(name);
+                    menuCart(name); // TODO - allow to use more than one cart
                     break;
 
                 case 2:

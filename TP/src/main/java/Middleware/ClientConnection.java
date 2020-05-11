@@ -41,17 +41,12 @@ public class ClientConnection {
         this.currentServer = servers.get(server);
 
         this.ms = new NettyMessagingService("supermarket", address, new MessagingConfig());
-        this.ms.start().get();
-    }
 
-    /**
-     * Register handler of a message with certain type
-     * @param type Message's type
-     */
-    public void registerHandler(String type) {
-        this.ms.registerHandler(type, (address, bytes) -> {
-            res.complete(bytes);
+        this.ms.registerHandler("res", (address1, bytes) -> {
+            this.res.complete(bytes);
         }, this.executor);
+
+        this.ms.start().get();
     }
 
     /**
