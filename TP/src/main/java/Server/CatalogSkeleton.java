@@ -1,6 +1,6 @@
 package Server;
 
-import Types.Product;
+import Helpers.Product;
 
 import java.sql.Connection;
 import java.sql.ResultSet;

@@ -1,7 +1,7 @@
 package Client;
 
+import Helpers.Serializers;
 import Middleware.ClientConnection;
-import Serializer.ClientSerializer;
 
 import io.atomix.utils.serializer.Serializer;
 
@@ -10,7 +10,7 @@ import io.atomix.utils.serializer.Serializer;
  */
 public class CatalogStub {
     private ClientConnection connection;
-    private ClientSerializer serializer;
+    private Serializer serializer = Serializers.clientSerializer;
 
     /**
      * Parameterized constructor
@@ -18,7 +18,6 @@ public class CatalogStub {
      */
     public CatalogStub(ClientConnection connection) {
         this.connection = connection;
-        this.serializer = new ClientSerializer();
 
         this.connection.registerHandler("catalogRes"); // TODO - add the others
     }
@@ -28,9 +27,8 @@ public class CatalogStub {
      * @return Catalog information
      */
     public String getCatalog() {
-        Serializer s = this.serializer.getSerializer();
         byte[] res = this.connection.sendAndReceive("getCatalog", null);
-        String catalog = s.decode(res);
+        String catalog = this.serializer.decode(res);
         return catalog;
     }
 
@@ -40,9 +38,8 @@ public class CatalogStub {
      * @return Product's price
      */
     public float getPrice(String idProduct) {
-        Serializer s = this.serializer.getSerializer();
-        byte[] res = this.connection.sendAndReceive("getPrice", s.encode(idProduct));
-        float price = s.decode(res);
+        byte[] res = this.connection.sendAndReceive("getPrice", this.serializer.encode(idProduct));
+        float price = this.serializer.decode(res);
         return price;
     }
 
@@ -52,9 +49,8 @@ public class CatalogStub {
      * @return Product's availability
      */
     public int getAvailability(String idProduct) {
-        Serializer s = this.serializer.getSerializer();
-        byte[] res = this.connection.sendAndReceive("getAvailability", s.encode(idProduct));
-        int availability = s.decode(res);
+        byte[] res = this.connection.sendAndReceive("getAvailability", this.serializer.encode(idProduct));
+        int availability = this.serializer.decode(res);
         return availability;
     }
 }

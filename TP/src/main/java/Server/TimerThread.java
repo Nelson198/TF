@@ -1,7 +1,7 @@
 package Server;
 
+import Helpers.Serializers;
 import Messages.DBUpdate;
-import Serializer.ServerSerializer;
 
 import io.atomix.utils.serializer.Serializer;
 
@@ -11,7 +11,7 @@ import io.atomix.utils.serializer.Serializer;
 public class TimerThread extends Thread {
     private int cartID;
     private Supermarket connection; // TODO - use ServerConnection here
-    private ServerSerializer serializer;
+    private Serializer serializer = Serializers.serverSerializer;
 
     // Time frame during which the cart needs to be checked out
     private final int TMAX = 30; // TODO - 30s for the moment
@@ -24,7 +24,6 @@ public class TimerThread extends Thread {
     public TimerThread(int cartID, Supermarket connection) {
         this.cartID = cartID;
         this.connection = connection;
-        this.serializer = new ServerSerializer();
     }
 
     /**
@@ -34,9 +33,8 @@ public class TimerThread extends Thread {
         try {
             Thread.sleep(this.TMAX * 1000);
 
-            Serializer s = this.serializer.getSerializer();
             DBUpdate dbu = new DBUpdate("DELETE FROM cart WHERE id=" + this.cartID, null, null, "deleteCart"); // TODO - query
-            this.connection.sendCluster(s.encode(dbu));
+            this.connection.sendCluster(this.serializer.encode(dbu));
         } catch (Exception e) {
             e.printStackTrace();
         }
