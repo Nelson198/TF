@@ -71,16 +71,29 @@ public class Client {
 
             switch (choice) {
                 case 1:
-                    cs.getProducts();
+                    List<Product> productList = new ArrayList<>();
+                    productList = cs.getProducts();
+
+                    StringBuilder prods = new StringBuilder();
+                    prods.append("This cart has:\n");
+                    for (Product p : productList) {
+                        prods.append("\t" + p.getName + " " + p.getQuantity())
+                    }
+
+                    clearTerminal();
+                    System.out.println(cart.toString());
+
                     break;
 
                 case 2:
+                    clearTerminal();
                     System.out.print("Please insert the product's code: ")
                     String idProduct = stdin.readLine();
                     cs.addProduct(idProduct, qtd);
                     break;
 
                 case 3:
+                    clearTerminal();
                     System.out.print("Please insert the product's code: ")
                     String idProduct = stdin.readLine();
                     System.out.print("Specify a quantity to remove (press a to remove all): ")
@@ -127,6 +140,7 @@ public class Client {
 
             switch (choice) {
                 case 1:
+                    clearTerminal();
                     System.out.println(3);
                     System.out.print("Choose a name for your cart: ");
                     String name = stdin.readLine();
@@ -136,6 +150,7 @@ public class Client {
                     break;
 
                 case 2:
+                    clearTerminal();
                     System.out.println("Choose a cart to check/update: ");
                     for (String c : carts.keySet()) {
                         System.out.println("\t" + c);
@@ -145,6 +160,7 @@ public class Client {
                     break;
 
                 case 3:
+                    clearTerminal();
                     System.out.print("Insert the product's code: ")
                     String productId = stdin.readLine();
                     float price = catalog.getPrice(productId);
@@ -152,6 +168,7 @@ public class Client {
                     break;
 
                 case 4:
+                    clearTerminal();
                     System.out.print("Insert the product's code: ")
                     String productId = stdin.readLine();
                     int price = catalog.getAvailability(productId);
