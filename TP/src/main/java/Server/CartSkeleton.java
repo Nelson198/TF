@@ -40,7 +40,7 @@ public class CartSkeleton {
      * @return Cart's products
      */
     public List<Product> getProducts() {
-        List<Helpers.Product> res = new ArrayList<>();
+        List<Product> res = new ArrayList<>();
         try {
             // Create and execute statement
             Statement stmt = this.connection.createStatement();

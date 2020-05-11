@@ -192,7 +192,7 @@ public class Client {
 
         Address myAddress = Address.from(Integer.parseInt(args[0]));
 
-        ArrayList<Address> servers = new ArrayList<>();
+        List<Address> servers = new ArrayList<>();
         for (int i = 1; i < args.length; i++) {
             servers.add(Address.from(Integer.parseInt(args[i])));
         }

@@ -44,7 +44,7 @@ public class Supermarket {
     String port;
 
     // Variable to store processes after which this one will be primary
-    ArrayList<SpreadGroup> primaryAfter = new ArrayList<>();
+    List<SpreadGroup> primaryAfter = new ArrayList<>();
 
     // Serializer for the messages sent between servers
     Serializer serializer = Serializers.serverSerializer;
@@ -65,7 +65,7 @@ public class Supermarket {
     HashMap<String, CartSkeleton> carts = new HashMap<>();
 
     // Queries that arrived between this server's connection and the reception of the DB
-    ArrayList<String> pendingQueries = new ArrayList<>();
+    List<String> pendingQueries = new ArrayList<>();
 
     /**
      * Parameterized constructor
@@ -241,7 +241,7 @@ public class Supermarket {
         // Catalog
 
         ms.registerHandler("getCatalog", (address, bytes) -> {
-            ArrayList<Product> res = catalog.getCatalog();
+            List<Product> res = catalog.getCatalog();
             ms.sendAsync(address, "res", aux.serializer.encode(res));
         }, executor);
 
