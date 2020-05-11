@@ -93,8 +93,10 @@ public class Supermarket {
                     DBContent dbMsg = (DBContent) ms;
                     // ........ update the db file
                     try {
-                        aux.dbConnection = DriverManager.getConnection("jdbc:hsqldb:file:supermarket" + port + "?allowMultiQueries=true", "SA", "");
+                        aux.dbConnection = DriverManager.getConnection("jdbc:hsqldb:file:supermarket" + port, "SA", "");
                         aux.dbConnection.setAutoCommit(true); // default
+
+                        // TODO - create DB tables
 
                         for (String pq : aux.pendingQueries) {
                             Statement st = aux.dbConnection.createStatement();
@@ -116,11 +118,10 @@ public class Supermarket {
                     } else {
                         try {
                             Statement st = aux.dbConnection.createStatement();
-                            int res = st.executeUpdate(query);
+                            int res = st.executeUpdate(query); // TODO : put the generated key in res
 
                             switch (dbUpdate.getSecondaryType()) {
                                 case "newCart":
-                                    // TODO : check "res"
                                     aux.carts.put(Integer.toString(res), new CartSkeleton(Integer.toString(res), aux.dbConnection));
                                     if (dbUpdate.getServer().equals(aux.port)) {
                                         Thread timer = new TimerThread(res, aux);
@@ -129,7 +130,6 @@ public class Supermarket {
                                     break;
                                 case "deleteCart":
                                 case "checkout":
-                                    // TODO : check "res"
                                     aux.carts.remove(res);
                                     break;
                             }
@@ -150,7 +150,7 @@ public class Supermarket {
                     if (info.getJoined().equals(aux.connection.getPrivateGroup())) {
                         if (info.getMembers().length == 1) {
                             try {
-                                aux.dbConnection = DriverManager.getConnection("jdbc:hsqldb:file:supermarket" + port + "?allowMultiQueries=true", "SA", "");
+                                aux.dbConnection = DriverManager.getConnection("jdbc:hsqldb:file:supermarket" + port, "SA", "");
                                 aux.dbConnection.setAutoCommit(true);
 
                                 aux.catalog = new CatalogSkeleton(aux.dbConnection);

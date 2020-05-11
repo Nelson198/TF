@@ -4,7 +4,7 @@ package Messages;
  * DB Update Message
  */
 public class DBUpdate implements Message {
-    private final String query;
+    private final String query; // TODO - see if this needs to be an array of queries (for checkout, for example - remove cart and update catalog)
 
     private final String server; // TODO - should be SpreadGroup, but the serializer complains
     private final String client; // TODO - should be Address, but the serializer complains

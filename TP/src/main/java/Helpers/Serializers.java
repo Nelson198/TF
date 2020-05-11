@@ -2,6 +2,7 @@ package Helpers;
 
 import Messages.CartUpdate;
 
+import Messages.DBUpdate;
 import io.atomix.utils.serializer.Serializer;
 import io.atomix.utils.serializer.SerializerBuilder;
 
@@ -14,5 +15,5 @@ public class Serializers {
                                                                        .addType(Integer.class)
                                                                        .addType(String.class).build();
 
-    public static Serializer serverSerializer = new SerializerBuilder().build();
+    public static Serializer serverSerializer = new SerializerBuilder().addType(DBUpdate.class).build();
 }
