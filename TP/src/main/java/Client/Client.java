@@ -1,5 +1,6 @@
 package Client;
 
+import Helpers.Product;
 import Middleware.ClientConnection;
 
 import io.atomix.utils.net.Address;
@@ -71,13 +72,13 @@ public class Client {
 
             switch (choice) {
                 case 1:
-                    List<Product> productList = new ArrayList<>();
+                    ArrayList<Product> productList = new ArrayList<>();
                     productList = cs.getProducts();
 
                     StringBuilder prods = new StringBuilder();
                     prods.append("This cart has:\n");
                     for (Product p : productList) {
-                        prods.append("\t" + p.getName + " " + p.getQuantity())
+                        prods.append("\t" + p.getDescription() + " " + p.getQuantity());
                     }
 
                     clearTerminal();
@@ -86,21 +87,19 @@ public class Client {
                     break;
 
                 case 2:
-                    clearTerminal();
-                    System.out.print("Please insert the product's code: ")
+                    System.out.print("Please insert the product's code: ");
                     String idProduct = stdin.readLine();
-                    System.out.print("Specify a quantity to remove (press a to remove all): ")
-                    int qtd = readInt();
-                    cs.addProduct(idProduct, qtd);
+                    System.out.print("Specify a quantity to remove (press a to remove all): ");
+                    int amount = readInt();
+                    cs.addProduct(idProduct, amount);
                     break;
 
                 case 3:
-                    clearTerminal();
-                    System.out.print("Please insert the product's code: ")
-                    String idProduct = stdin.readLine();
-                    System.out.print("Specify a quantity to remove (press a to remove all): ")
+                    System.out.print("Please insert the product's code: ");
+                    idProduct = stdin.readLine();
+                    System.out.print("Specify a quantity to remove (press a to remove all): ");
                     String qtd = stdin.readLine();
-                    if qtd.equals("a")
+                    if (qtd.equals("a"))
                         cs.removeProduct(idProduct, Integer.MAX_VALUE);
                     else
                         cs.removeProduct(idProduct, Integer.parseInt(qtd));
@@ -163,18 +162,18 @@ public class Client {
 
                 case 3:
                     clearTerminal();
-                    System.out.print("Insert the product's code: ")
+                    System.out.print("Insert the product's code: ");
                     String productId = stdin.readLine();
                     float price = catalog.getPrice(productId);
-                    System.out.println("This product will cost you €" + price.toString());
+                    System.out.println("This product will cost you €" + price);
                     break;
 
                 case 4:
                     clearTerminal();
-                    System.out.print("Insert the product's code: ")
-                    String productId = stdin.readLine();
-                    int price = catalog.getAvailability(productId);
-                    System.out.println("We have " + price.toString() + " available at the moment");
+                    System.out.print("Insert the product's code: ");
+                    productId = stdin.readLine();
+                    int amount = catalog.getAvailability(productId);
+                    System.out.println("We have " + amount + " available at the moment");
                     break;
 
                 case 5:

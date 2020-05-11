@@ -1,7 +1,13 @@
 package Server;
 
+import Helpers.Product;
+
 import java.sql.Connection;
-import java.util.HashMap;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.ResultSet;
+
+import java.util.ArrayList;
 
 /**
  * Cart Skeleton
@@ -32,8 +38,8 @@ public class CartSkeleton {
      * Get the cart's products
      * @return Cart's products
      */
-    public List<Product> getProducts() {
-        List<Product> res = new ArrayList<>();
+    public ArrayList<Product> getProducts() {
+        ArrayList<Helpers.Product> res = new ArrayList<>();
         try {
             // Create and execute statement
             Statement stmt = this.connection.createStatement();
@@ -42,7 +48,7 @@ public class CartSkeleton {
             // Get result from query
             while(rs.next()) {
                 Product p = new Product(rs.getString("id"), rs.getString("name"), rs.getString("description"), rs.getFloat("price"), rs.getInt("amount"));
-                res.add(p)
+                res.add(p);
             }
 
             // Clean up
@@ -73,7 +79,7 @@ public class CartSkeleton {
         }
     }
 
-    /**// TODO - confirm query
+    /* TODO - confirm query
      * Remove a product from the cart
      * @param idProduct Product identifier
      */
