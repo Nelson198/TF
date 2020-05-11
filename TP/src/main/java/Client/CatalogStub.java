@@ -19,7 +19,7 @@ public class CatalogStub {
     public CatalogStub(ClientConnection connection) {
         this.connection = connection;
 
-        this.connection.registerHandler("catalogRes"); // TODO - add the others
+        this.connection.registerHandler("res");
     }
 
     /**
