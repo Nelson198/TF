@@ -4,7 +4,7 @@ package Messages;
  * DB Message
  */
 public class DBContent implements Message {
-    // ..... contents of the database
+    // TODO - contents of the database
 
     /**
      * Get DB's message type

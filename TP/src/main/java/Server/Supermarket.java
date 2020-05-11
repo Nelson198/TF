@@ -91,9 +91,9 @@ public class Supermarket {
                 Message ms = aux.serializer.decode(spreadMessage.getData());
                 if (ms.getType().equals("db")) {
                     DBContent dbMsg = (DBContent) ms;
-                    // ........ update the db file
+                    // TODO - update the db file
                     try {
-                        aux.dbConnection = DriverManager.getConnection("jdbc:hsqldb:file:supermarket" + port, "sa", "");
+                        aux.dbConnection = DriverManager.getConnection("jdbc:hsqldb:file:supermarket" + port + "/", "sa", "");
 
                         Statement stm = aux.dbConnection.createStatement();
                         stm.executeUpdate("CREATE TABLE cart (id INT AUTO_INCREMENT PRIMARY KEY)");
@@ -152,7 +152,7 @@ public class Supermarket {
                     if (info.getJoined().equals(aux.connection.getPrivateGroup())) {
                         if (info.getMembers().length == 1) {
                             try {
-                                aux.dbConnection = DriverManager.getConnection("jdbc:hsqldb:file:supermarket" + port, "SA", "");
+                                aux.dbConnection = DriverManager.getConnection("jdbc:hsqldb:file:supermarket" + port + "/", "SA", "");
                                 aux.dbConnection.setAutoCommit(true);
 
                                 aux.catalog = new CatalogSkeleton(aux.dbConnection);
