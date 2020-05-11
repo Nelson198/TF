@@ -60,8 +60,9 @@ public class CartStub {
      * Get cart's products
      * @return Cart's products
      */
-    public HashMap<String, Integer> getProducts() {
-        // TODO - ....
-        return new HashMap<>();
+    public List<Product> getProducts() {
+        byte[] res = this.connection.sendAndReceive("getProducts", this.serializer.encode(this.idCart));
+        List<Product> productList = this.serializer.decode(res);
+        return productList;
     }
 }
