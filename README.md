@@ -11,7 +11,6 @@
 ### Instalação
 
 * Ficheiro *.jar* relativo ao *spread*:
-
 ```bash
 mvn install:install-file -Dfile=/path/to/spread-4.4.0.jar \
                          -DgroupId=org.spread \
@@ -19,4 +18,17 @@ mvn install:install-file -Dfile=/path/to/spread-4.4.0.jar \
                          -Dversion=4.4.0 \
                          -Dpackaging=jar \
                          -DgeneratePom=true
+```
+
+### Arranque do sistema
+
+* Servidor:
+```bash
+mvn exec:java -Dexec.mainClass=Server.Supermarket -Dexec.args="1111"
+```
+
+
+* Cliente:
+```bash
+mvn exec:java -Dexec.mainClass=Client.Client -Dexec.args="9999 1111"
 ```

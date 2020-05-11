@@ -28,6 +28,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.CompletableFuture;
@@ -235,7 +236,7 @@ public class Supermarket {
             String idCart = aux.serializer.decode(bytes);
             List<Product> res = new ArrayList<>(carts.get(idCart).getProducts());
             ms.sendAsync(address, "res", aux.serializer.encode(res));
-        })
+        }, executor);
 
         // Catalog
 
@@ -285,7 +286,7 @@ public class Supermarket {
 
     public static void main(String[] args) throws InterruptedException, SpreadException, ExecutionException, UnknownHostException {
         if (args.length != 1) {
-            System.out.println("Indique a porta do servidor");
+            System.out.println("Please indicate the server port.");
             System.exit(1);
         }
 

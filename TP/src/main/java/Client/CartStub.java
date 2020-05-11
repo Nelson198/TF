@@ -3,11 +3,11 @@ package Client;
 import Helpers.Product;
 import Helpers.Serializers;
 import Messages.CartUpdate;
+import Messages.Checkout;
 import Middleware.ClientConnection;
-
 import io.atomix.utils.serializer.Serializer;
 
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Cart Stub
@@ -60,9 +60,9 @@ public class CartStub {
      * Get cart's products
      * @return Cart's products
      */
-    public ArrayList<Product> getProducts() {
+    public List<Product> getProducts() {
         byte[] res = this.connection.sendAndReceive("getProducts", this.serializer.encode(this.idCart));
-        ArrayList<Product> productList = this.serializer.decode(res);
+        List<Product> productList = this.serializer.decode(res);
         return productList;
     }
 }
