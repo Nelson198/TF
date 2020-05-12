@@ -2,8 +2,8 @@ package Server;
 
 import Helpers.Serializers;
 import Messages.DBUpdate;
-
 import Middleware.ServerConnection;
+
 import io.atomix.utils.serializer.Serializer;
 
 /**

@@ -79,7 +79,7 @@ public class Client {
                     StringBuilder prods = new StringBuilder();
                     prods.append("This cart has:\n");
                     for (Product p : productList) {
-                        prods.append("\t").append(p.getDescription()).append(" ").append(p.getQuantity());
+                        prods.append("\t").append(p.getDescription()).append(" ").append(p.getAmount());
                     }
 
                     clearTerminal();
@@ -119,10 +119,8 @@ public class Client {
     /**
      * Main menu
      * @throws IOException IOException
-     * @throws ExecutionException ExecutionException
-     * @throws InterruptedException InterruptedException
      */
-    private static void menu() throws IOException, ExecutionException, InterruptedException {
+    private static void menu() throws IOException {
         while (true) {
             StringBuilder main = new StringBuilder();
             main.append("Welcome to our supermarket. Choose an option:\n")

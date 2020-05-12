@@ -1,12 +1,12 @@
 package Server;
 
-import Helpers.Product;
-import Helpers.Serializers;
 import Helpers.CartUpdate;
-import Messages.DBUpdate;
+import Helpers.Product;
 import Helpers.ProductGet;
-
+import Helpers.Serializers;
+import Messages.DBUpdate;
 import Middleware.ServerConnection;
+
 import io.atomix.utils.net.Address;
 import io.atomix.utils.serializer.Serializer;
 
@@ -17,6 +17,7 @@ import java.sql.Connection;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.function.BiFunction;
@@ -36,7 +37,7 @@ public class Supermarket {
     CatalogSkeleton catalog;
 
     // Skeletons for the carts
-    HashMap<String, CartSkeleton> carts = new HashMap<>();
+    Map<String, CartSkeleton> carts = new HashMap<>();
 
     /**
      * Parameterized constructor
@@ -46,6 +47,11 @@ public class Supermarket {
         this.connection = new ServerConnection(port);
     }
 
+    /**
+     * Initialize
+     * @throws SpreadException SpreadException
+     * @throws UnknownHostException UnknownHostException
+     */
     public void initialize() throws SpreadException, UnknownHostException {
         BiFunction<DBUpdate, Connection, Object> processDBUpdate = (dbUpdate, dbConnection) -> {
             switch (dbUpdate.getSecondaryType()) {
@@ -79,7 +85,6 @@ public class Supermarket {
 
                     return null;
             }
-
             return null;
         };
 
@@ -87,12 +92,12 @@ public class Supermarket {
             this.catalog = new CatalogSkeleton(dbConnection);
         };
 
-        ArrayList<String> tablesToCreate = new ArrayList<>();
+        List<String> tablesToCreate = new ArrayList<>();
         tablesToCreate.add("CREATE TABLE cart (id INT AUTO_INCREMENT PRIMARY KEY)");
         tablesToCreate.add("CREATE TABLE product (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(100), description VARCHAR(100), price FLOAT, amount INT)");
         tablesToCreate.add("CREATE TABLE cartProduct (id INT AUTO_INCREMENT PRIMARY KEY, idProduct FOREIGN KEY REFERENCES product(id), amount INT)");
 
-        HashMap<String, BiFunction<Address, byte[], HandlerRes>> handlers = new HashMap<>();
+        Map<String, BiFunction<Address, byte[], HandlerRes>> handlers = new HashMap<>();
 
         // Cart
         handlers.put("newCart", (address, bytes) -> {

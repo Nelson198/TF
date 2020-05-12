@@ -1,8 +1,8 @@
 package Client;
 
+import Helpers.CartUpdate;
 import Helpers.Product;
 import Helpers.Serializers;
-import Helpers.CartUpdate;
 import Middleware.ClientConnection;
 
 import io.atomix.utils.serializer.Serializer;
@@ -13,9 +13,9 @@ import java.util.List;
  * Cart Stub
  */
 public class CartStub {
+    private final String idCart;
     private final ClientConnection connection;
     private final Serializer serializer = Serializers.clientSerializer;
-    private final String idCart;
 
     /**
      * Parameterized constructor
@@ -30,20 +30,20 @@ public class CartStub {
     /**
      * Add product
      * @param idProduct Product's identifier
-     * @param qtd Product's quantity
+     * @param amount Product's amount
      */
-    public void addProduct(String idProduct, int qtd) {
-        CartUpdate toSend = new CartUpdate(this.idCart, idProduct, qtd);
+    public void addProduct(String idProduct, int amount) {
+        CartUpdate toSend = new CartUpdate(this.idCart, idProduct, amount);
         this.connection.sendAndReceive("updateProduct", this.serializer.encode(toSend));
     }
 
     /**
      * Remove product
      * @param idProduct Product's identifier
-     * @param qtd Product's quantity
+     * @param amount Product's amount
      */
-    public void removeProduct(String idProduct, int qtd) {
-        CartUpdate toSend = new CartUpdate(this.idCart, idProduct, qtd);
+    public void removeProduct(String idProduct, int amount) {
+        CartUpdate toSend = new CartUpdate(this.idCart, idProduct, amount);
         this.connection.sendAndReceive("updateProduct", this.serializer.encode(toSend));
     }
 

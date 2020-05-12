@@ -1,14 +1,23 @@
 package Middleware;
 
 import Helpers.Serializers;
-import Messages.*;
+import Messages.DBContent;
+import Messages.DBUpdate;
+import Messages.Message;
 import Server.HandlerRes;
+
 import io.atomix.cluster.messaging.ManagedMessagingService;
 import io.atomix.cluster.messaging.MessagingConfig;
 import io.atomix.cluster.messaging.impl.NettyMessagingService;
 import io.atomix.utils.net.Address;
 import io.atomix.utils.serializer.Serializer;
-import spread.*;
+
+import spread.AdvancedMessageListener;
+import spread.MembershipInfo;
+import spread.SpreadConnection;
+import spread.SpreadException;
+import spread.SpreadGroup;
+import spread.SpreadMessage;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -16,8 +25,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -51,10 +60,18 @@ public class ServerConnection {
     // DBUpdate's that arrived between this server's connection and the reception of the DB
     List<DBUpdate> pendingQueries = new ArrayList<>();
 
+    /**
+     * Parameterized constructor
+     * @param port Port
+     */
     public ServerConnection(String port) {
         this.port = port;
     }
 
+    /**
+     * isPrimary
+     * @return Status
+     */
     public boolean isPrimary() {
         return this.primaryAfter.size() == 0;
     }
@@ -84,7 +101,7 @@ public class ServerConnection {
      * @throws SpreadException SpreadException
      * @throws UnknownHostException UnknownHostException
      */
-    public void initialize(BiFunction<DBUpdate, Connection, Object> processDBUpdate, Consumer<Connection> afterDBStart, ArrayList<String> tablesToCreate, HashMap<String, BiFunction<Address, byte[], HandlerRes>> handlers) throws SpreadException, UnknownHostException {
+    public void initialize(BiFunction<DBUpdate, Connection, Object> processDBUpdate, Consumer<Connection> afterDBStart, List<String> tablesToCreate, Map<String, BiFunction<Address, byte[], HandlerRes>> handlers) throws SpreadException, UnknownHostException {
         // Initialize the spread connection
         this.spreadConnection = new SpreadConnection();
         this.spreadConnection.connect(InetAddress.getByName("localhost"), 4803, this.port, false, true);
@@ -173,7 +190,7 @@ public class ServerConnection {
      * @throws ExecutionException ExecutionException
      * @throws InterruptedException InterruptedException
      */
-    public void initializeAtomix(HashMap<String, BiFunction<Address, byte[], HandlerRes>> handlers) throws ExecutionException, InterruptedException {
+    public void initializeAtomix(Map<String, BiFunction<Address, byte[], HandlerRes>> handlers) throws ExecutionException, InterruptedException {
         // Initialize the messaging service and register messaging service handlers
         this.ms = new NettyMessagingService("cluster", Address.from(Integer.parseInt(port)), new MessagingConfig());
 
