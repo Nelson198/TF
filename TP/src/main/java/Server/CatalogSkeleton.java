@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Catalog Skeleton
@@ -26,8 +27,8 @@ public class CatalogSkeleton {
      * Get catalog information
      * @return Catalog information
      */
-    public ArrayList<Product> getCatalog() {
-        ArrayList<Product> res = new ArrayList<>();
+    public List<Product> getCatalog() {
+        List<Product> res = new ArrayList<>();
         try {
             // Create and execute statement
             Statement stmt = this.connection.createStatement();

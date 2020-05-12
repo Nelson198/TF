@@ -26,6 +26,7 @@ import java.net.UnknownHostException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
+import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.CompletableFuture;
@@ -41,7 +42,7 @@ public class Supermarket {
     String port;
 
     // Variable to store processes after which this one will be primary
-    ArrayList<SpreadGroup> primaryAfter = new ArrayList<>();
+    List<SpreadGroup> primaryAfter = new ArrayList<>();
 
     // Serializer for the messages sent between servers
     Serializer serializer = Serializers.serverSerializer;
@@ -62,7 +63,7 @@ public class Supermarket {
     HashMap<String, CartSkeleton> carts = new HashMap<>();
 
     // DBUpdate's that arrived between this server's connection and the reception of the DB
-    ArrayList<DBUpdate> pendingQueries = new ArrayList<>();
+    List<DBUpdate> pendingQueries = new ArrayList<>();
 
     /**
      * Parameterized constructor
@@ -234,9 +235,15 @@ public class Supermarket {
             aux.sendCluster(aux.serializer.encode(dbu));
         }, executor);
 
+        ms.registerHandler("getProducts", (address, bytes) -> {
+            String idCart = aux.serializer.decode(bytes);
+            List<Product> res = new ArrayList<>(carts.get(idCart).getProducts());
+            ms.sendAsync(address, "res", aux.serializer.encode(res));
+        }, executor);
+
         // Catalog
         ms.registerHandler("getCatalog", (address, bytes) -> {
-            ArrayList<Product> res = catalog.getCatalog();
+            List<Product> res = catalog.getCatalog();
             ms.sendAsync(address, "res", aux.serializer.encode(res));
         }, executor);
 
@@ -281,7 +288,7 @@ public class Supermarket {
 
     public static void main(String[] args) throws InterruptedException, SpreadException, ExecutionException, UnknownHostException {
         if (args.length != 1) {
-            System.out.println("Indique a porta do servidor");
+            System.out.println("Please indicate the server port.");
             System.exit(1);
         }
 

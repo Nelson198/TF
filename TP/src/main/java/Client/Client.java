@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -18,7 +20,7 @@ import java.util.concurrent.ExecutionException;
 public class Client {
     private static final BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
 
-    private static final HashMap<String, CartStub> carts = new HashMap<>();
+    private static final Map<String, CartStub> carts = new HashMap<>();
     private static CatalogStub catalog;
 
     private static ClientConnection connection;
@@ -72,7 +74,7 @@ public class Client {
 
             switch (choice) {
                 case 1:
-                    ArrayList<Product> productList = cs.getProducts();
+                    List<Product> productList = cs.getProducts();
 
                     StringBuilder prods = new StringBuilder();
                     prods.append("This cart has:\n");
@@ -141,7 +143,6 @@ public class Client {
             switch (choice) {
                 case 1:
                     clearTerminal();
-                    System.out.println(3);
                     System.out.print("Choose a name for your cart: ");
                     String name = stdin.readLine();
                     CartStub cart = new CartStub(connection);
@@ -191,7 +192,7 @@ public class Client {
 
         Address myAddress = Address.from(Integer.parseInt(args[0]));
 
-        ArrayList<Address> servers = new ArrayList<>();
+        List<Address> servers = new ArrayList<>();
         for (int i = 1; i < args.length; i++) {
             servers.add(Address.from(Integer.parseInt(args[i])));
         }

@@ -5,7 +5,7 @@ import io.atomix.cluster.messaging.MessagingConfig;
 import io.atomix.cluster.messaging.impl.NettyMessagingService;
 import io.atomix.utils.net.Address;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -19,7 +19,7 @@ import java.util.concurrent.Executors;
  */
 public class ClientConnection {
     private ManagedMessagingService ms;
-    private ArrayList<Address> servers;
+    private List<Address> servers;
     private Address currentServer;
     private CompletableFuture<byte[]> res;
 
@@ -30,7 +30,7 @@ public class ClientConnection {
      * @throws ExecutionException ExecutionException
      * @throws InterruptedException InterruptedException
      */
-    public ClientConnection(Address address, ArrayList<Address> servers) throws ExecutionException, InterruptedException {
+    public ClientConnection(Address address, List<Address> servers) throws ExecutionException, InterruptedException {
         this.servers = servers;
 
         Random rand = new Random();
