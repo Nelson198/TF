@@ -4,7 +4,7 @@ package Messages;
  * DB Update Message
  */
 public class DBUpdate implements Message {
-    private final String query; // TODO - see if this needs to be an array of queries (for checkout, for example - remove cart and update catalog)
+    private final Object updateInfo;
 
     private final String server; // TODO - should be SpreadGroup, but the serializer complains
     private final String client; // TODO - should be Address, but the serializer complains
@@ -13,12 +13,12 @@ public class DBUpdate implements Message {
 
     /**
      * Parameterized constructor
-     * @param query Query
+     * @param updateInfo Information about the update
      * @param server Server to answer from
      * @param client Client to answer to
      */
-    public DBUpdate(String query, String client, String server, String secondaryType) {
-        this.query = query;
+    public DBUpdate(Object updateInfo, String client, String server, String secondaryType) {
+        this.updateInfo = updateInfo;
         this.client = client;
         this.server = server;
         this.secondaryType = secondaryType;
@@ -41,11 +41,11 @@ public class DBUpdate implements Message {
     }
 
     /**
-     * Get query
-     * @return Query
+     * Get updateInfo
+     * @return UpdateInfo
      */
-    public String getQuery() {
-        return this.query;
+    public Object getUpdateInfo() {
+        return this.updateInfo;
     }
 
     /**

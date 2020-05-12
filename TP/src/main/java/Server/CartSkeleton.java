@@ -13,17 +13,24 @@ import java.util.ArrayList;
  * Cart Skeleton
  */
 public class CartSkeleton {
-    private final String idCart;
+    private String idCart;
     private final Connection connection;
 
     /**
      * Parameterized constructor
-     * @param id Cart's identifier
      * @param connection Connection to the DB
      */
-    public CartSkeleton(String id, Connection connection) {
-        this.idCart = id;
+    public CartSkeleton(Connection connection) {
         this.connection = connection;
+
+        try {
+            Statement st = this.connection.createStatement();
+            int res = st.executeUpdate("INSERT INTO cart () VALUES ()"); // TODO : put the generated key in res
+
+            this.idCart = Integer.toString(res);
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
     }
 
     /**
@@ -79,11 +86,22 @@ public class CartSkeleton {
         }
     }
 
+    /*
+    StringBuilder sb = new StringBuilder();
+    String query = sb.append("IF EXISTS (SELECT * FROM cart WHERE id=").append(cu.getIdProduct()).append(") THEN\n")
+                             .append("UPDATE cart SET amount = amount + 1").append("WHERE id=").append(cu.getIdProduct()).append(";\n")
+                             .append("ELSE\n")
+                             .append("INSERT INTO cart VALUES(").append(cu.getIdProduct()).append(", ").append(cu.getAmount()).append(");\n")
+                             .append("END IF;")
+                             .toString();
+    sb.setLength(0);
+     */
+
     /* TODO - confirm query
      * Remove a product from the cart
      * @param idProduct Product identifier
      */
-    public void removeProduct(String idProduct) {
+    public void removeProduct(String idProduct, int quantity) {
         try {
             // Create and execute statement
             Statement stmt = this.connection.createStatement();
@@ -95,5 +113,33 @@ public class CartSkeleton {
         } catch (SQLException e) {
             System.err.println(e.getMessage());
         }
+    }
+
+    public void delete() {
+        try {
+            // Create and execute statement
+            Statement stmt = this.connection.createStatement();
+            int res = stmt.executeUpdate("DELETE FROM cart WHERE id=" + this.idCart); // TODO - confirm query
+
+            // Clean up
+            stmt.close();
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
+    }
+
+    public boolean checkout() {
+        try {
+            // Create and execute statement
+            Statement stmt = this.connection.createStatement();
+            int res = stmt.executeUpdate("UPDATE cart SET ... WHERE id=" + this.idCart); // TODO - confirm query
+
+            // Clean up
+            stmt.close();
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
+
+        return true; // TODO - return if the checkout was successful
     }
 }
