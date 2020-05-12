@@ -1,6 +1,5 @@
 package Helpers;
 
-import Messages.CartUpdate;
 import Messages.DBUpdate;
 
 import io.atomix.utils.serializer.Serializer;
@@ -16,4 +15,6 @@ public class Serializers {
                                                                        .addType(String.class).build();
 
     public static Serializer serverSerializer = new SerializerBuilder().addType(DBUpdate.class).build();
+
+    // TODO - add a serializer just for the supermarket
 }

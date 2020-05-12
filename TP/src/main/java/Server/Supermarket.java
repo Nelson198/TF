@@ -2,59 +2,35 @@ package Server;
 
 import Helpers.Product;
 import Helpers.Serializers;
-import Messages.CartUpdate;
-import Messages.DBContent;
+import Helpers.CartUpdate;
 import Messages.DBUpdate;
-import Messages.Message;
-import Messages.ProductGet;
+import Helpers.ProductGet;
 
-import io.atomix.cluster.messaging.ManagedMessagingService;
-import io.atomix.cluster.messaging.MessagingConfig;
-import io.atomix.cluster.messaging.impl.NettyMessagingService;
+import Middleware.ServerConnection;
 import io.atomix.utils.net.Address;
 import io.atomix.utils.serializer.Serializer;
 
-import spread.AdvancedMessageListener;
-import spread.MembershipInfo;
-import spread.SpreadConnection;
 import spread.SpreadException;
-import spread.SpreadGroup;
-import spread.SpreadMessage;
 
-import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.Statement;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
 
 /**
  * Supermarket Implementation
  */
 public class Supermarket {
-    // Server port
-    String port;
-
-    // Variable to store processes after which this one will be primary
-    List<SpreadGroup> primaryAfter = new ArrayList<>();
+    // Connection to the cluster
+    ServerConnection connection;
 
     // Serializer for the messages sent between servers
     Serializer serializer = Serializers.serverSerializer;
-
-    // Initialize the spread connection
-    SpreadConnection connection = new SpreadConnection();
-
-    // Database connection
-    Connection dbConnection;
-
-    // Atomix connection
-    ManagedMessagingService ms;
 
     // Skeleton for the catalog
     CatalogSkeleton catalog;
@@ -62,228 +38,115 @@ public class Supermarket {
     // Skeletons for the carts
     HashMap<String, CartSkeleton> carts = new HashMap<>();
 
-    // DBUpdate's that arrived between this server's connection and the reception of the DB
-    List<DBUpdate> pendingQueries = new ArrayList<>();
-
     /**
      * Parameterized constructor
      * @param port Port
      */
     public Supermarket(String port) {
-        this.port = port;
+        this.connection = new ServerConnection(port);
     }
 
-    public boolean isPrimary() {
-        return this.primaryAfter.size() == 0;
-    }
+    public void initialize() throws SpreadException, UnknownHostException {
+        BiFunction<DBUpdate, Connection, Object> processDBUpdate = (dbUpdate, dbConnection) -> {
+            switch (dbUpdate.getSecondaryType()) {
+                case "newCart":
+                    CartSkeleton cs = new CartSkeleton(dbConnection);
+                    this.carts.put(cs.getIdCart(), cs);
 
-    public void processDBUpdate(DBUpdate dbUpdate) {
-        switch (dbUpdate.getSecondaryType()) {
-            case "newCart":
-                CartSkeleton cs = new CartSkeleton(this.dbConnection);
-                this.carts.put(cs.getIdCart(), cs);
+                    Thread timer = new TimerThread(cs.getIdCart(), connection);
+                    timer.start();
 
-                Thread timer = new TimerThread(cs.getIdCart(), this);
-                timer.start();
+                    return cs.getIdCart();
+                case "deleteCart":
+                    String objectID = (String) dbUpdate.getUpdateInfo();
+                    this.carts.get(objectID).delete();
+                    this.carts.remove(objectID);
 
-                if (dbUpdate.getServer().equals(this.connection.getPrivateGroup().toString()))
-                    this.ms.sendAsync(Address.from(dbUpdate.getClient()), "res", this.serializer.encode(cs.getIdCart())); // TODO - review response
-                break;
-            case "deleteCart":
-                String objectID = (String) dbUpdate.getUpdateInfo();
-                this.carts.get(objectID).delete();
-                this.carts.remove(objectID);
+                    return null;
+                case "checkout":
+                    String objID = (String) dbUpdate.getUpdateInfo();
+                    boolean res = this.carts.get(objID).checkout();
+                    this.carts.remove(objID);
 
-                if (dbUpdate.getServer().equals(this.connection.getPrivateGroup().toString()))
-                    this.ms.sendAsync(Address.from(dbUpdate.getClient()), "res", this.serializer.encode(null)); // TODO - review response
-            case "checkout":
-                String objID = (String) dbUpdate.getUpdateInfo();
-                boolean res = this.carts.get(objID).checkout();
-                this.carts.remove(objID);
+                    return res;
+                case "updateCart":
+                    CartUpdate cartUpdate = (CartUpdate) dbUpdate.getUpdateInfo();
+                    CartSkeleton cart = this.carts.get(cartUpdate.getIdCart());
+                    if (cartUpdate.getAmount() < 0)
+                        cart.removeProduct(cartUpdate.getIdProduct(), cartUpdate.getAmount()); // TODO - join these two cases in CartSkeleton (updateProduct)
+                    else
+                        cart.addProduct(cartUpdate.getIdProduct(), cartUpdate.getAmount()); // TODO - join these two cases in CartSkeleton (updateProduct)
 
-                if (dbUpdate.getServer().equals(this.connection.getPrivateGroup().toString()))
-                    this.ms.sendAsync(Address.from(dbUpdate.getClient()), "res", this.serializer.encode(res)); // TODO - review response
-                break;
-            case "updateCart":
-                CartUpdate cartUpdate = (CartUpdate) dbUpdate.getUpdateInfo();
-                CartSkeleton cart = this.carts.get(cartUpdate.getIdCart());
-                if (cartUpdate.getAmount() < 0)
-                    cart.removeProduct(cartUpdate.getIdProduct(), cartUpdate.getAmount()); // TODO - join these two cases in CartSkeleton (updateProduct)
-                else
-                    cart.addProduct(cartUpdate.getIdProduct(), cartUpdate.getAmount()); // TODO - join these two cases in CartSkeleton (updateProduct)
-
-                if (dbUpdate.getServer().equals(this.connection.getPrivateGroup().toString()))
-                    this.ms.sendAsync(Address.from(dbUpdate.getClient()), "res", this.serializer.encode(null)); // TODO - review response
-                break;
-        }
-    }
-
-    /**
-     * Initialize Spread connection
-     * @throws SpreadException SpreadException
-     * @throws UnknownHostException UnknownHostException
-     */
-    public void initializeSpread() throws SpreadException, UnknownHostException {
-        // Initialize the spread connection
-        this.connection = new SpreadConnection();
-        this.connection.connect(InetAddress.getByName("localhost"), 4803, this.port, false, true);
-
-        Supermarket aux = this;
-
-        this.connection.add(new AdvancedMessageListener() {
-            public void regularMessageReceived(SpreadMessage spreadMessage) {
-                Message ms = aux.serializer.decode(spreadMessage.getData());
-                if (ms.getType().equals("db")) {
-                    DBContent dbMsg = (DBContent) ms;
-                    // TODO - update the db file
-                    try {
-                        aux.dbConnection = DriverManager.getConnection("jdbc:hsqldb:file:supermarket" + port + "/", "sa", "");
-
-                        Statement stm = aux.dbConnection.createStatement();
-                        stm.executeUpdate("CREATE TABLE cart (id INT AUTO_INCREMENT PRIMARY KEY)");
-                        stm.executeUpdate("CREATE TABLE product (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(100), description VARCHAR(100), price FLOAT, amount INT)");
-                        stm.executeUpdate("CREATE TABLE cartProduct (id INT AUTO_INCREMENT PRIMARY KEY, idProduct FOREIGN KEY REFERENCES product(id), amount INT)");
-
-                        for (DBUpdate dbUpdate : aux.pendingQueries)
-                            processDBUpdate(dbUpdate);
-                        aux.pendingQueries = null;
-
-                        aux.catalog = new CatalogSkeleton(aux.dbConnection);
-                        initializeAtomix();
-                    } catch (Exception exception) {
-                        exception.printStackTrace();
-                    }
-                } else if (ms.getType().equals("dbUpdate")) {
-                    DBUpdate dbUpdate = (DBUpdate) ms;
-
-                    if (aux.dbConnection == null) {
-                        aux.pendingQueries.add(dbUpdate);
-                    } else {
-                        processDBUpdate(dbUpdate);
-                    }
-                }
+                    return null;
             }
 
-            public void membershipMessageReceived(SpreadMessage spreadMessage) {
-                MembershipInfo info = spreadMessage.getMembershipInfo();
-                if (info.isCausedByJoin()) {
-                    if (info.getJoined().equals(aux.connection.getPrivateGroup())) {
-                        if (info.getMembers().length == 1) {
-                            try {
-                                aux.dbConnection = DriverManager.getConnection("jdbc:hsqldb:file:supermarket" + port + "/", "SA", "");
-                                aux.dbConnection.setAutoCommit(true);
+            return null;
+        };
 
-                                aux.catalog = new CatalogSkeleton(aux.dbConnection);
+        Consumer<Connection> afterDBStart = (dbConnection) -> {
+            this.catalog = new CatalogSkeleton(dbConnection);
+        };
 
-                                initializeAtomix();
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                        } else {
-                            for (SpreadGroup member : info.getMembers()) {
-                                if (!member.equals(aux.connection.getPrivateGroup()))
-                                    primaryAfter.add(member);
-                            }
-                        }
-                    } else if (primaryAfter.size() == 0) {
-                        // TODO - send database (or updates) to new member
-                    }
-                } else if (info.isCausedByDisconnect()) {
-                    primaryAfter.remove(info.getDisconnected());
-                } else if (info.isCausedByLeave()) {
-                    primaryAfter.remove(info.getLeft());
-                } else if (info.isCausedByNetwork()) {
-                    // TODO - deal with network partitions
-                    //        see info.getMyVirtualSynchronySet(), info.getStayed(), info.getVirtualSynchronySets()
-                }
-            }
-        });
+        ArrayList<String> tablesToCreate = new ArrayList<>();
+        tablesToCreate.add("CREATE TABLE cart (id INT AUTO_INCREMENT PRIMARY KEY)");
+        tablesToCreate.add("CREATE TABLE product (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(100), description VARCHAR(100), price FLOAT, amount INT)");
+        tablesToCreate.add("CREATE TABLE cartProduct (id INT AUTO_INCREMENT PRIMARY KEY, idProduct FOREIGN KEY REFERENCES product(id), amount INT)");
 
-        SpreadGroup g = new SpreadGroup();
-        g.join(this.connection, "supermarket");
-    }
-
-    /**
-     * Initialize Atomix connection
-     * @throws ExecutionException ExecutionException
-     * @throws InterruptedException InterruptedException
-     */
-    public void initializeAtomix() throws ExecutionException, InterruptedException {
-        // Initialize the messaging service and register messaging service handlers
-        this.ms = new NettyMessagingService("supermarket", Address.from(Integer.parseInt(this.port)), new MessagingConfig());
-        ExecutorService executor = Executors.newFixedThreadPool(1);
-
-        Supermarket aux = this;
+        HashMap<String, BiFunction<Address, byte[], HandlerRes>> handlers = new HashMap<>();
 
         // Cart
-        ms.registerHandler("newCart", (address, bytes) -> {
-            DBUpdate dbu = new DBUpdate(null, aux.connection.getPrivateGroup().toString(), address.toString(), "newCart");
-            aux.sendCluster(aux.serializer.encode(dbu));
-        }, executor);
+        handlers.put("newCart", (address, bytes) -> {
+            return new HandlerRes(null, true, false);
+        });
 
-        ms.registerHandler("updateCart", (address, bytes) -> {
-            CartUpdate cu = aux.serializer.decode(bytes);
+        handlers.put("updateCart", (address, bytes) -> {
+            CartUpdate cu = serializer.decode(bytes);
 
-            DBUpdate dbu = new DBUpdate(cu, aux.connection.getPrivateGroup().toString(), address.toString(), "addProduct");
-            aux.sendCluster(aux.serializer.encode(dbu));
-        }, executor);
+            return new HandlerRes(cu, true, false);
+        });
 
-        ms.registerHandler("checkout", (address, bytes) -> {
-            String cartID = aux.serializer.decode(bytes);
+        handlers.put("checkout", (address, bytes) -> {
+            String cartID = serializer.decode(bytes);
 
-            DBUpdate dbu = new DBUpdate(cartID, aux.connection.getPrivateGroup().toString(), address.toString(), "checkout");
-            aux.sendCluster(aux.serializer.encode(dbu));
-        }, executor);
+            return new HandlerRes(cartID, true, false);
+        });
 
-        ms.registerHandler("getProducts", (address, bytes) -> {
-            String idCart = aux.serializer.decode(bytes);
+        handlers.put("getProducts", (address, bytes) -> {
+            String idCart = serializer.decode(bytes);
             List<Product> res = new ArrayList<>(carts.get(idCart).getProducts());
-            ms.sendAsync(address, "res", aux.serializer.encode(res));
-        }, executor);
+
+            return new HandlerRes(serializer.encode(res), false, true);
+        });
 
         // Catalog
-        ms.registerHandler("getCatalog", (address, bytes) -> {
+        handlers.put("getCatalog", (address, bytes) -> {
             List<Product> res = catalog.getCatalog();
-            ms.sendAsync(address, "res", aux.serializer.encode(res));
-        }, executor);
 
-        ms.registerHandler("getProduct", (address, bytes) -> {
-            ProductGet pg = aux.serializer.decode(bytes);
+            return new HandlerRes(serializer.encode(res), false, true);
+        });
+
+        handlers.put("getProduct", (address, bytes) -> {
+            ProductGet pg = serializer.decode(bytes);
             Product res = catalog.getProduct(pg.getId());
-            ms.sendAsync(address, "res", aux.serializer.encode(res));
-        }, executor);
 
-        ms.registerHandler("getPrice", (address, bytes) -> {
-            String idProduct = aux.serializer.decode(bytes);
+            return new HandlerRes(serializer.encode(res), false, true);
+        });
+
+        handlers.put("getPrice", (address, bytes) -> {
+            String idProduct = serializer.decode(bytes);
             float res = catalog.getPrice(idProduct);
-            ms.sendAsync(address, "res", aux.serializer.encode(res));
-        }, executor);
 
-        ms.registerHandler("getAvailability", (address, bytes) -> {
-            String idProduct = aux.serializer.decode(bytes);
+            return new HandlerRes(serializer.encode(res), false, true);
+        });
+
+        handlers.put("getAvailability", (address, bytes) -> {
+            String idProduct = serializer.decode(bytes);
             int res = catalog.getAvailability(idProduct);
-            ms.sendAsync(address, "res", aux.serializer.encode(res));
-        }, executor);
 
-        ms.start().get();
-    }
+            return new HandlerRes(serializer.encode(res), false, true);
+        });
 
-    /**
-     * Multicast a message to the cluster
-     * @param message Message
-     *
-     * TODO - move to ServerConnection
-     */
-    public void sendCluster(byte[] message) {
-        SpreadMessage m = new SpreadMessage();
-        m.addGroup("supermarket");
-        m.setData(message);
-        m.setSafe();
-        try {
-            this.connection.multicast(m);
-        } catch (SpreadException e) {
-            e.printStackTrace();
-        }
+        this.connection.initialize(processDBUpdate, afterDBStart, tablesToCreate, handlers);
     }
 
     public static void main(String[] args) throws InterruptedException, SpreadException, ExecutionException, UnknownHostException {
@@ -293,7 +156,7 @@ public class Supermarket {
         }
 
         Supermarket s = new Supermarket(args[0]);
-        s.initializeSpread();
+        s.initialize();
 
         System.out.println("Server is running on port " + args[0] + " ...");
 

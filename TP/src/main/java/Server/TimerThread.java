@@ -3,6 +3,7 @@ package Server;
 import Helpers.Serializers;
 import Messages.DBUpdate;
 
+import Middleware.ServerConnection;
 import io.atomix.utils.serializer.Serializer;
 
 /**
@@ -10,7 +11,7 @@ import io.atomix.utils.serializer.Serializer;
  */
 public class TimerThread extends Thread {
     private final String cartID;
-    private final Supermarket connection; // TODO - use ServerConnection here
+    private final ServerConnection connection; // TODO - use ServerConnection here
     private final Serializer serializer = Serializers.serverSerializer;
 
     // Time frame during which the cart needs to be checked out
@@ -21,7 +22,7 @@ public class TimerThread extends Thread {
      * @param cartID Cart's identifier
      * @param connection Supermarket's connection
      */
-    public TimerThread(String cartID, Supermarket connection) {
+    public TimerThread(String cartID, ServerConnection connection) {
         this.cartID = cartID;
         this.connection = connection;
     }

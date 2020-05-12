@@ -1,9 +1,11 @@
 package Middleware;
 
+import Helpers.Serializers;
 import io.atomix.cluster.messaging.ManagedMessagingService;
 import io.atomix.cluster.messaging.MessagingConfig;
 import io.atomix.cluster.messaging.impl.NettyMessagingService;
 import io.atomix.utils.net.Address;
+import io.atomix.utils.serializer.Serializer;
 
 import java.util.List;
 import java.util.Random;
@@ -22,6 +24,7 @@ public class ClientConnection {
     private List<Address> servers;
     private Address currentServer;
     private CompletableFuture<byte[]> res;
+    private final Serializer serializer = Serializers.clientSerializer;
 
     /**
      * Parameterized constructor
@@ -37,7 +40,7 @@ public class ClientConnection {
         int server = rand.nextInt(servers.size());
         this.currentServer = servers.get(server);
 
-        this.ms = new NettyMessagingService("supermarket", address, new MessagingConfig());
+        this.ms = new NettyMessagingService("cluster", address, new MessagingConfig());
 
         this.ms.registerHandler("res", (address1, bytes) -> {
             this.res.complete(bytes);
