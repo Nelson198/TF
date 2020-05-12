@@ -72,12 +72,23 @@ public class CartSkeleton {
     /**
      * Add a product to the cart
      * @param idProduct Product identifier
+     * @param amount Product amount
      */
-    public void addProduct(String idProduct, int quantity) {
+    public void addProduct(String idProduct, int amount) {
         try {
             // Create and execute statement
             Statement stmt = this.connection.createStatement();
-            ResultSet rs = stmt.executeQuery("UPDATE cart SET ... WHERE idCart=" + this.idCart); // TODO - query
+
+            StringBuilder sb = new StringBuilder();
+            String query = sb.append("IF EXISTS (SELECT * FROM cart WHERE idCart=").append(this.idCart).append(" AND idProduct=").append(idProduct).append(") THEN\n")
+                             .append("\tUPDATE cart SET amount = amount + ").append(amount).append(" WHERE idCart=").append(this.idCart).append(" AND idProduct=").append(idProduct).append(";\n")
+                             .append("ELSE\n")
+                             .append("\tINSERT INTO cart VALUES(").append(idProduct).append(", ").append(amount).append(");\n")
+                             .append("END IF;")
+                             .toString();
+            sb.setLength(0);
+
+            ResultSet rs = stmt.executeQuery(query);
 
             // Clean up
             rs.close();
@@ -87,26 +98,37 @@ public class CartSkeleton {
         }
     }
 
-    /*
-    StringBuilder sb = new StringBuilder();
-    String query = sb.append("IF EXISTS (SELECT * FROM cart WHERE id=").append(cu.getIdProduct()).append(") THEN\n")
-                             .append("UPDATE cart SET amount = amount + 1").append("WHERE id=").append(cu.getIdProduct()).append(";\n")
-                             .append("ELSE\n")
-                             .append("INSERT INTO cart VALUES(").append(cu.getIdProduct()).append(", ").append(cu.getAmount()).append(");\n")
-                             .append("END IF;")
-                             .toString();
-    sb.setLength(0);
-     */
-
-    /* TODO - confirm query
+    /**
      * Remove a product from the cart
      * @param idProduct Product identifier
      */
-    public void removeProduct(String idProduct, int quantity) {
+    public void removeProduct(String idProduct, int amount) {
+        StringBuilder sb = new StringBuilder();
         try {
             // Create and execute statement
             Statement stmt = this.connection.createStatement();
-            ResultSet rs = stmt.executeQuery("DELETE FROM cart WHERE id=" + this.idCart + " AND idProduct=" + idProduct); // TODO - confirm query
+
+            String query = sb.append("EXISTS (SELECT * FROM cart WHERE idCart=").append(this.idCart).append(" AND idProduct=").append(idProduct).append(");").toString();
+            sb.setLength(0);
+
+            ResultSet rs = stmt.executeQuery(query);
+            boolean exists = rs.getBoolean(1);
+
+            if (exists) {
+                query = sb.append("SELECT amount FROM cart WHERE idCart=").append(this.idCart).append(" AND idProduct=").append(idProduct).append(");").toString();
+                sb.setLength(0);
+
+                rs = stmt.executeQuery(query);
+                int quantity = rs.getInt("amount");
+
+                if (quantity > amount) {
+                    query = sb.append("UPDATE cart SET amount = amount - ").append(amount).append(" WHERE idCart=").append(this.idCart).append(" AND idProduct=").append(idProduct).toString();
+                } else {
+                    query = sb.append("DELETE FROM cart WHERE idCart=").append(this.idCart).append(" AND idProduct=").append(idProduct).append(";").toString();
+                }
+                stmt.executeUpdate(query);
+                sb.setLength(0);
+            }
 
             // Clean up
             rs.close();
@@ -116,11 +138,14 @@ public class CartSkeleton {
         }
     }
 
+    /**
+     * Delete cart
+     */
     public void delete() {
         try {
             // Create and execute statement
             Statement stmt = this.connection.createStatement();
-            int res = stmt.executeUpdate("DELETE FROM cart WHERE id=" + this.idCart); // TODO - confirm query
+            stmt.executeUpdate("DELETE FROM cart WHERE idCart=" + this.idCart);
 
             // Clean up
             stmt.close();
@@ -129,11 +154,15 @@ public class CartSkeleton {
         }
     }
 
+    /**
+     * Checkout cart
+     * @return Status
+     */
     public boolean checkout() {
         try {
             // Create and execute statement
             Statement stmt = this.connection.createStatement();
-            int res = stmt.executeUpdate("UPDATE cart SET ... WHERE id=" + this.idCart); // TODO - confirm query
+            stmt.executeUpdate("UPDATE cart SET ... WHERE idCart=" + this.idCart); // TODO - confirm query
 
             // Clean up
             stmt.close();

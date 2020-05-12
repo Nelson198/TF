@@ -3,7 +3,6 @@ package Client;
 import Helpers.Product;
 import Helpers.Serializers;
 import Messages.CartUpdate;
-import Messages.Checkout;
 import Middleware.ClientConnection;
 
 import io.atomix.utils.serializer.Serializer;
@@ -24,8 +23,7 @@ public class CartStub {
      */
     public CartStub(ClientConnection connection) {
         this.connection = connection;
-
-        byte[] res = this.connection.sendAndReceive("newCart", serializer.encode(null));
+        byte[] res = this.connection.sendAndReceive("newCart", this.serializer.encode(null));
         this.idCart = this.serializer.decode(res);
     }
 
@@ -53,8 +51,7 @@ public class CartStub {
      * Checkout
      */
     public void checkout() {
-        Checkout co = new Checkout(this.idCart);
-        this.connection.sendAndReceive("checkout", this.serializer.encode(co));
+        this.connection.sendAndReceive("checkout", this.serializer.encode(this.idCart));
     }
 
     /**
