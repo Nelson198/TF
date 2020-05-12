@@ -22,11 +22,15 @@ mvn install:install-file -Dfile=/path/to/spread-4.4.0.jar \
 
 ### Arranque do sistema
 
+* *Spread*:
+```bash
+./spread-src-5.0.1/daemon/spread -c spread.conf
+```
+
 * Servidor:
 ```bash
 mvn exec:java -Dexec.mainClass=Server.Supermarket -Dexec.args="1111"
 ```
-
 
 * Cliente:
 ```bash

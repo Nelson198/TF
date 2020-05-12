@@ -15,3 +15,6 @@ target/
 .classpath
 .project
 .settings
+
+# Spread
+Spread 5.0.1/
