@@ -1,11 +1,9 @@
 package Middleware;
 
-import Helpers.Serializers;
 import io.atomix.cluster.messaging.ManagedMessagingService;
 import io.atomix.cluster.messaging.MessagingConfig;
 import io.atomix.cluster.messaging.impl.NettyMessagingService;
 import io.atomix.utils.net.Address;
-import io.atomix.utils.serializer.Serializer;
 
 import java.util.List;
 import java.util.Random;
@@ -20,11 +18,10 @@ import java.util.concurrent.Executors;
  *                    Given that the client is single-threaded, this middleware can only handle one operation at a time.
  */
 public class ClientConnection {
-    private ManagedMessagingService ms;
-    private List<Address> servers;
-    private Address currentServer;
+    private final ManagedMessagingService ms;
+    private final List<Address> servers;
+    private final Address currentServer;
     private CompletableFuture<byte[]> res;
-    private final Serializer serializer = Serializers.clientSerializer;
 
     /**
      * Parameterized constructor

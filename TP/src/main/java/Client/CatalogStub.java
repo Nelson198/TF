@@ -9,8 +9,8 @@ import io.atomix.utils.serializer.Serializer;
  * Catalog Stub
  */
 public class CatalogStub {
-    private ClientConnection connection;
-    private Serializer serializer = Serializers.clientSerializer;
+    private final ClientConnection connection;
+    private final Serializer serializer = Serializers.clientSerializer;
 
     /**
      * Parameterized constructor
@@ -26,8 +26,7 @@ public class CatalogStub {
      */
     public String getCatalog() {
         byte[] res = this.connection.sendAndReceive("getCatalog", null);
-        String catalog = this.serializer.decode(res);
-        return catalog;
+        return this.serializer.decode(res);
     }
 
     /**
@@ -37,8 +36,7 @@ public class CatalogStub {
      */
     public float getPrice(String idProduct) {
         byte[] res = this.connection.sendAndReceive("getPrice", this.serializer.encode(idProduct));
-        float price = this.serializer.decode(res);
-        return price;
+        return this.serializer.decode(res);
     }
 
     /**
@@ -48,7 +46,6 @@ public class CatalogStub {
      */
     public int getAmount(String idProduct) {
         byte[] res = this.connection.sendAndReceive("getAvailability", this.serializer.encode(idProduct));
-        int amount = this.serializer.decode(res);
-        return amount;
+        return this.serializer.decode(res);
     }
 }

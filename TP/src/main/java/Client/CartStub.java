@@ -60,7 +60,6 @@ public class CartStub {
      */
     public List<Product> getProducts() {
         byte[] res = this.connection.sendAndReceive("getProducts", this.serializer.encode(this.idCart));
-        List<Product> productList = this.serializer.decode(res);
-        return productList;
+        return this.serializer.decode(res);
     }
 }

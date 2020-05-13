@@ -82,9 +82,7 @@ public class Supermarket {
             return null;
         };
 
-        Consumer<Connection> afterDBStart = (dbConnection) -> {
-            this.catalog = new CatalogSkeleton(dbConnection);
-        };
+        Consumer<Connection> afterDBStart = (dbConnection) -> this.catalog = new CatalogSkeleton(dbConnection);
 
         ArrayList<String> tablesToCreate = new ArrayList<>();
         tablesToCreate.add("CREATE TABLE cart (id INT AUTO_INCREMENT PRIMARY KEY)");
@@ -94,9 +92,7 @@ public class Supermarket {
         HashMap<String, BiFunction<Address, byte[], HandlerRes>> handlers = new HashMap<>();
 
         // Cart
-        handlers.put("newCart", (address, bytes) -> {
-            return new HandlerRes(null, true, false);
-        });
+        handlers.put("newCart", (address, bytes) -> new HandlerRes(null, true, false));
 
         handlers.put("updateCart", (address, bytes) -> {
             CartUpdate cu = serializer.decode(bytes);

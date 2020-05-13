@@ -56,16 +56,14 @@ public class Client {
     private static void menuCart(String cartName) throws IOException {
         CartStub cs = carts.get(cartName);
         while(true) {
-            StringBuilder cart = new StringBuilder();
-            cart.append("What do you want to do?\n")
-                .append("1 - Get products\n")
-                .append("2 - Add product\n")
-                .append("3 - Remove product\n")
-                .append("4 - Checkout\n")
-                .append("5 - Get back\n");
-
             clearTerminal();
-            System.out.println(cart.toString());
+            String cart = "What do you want to do?\n" +
+                          "1 - Get products\n" +
+                          "2 - Add product\n" +
+                          "3 - Remove product\n" +
+                          "4 - Checkout\n" +
+                          "5 - Get back\n";
+            System.out.println(cart);
 
             int choice;
             do {
@@ -119,21 +117,18 @@ public class Client {
     /**
      * Main menu
      * @throws IOException IOException
-     * @throws ExecutionException ExecutionException
-     * @throws InterruptedException InterruptedException
      */
-    private static void menu() throws IOException, ExecutionException, InterruptedException {
+    private static void menu() throws IOException {
         while (true) {
-            StringBuilder main = new StringBuilder();
-            main.append("Welcome to our supermarket. Choose an option:\n")
-                .append("\t1 - Create a cart\n")
-                .append("\t2 - Check/Update a cart\n")
-                .append("\t3 - Check a product's price\n")
-                .append("\t4 - Check a product's availability\n")
-                .append("\t5 - Disconnect\n");
-
             clearTerminal();
-            System.out.println(main.toString());
+            String main = "Welcome to our supermarket. Choose an option:\n" +
+                          "\t1 - Create a cart\n" +
+                          "\t2 - Check/Update a cart\n" +
+                          "\t3 - Check a product's price\n" +
+                          "\t4 - Check a product's availability\n" +
+                          // TODO - add option to get the whole catalog
+                          "\t5 - Disconnect\n";
+            System.out.println(main);
 
             int choice;
             do {
@@ -147,7 +142,7 @@ public class Client {
                     String name = stdin.readLine();
                     CartStub cart = new CartStub(connection);
                     carts.put(name, cart);
-                    menuCart(name); // TODO - allow to use more than one cart
+                    menuCart(name);
                     break;
 
                 case 2:

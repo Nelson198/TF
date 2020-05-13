@@ -26,8 +26,6 @@ import java.util.function.Consumer;
 
 /**
  * ServerConnection - Middleware that handles the network connection of a server in the cluster.
- *
- * TODO - bring more stuff to this class
  */
 public class ServerConnection {
     // Server port

@@ -27,18 +27,6 @@ public class Product {
     }
 
     /**
-     * Parameterized constructor
-     * @param p Product
-     */
-    public Product(Product p) {
-        this.id = p.getId();
-        this.name = p.getName();
-        this.description = p.getDescription();
-        this.price = p.getPrice();
-        this.quantity = p.getQuantity();
-    }
-
-    /**
      * Get the product's identifier
      * @return Product's identifier
      */
