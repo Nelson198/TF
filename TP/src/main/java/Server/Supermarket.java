@@ -77,10 +77,7 @@ public class Supermarket {
                 case "updateCart":
                     CartUpdate cartUpdate = (CartUpdate) dbUpdate.getUpdateInfo();
                     CartSkeleton cart = this.carts.get(cartUpdate.getIdCart());
-                    if (cartUpdate.getAmount() < 0)
-                        cart.removeProduct(cartUpdate.getIdProduct(), cartUpdate.getAmount()); // TODO - join these two cases in CartSkeleton (updateProduct)
-                    else
-                        cart.addProduct(cartUpdate.getIdProduct(), cartUpdate.getAmount()); // TODO - join these two cases in CartSkeleton (updateProduct)
+                    cart.updateProduct(cartUpdate.getIdProduct(), cartUpdate.getAmount());
 
                     return null;
             }

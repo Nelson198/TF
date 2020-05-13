@@ -72,64 +72,43 @@ public class CartSkeleton {
     }
 
     /**
-     * Add a product to the cart
+     * Update product in the cart
      * @param idProduct Product identifier
-     * @param amount Product amount
      */
-    public void addProduct(String idProduct, int amount) {
+    public void updateProduct(String idProduct, int amount) {
         try {
             // Create and execute statement
             Statement stmt = this.connection.createStatement();
 
             StringBuilder sb = new StringBuilder();
-            String query = sb.append("IF EXISTS (SELECT * FROM cart WHERE id=").append(this.idCart).append(" AND idProduct=").append(idProduct).append(") THEN\n")
-                             .append("\tUPDATE cart SET amount = amount + ").append(amount).append(" WHERE id=").append(this.idCart).append(" AND idProduct=").append(idProduct).append(";\n")
-                             .append("ELSE\n")
-                             .append("\tINSERT INTO cart VALUES(").append(idProduct).append(", ").append(amount).append(");\n")
-                             .append("END IF;")
-                             .toString();
-
-            ResultSet rs = stmt.executeQuery(query);
-
-            // Clean up
-            rs.close();
-            stmt.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
-    }
-
-    /**
-     * Remove a product from the cart
-     * @param idProduct Product identifier
-     */
-    public void removeProduct(String idProduct, int amount) {
-        try {
-            // Create and execute statement
-            Statement stmt = this.connection.createStatement();
-
-            StringBuilder sb = new StringBuilder();
-            String query = sb.append("EXISTS (SELECT * FROM cart WHERE id=").append(this.idCart).append(" AND idProduct=").append(idProduct).append(");").toString();
+            String query = sb.append("EXISTS (SELECT * FROM cart WHERE id=").append(this.idCart).append(" AND idProduct=").append(idProduct).append(")").toString();
             sb.setLength(0);
 
             ResultSet rs = stmt.executeQuery(query);
             boolean exists = rs.getBoolean(1);
 
-            if (exists) {
-                query = sb.append("SELECT amount FROM cart WHERE id=").append(this.idCart).append(" AND idProduct=").append(idProduct).append(");").toString();
+            if (exists && amount < 0) { // Remove product
+                query = sb.append("SELECT amount FROM cart WHERE id=").append(this.idCart).append(" AND idProduct=").append(idProduct).append(")").toString();
                 sb.setLength(0);
 
                 rs = stmt.executeQuery(query);
                 int cartAmount = rs.getInt("amount");
 
-                if (cartAmount > amount) {
+                if (cartAmount > Math.abs(amount)) {
                     query = sb.append("UPDATE cart SET amount = amount - ").append(amount).append(" WHERE id=").append(this.idCart).append(" AND idProduct=").append(idProduct).toString();
                 } else {
-                    query = sb.append("DELETE FROM cart WHERE id=").append(this.idCart).append(" AND idProduct=").append(idProduct).append(";").toString();
+                    query = sb.append("DELETE FROM cart WHERE id=").append(this.idCart).append(" AND idProduct=").append(idProduct).toString();
                 }
-                stmt.executeUpdate(query);
                 sb.setLength(0);
+                stmt.executeUpdate(query);
+            } else if (exists && amount > 0) { // Add product
+                query = sb.append("UPDATE cart SET amount = amount + ").append(amount).append(" WHERE id=").append(this.idCart).append(" AND idProduct=").append(idProduct).toString();
+                sb.setLength(0);
+                stmt.executeUpdate(query);
+            } else if (!exists && amount > 0) { // Add product
+                query = sb.append("INSERT INTO cart VALUES(").append(idProduct).append(", ").append(amount).append(")").toString();
+                sb.setLength(0);
+                stmt.executeUpdate(query);
             }
 
             // Clean up

@@ -28,21 +28,11 @@ public class CartStub {
     }
 
     /**
-     * Add product
+     * Update product
      * @param idProduct Product's identifier
      * @param amount Product's amount
      */
-    public void addProduct(String idProduct, int amount) {
-        CartUpdate toSend = new CartUpdate(this.idCart, idProduct, amount);
-        this.connection.sendAndReceive("updateProduct", this.serializer.encode(toSend));
-    }
-
-    /**
-     * Remove product
-     * @param idProduct Product's identifier
-     * @param amount Product's amount
-     */
-    public void removeProduct(String idProduct, int amount) {
+    public void updateProduct(String idProduct, int amount) {
         CartUpdate toSend = new CartUpdate(this.idCart, idProduct, amount);
         this.connection.sendAndReceive("updateProduct", this.serializer.encode(toSend));
     }

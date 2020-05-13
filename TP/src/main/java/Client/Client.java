@@ -96,22 +96,20 @@ public class Client {
                     break;
 
                 case 2:
-                    System.out.print("Please insert the product's code: ");
+                    System.out.print("Please insert the product's identifier: ");
                     String idProduct = stdin.readLine();
-                    System.out.print("Specify an amount to remove (press a to remove all): ");
+                    System.out.print("Specify an amount: ");
                     int amount = readInt();
-                    cs.addProduct(idProduct, amount);
+                    cs.updateProduct(idProduct, amount);
                     break;
 
                 case 3:
-                    System.out.print("Please insert the product's code: ");
+                    System.out.print("Please insert the product's identifier: ");
                     idProduct = stdin.readLine();
-                    System.out.print("Specify an amount to remove (press a to remove all): ");
-                    String qtd = stdin.readLine();
-                    if (qtd.equals("a"))
-                        cs.removeProduct(idProduct, Integer.MAX_VALUE);
-                    else
-                        cs.removeProduct(idProduct, Integer.parseInt(qtd));
+                    System.out.print("Specify an amount: ");
+                    int quantity = readInt();
+                    cs.updateProduct(idProduct, -quantity);
+                    waitConfirmation();
                     break;
 
                 case 4:
@@ -119,6 +117,8 @@ public class Client {
                     break;
 
                 case 5:
+                    clearTerminal();
+                    menu();
                     return;
             }
         }
@@ -193,7 +193,7 @@ public class Client {
 
     public static void main(String[] args) throws IOException, ExecutionException, InterruptedException {
         if (args.length < 2) {
-            System.out.println("The port of the client and the ports of at least one server were not specified");
+            System.out.println("Please indicate the port of the client and the ports of at least one server.");
             System.exit(1);
         }
 
