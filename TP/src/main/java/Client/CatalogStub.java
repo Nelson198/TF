@@ -1,9 +1,12 @@
 package Client;
 
+import Helpers.Product;
 import Helpers.Serializers;
 import Middleware.ClientConnection;
 
 import io.atomix.utils.serializer.Serializer;
+
+import java.util.List;
 
 /**
  * Catalog Stub
@@ -26,8 +29,17 @@ public class CatalogStub {
      */
     public String getCatalog() {
         byte[] res = this.connection.sendAndReceive("getCatalog", null);
-        String catalog = this.serializer.decode(res);
-        return catalog;
+        List<Product> catalog = this.serializer.decode(res);
+
+        StringBuilder sb = new StringBuilder("Catalog:\n");
+        for (Product p : catalog) {
+            sb.append("\tProduct nº ").append(p.getId()).append("\n")
+              .append("\t\t--> Name: ").append(p.getName()).append("\n")
+              .append("\t\t--> Description: ").append(p.getDescription()).append("\n")
+              .append("\t\t--> Price: ").append(p.getPrice()).append(" €\n")
+              .append("\t\t--> Amount: ").append(p.getAmount()).append(" unit(s)\n");
+        }
+        return sb.toString();
     }
 
     /**
@@ -47,7 +59,7 @@ public class CatalogStub {
      * @return Product's amount
      */
     public int getAmount(String idProduct) {
-        byte[] res = this.connection.sendAndReceive("getAvailability", this.serializer.encode(idProduct));
+        byte[] res = this.connection.sendAndReceive("getAmount", this.serializer.encode(idProduct));
         int amount = this.serializer.decode(res);
         return amount;
     }

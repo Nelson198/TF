@@ -28,16 +28,16 @@ import java.util.function.Consumer;
  */
 public class Supermarket {
     // Connection to the cluster
-    ServerConnection connection;
+    private ServerConnection connection;
 
     // Serializer for the messages sent between servers
-    Serializer serializer = Serializers.serverSerializer;
+    private Serializer serializer = Serializers.serverSerializer;
 
     // Skeleton for the catalog
-    CatalogSkeleton catalog;
+    private CatalogSkeleton catalog;
 
     // Skeletons for the carts
-    Map<String, CartSkeleton> carts = new HashMap<>();
+    private Map<String, CartSkeleton> carts = new HashMap<>();
 
     /**
      * Parameterized constructor
@@ -59,7 +59,7 @@ public class Supermarket {
                     CartSkeleton cs = new CartSkeleton(dbConnection);
                     this.carts.put(cs.getIdCart(), cs);
 
-                    Thread timer = new TimerThread(cs.getIdCart(), connection);
+                    Thread timer = new TimerThread(cs.getIdCart(), this.connection);
                     timer.start();
 
                     return cs.getIdCart();
@@ -144,9 +144,9 @@ public class Supermarket {
             return new HandlerRes(serializer.encode(res), false, true);
         });
 
-        handlers.put("getAvailability", (address, bytes) -> {
+        handlers.put("getAmount", (address, bytes) -> {
             String idProduct = serializer.decode(bytes);
-            int res = catalog.getAvailability(idProduct);
+            int res = catalog.getAmount(idProduct);
 
             return new HandlerRes(serializer.encode(res), false, true);
         });
