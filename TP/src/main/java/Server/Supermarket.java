@@ -53,8 +53,7 @@ public class Supermarket {
                     CartSkeleton cs = new CartSkeleton(dbConnection);
                     this.carts.put(cs.getIdCart(), cs);
 
-                    Thread timer = new TimerThread(cs.getIdCart(), connection);
-                    timer.start();
+                    this.connection.startTimer(cs.getIdCart(), "deleteCart", 30); // TODO - 30s for the moment
 
                     return cs.getIdCart();
                 case "deleteCart":

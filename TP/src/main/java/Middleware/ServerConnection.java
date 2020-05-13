@@ -76,6 +76,15 @@ public class ServerConnection {
     }
 
     /**
+     * Start a timer, after which a message is sent to the cluster
+     * @param message Message
+     */
+    public void startTimer(Object message, String type, int time) {
+        Thread timer = new TimerThread(message, type, time, this);
+        timer.start();
+    }
+
+    /**
      * Initialize Spread connection
      * @param processDBUpdate Function executed when there is a DBUpdate that arrives to the server
      * @param afterDBStart Function executed after the DB is initialized
