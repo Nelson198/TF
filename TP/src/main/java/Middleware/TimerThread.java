@@ -40,6 +40,7 @@ public class TimerThread extends Thread {
             }
         } catch (Exception e) {
             e.printStackTrace();
+            System.exit(1);
         }
     }
 }

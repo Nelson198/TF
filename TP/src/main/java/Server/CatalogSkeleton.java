@@ -44,7 +44,8 @@ public class CatalogSkeleton {
             rs.close();
             stmt.close();
         } catch (SQLException e) {
-            System.err.println(e.getMessage());
+            e.printStackTrace();
+            System.exit(1);
         }
         return res;
     }
@@ -68,7 +69,8 @@ public class CatalogSkeleton {
             rs.close();
             stmt.close();
         } catch (SQLException e) {
-            System.err.println(e.getMessage());
+            e.printStackTrace();
+            System.exit(1);
         }
         return res;
     }
@@ -92,7 +94,8 @@ public class CatalogSkeleton {
             rs.close();
             stmt.close();
         } catch (SQLException e) {
-            System.err.println(e.getMessage());
+            e.printStackTrace();
+            System.exit(1);
         }
         return price;
     }
@@ -116,7 +119,8 @@ public class CatalogSkeleton {
             rs.close();
             stmt.close();
         } catch (SQLException e) {
-            System.err.println(e.getMessage());
+            e.printStackTrace();
+            System.exit(1);
         }
         return availability;
     }

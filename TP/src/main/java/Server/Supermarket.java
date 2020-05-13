@@ -85,9 +85,9 @@ public class Supermarket {
         Consumer<Connection> afterDBStart = (dbConnection) -> this.catalog = new CatalogSkeleton(dbConnection);
 
         ArrayList<String> tablesToCreate = new ArrayList<>();
-        tablesToCreate.add("CREATE TABLE cart (id INT AUTO_INCREMENT PRIMARY KEY)");
-        tablesToCreate.add("CREATE TABLE product (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(100), description VARCHAR(100), price FLOAT, amount INT)");
-        tablesToCreate.add("CREATE TABLE cartProduct (id INT AUTO_INCREMENT PRIMARY KEY, idProduct FOREIGN KEY REFERENCES product(id), amount INT)");
+        tablesToCreate.add("CREATE TABLE cart (id INT IDENTITY PRIMARY KEY)");
+        tablesToCreate.add("CREATE TABLE product (id INT IDENTITY PRIMARY KEY, name VARCHAR(100), description VARCHAR(100), price FLOAT, quantity INT)");
+        tablesToCreate.add("CREATE TABLE cartProduct (id INT IDENTITY PRIMARY KEY, idProduct INT, FOREIGN KEY (idProduct) REFERENCES product (id), quantity INT)");
 
         HashMap<String, BiFunction<Address, byte[], HandlerRes>> handlers = new HashMap<>();
 

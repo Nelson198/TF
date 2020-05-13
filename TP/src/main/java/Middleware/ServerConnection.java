@@ -14,6 +14,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -70,6 +71,7 @@ public class ServerConnection {
             this.spreadConnection.multicast(m);
         } catch (SpreadException e) {
             e.printStackTrace();
+            System.exit(1);
         }
     }
 
@@ -105,7 +107,7 @@ public class ServerConnection {
                     DBContent dbMsg = (DBContent) ms;
                     // TODO - update the db file
                     try {
-                        aux.dbConnection = DriverManager.getConnection("jdbc:hsqldb:file:supermarket" + port + "/", "sa", "");
+                        aux.dbConnection = DriverManager.getConnection("jdbc:hsqldb:file:clusterDB" + port, "sa", "");
 
                         for (DBUpdate dbUpdate : aux.pendingQueries)
                             processDBUpdate.apply(dbUpdate, aux.dbConnection);
@@ -117,6 +119,7 @@ public class ServerConnection {
                         initializeAtomix(handlers);
                     } catch (Exception exception) {
                         exception.printStackTrace();
+                        System.exit(1);
                     }
                 } else if (ms.getType().equals("dbUpdate")) {
                     DBUpdate dbUpdate = (DBUpdate) ms;
@@ -137,7 +140,7 @@ public class ServerConnection {
                     if (info.getJoined().equals(aux.spreadConnection.getPrivateGroup())) {
                         if (info.getMembers().length == 1) {
                             try {
-                                aux.dbConnection = DriverManager.getConnection("jdbc:hsqldb:file:supermarket" + port + "/", "SA", "");
+                                aux.dbConnection = DriverManager.getConnection("jdbc:hsqldb:file:clusterDB" + port, "SA", "");
 
                                 // Create the tables
                                 Statement stm = dbConnection.createStatement();
@@ -150,6 +153,7 @@ public class ServerConnection {
                                 initializeAtomix(handlers);
                             } catch (Exception e) {
                                 e.printStackTrace();
+                                System.exit(1);
                             }
                         } else {
                             for (SpreadGroup member : info.getMembers()) {
@@ -157,8 +161,18 @@ public class ServerConnection {
                                     primaryAfter.add(member);
                             }
                         }
-                    } else if (primaryAfter.size() == 0) {
-                        // TODO - send database (or updates) to new member
+                    } else {
+                        try {
+                            Statement stm = aux.dbConnection.createStatement();
+                            stm.executeUpdate("CHECKPOINT"); // Make a checkpoint in every member of the cluster to synchronize the DB's
+                            if (primaryAfter.size() == 0) {
+                                stm.executeUpdate("BACKUP DATABASE TO 'backup/' NOT BLOCKING AS FILES"); // TODO - review
+                                // TODO - send database (or updates) to new member
+                            }
+                        } catch (SQLException exception) {
+                            exception.printStackTrace();
+                            System.exit(1);
+                        }
                     }
                 } else if (info.isCausedByDisconnect()) {
                     primaryAfter.remove(info.getDisconnected());
