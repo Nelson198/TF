@@ -101,19 +101,19 @@ public class CatalogSkeleton {
     }
 
     /**
-     * Get product's availability
+     * Get product's amount
      * @param idProduct Product's identifier
-     * @return Product's availability
+     * @return Product's amount
      */
-    public int getAvailability(String idProduct) {
-        int availability = 0;
+    public int getAmount(String idProduct) {
+        int amount = 0;
         try {
             // Create and execute statement
             Statement stmt = this.connection.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT amount FROM product WHERE id=" + idProduct);
 
             // Get result from query
-            availability = rs.getInt("amount");
+            amount = rs.getInt("amount");
 
             // Clean up
             rs.close();
@@ -122,6 +122,6 @@ public class CatalogSkeleton {
             e.printStackTrace();
             System.exit(1);
         }
-        return availability;
+        return amount;
     }
 }

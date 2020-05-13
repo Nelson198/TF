@@ -1,12 +1,12 @@
 package Server;
 
-import Helpers.Product;
-import Helpers.Serializers;
 import Helpers.CartUpdate;
-import Messages.DBUpdate;
+import Helpers.Product;
 import Helpers.ProductGet;
-
+import Helpers.Serializers;
+import Messages.DBUpdate;
 import Middleware.ServerConnection;
+
 import io.atomix.utils.net.Address;
 import io.atomix.utils.serializer.Serializer;
 
@@ -17,6 +17,7 @@ import java.sql.Connection;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.function.BiFunction;
@@ -27,16 +28,16 @@ import java.util.function.Consumer;
  */
 public class Supermarket {
     // Connection to the cluster
-    ServerConnection connection;
+    private final ServerConnection connection;
 
     // Serializer for the messages sent between servers
-    Serializer serializer = Serializers.serverSerializer;
+    private final Serializer serializer = Serializers.serverSerializer;
 
     // Skeleton for the catalog
-    CatalogSkeleton catalog;
+    private CatalogSkeleton catalog;
 
     // Skeletons for the carts
-    HashMap<String, CartSkeleton> carts = new HashMap<>();
+    private final Map<String, CartSkeleton> carts = new HashMap<>();
 
     /**
      * Parameterized constructor
@@ -46,6 +47,11 @@ public class Supermarket {
         this.connection = new ServerConnection(port);
     }
 
+    /**
+     * Initialize
+     * @throws SpreadException SpreadException
+     * @throws UnknownHostException UnknownHostException
+     */
     public void initialize() throws SpreadException, UnknownHostException {
         BiFunction<DBUpdate, Connection, Object> processDBUpdate = (dbUpdate, dbConnection) -> {
             switch (dbUpdate.getSecondaryType()) {
@@ -78,7 +84,6 @@ public class Supermarket {
 
                     return null;
             }
-
             return null;
         };
 
@@ -86,10 +91,10 @@ public class Supermarket {
 
         ArrayList<String> tablesToCreate = new ArrayList<>();
         tablesToCreate.add("CREATE TABLE cart (id INT IDENTITY PRIMARY KEY)");
-        tablesToCreate.add("CREATE TABLE product (id INT IDENTITY PRIMARY KEY, name VARCHAR(100), description VARCHAR(100), price FLOAT, quantity INT)");
-        tablesToCreate.add("CREATE TABLE cartProduct (id INT IDENTITY PRIMARY KEY, idProduct INT, FOREIGN KEY (idProduct) REFERENCES product (id), quantity INT)");
+        tablesToCreate.add("CREATE TABLE product (id INT IDENTITY PRIMARY KEY, name VARCHAR(100), description VARCHAR(100), price FLOAT, amount INT)");
+        tablesToCreate.add("CREATE TABLE cartProduct (id INT IDENTITY PRIMARY KEY, idProduct INT, FOREIGN KEY (idProduct) REFERENCES product (id), amount INT)");
 
-        HashMap<String, BiFunction<Address, byte[], HandlerRes>> handlers = new HashMap<>();
+        Map<String, BiFunction<Address, byte[], HandlerRes>> handlers = new HashMap<>();
 
         // Cart
         handlers.put("newCart", (address, bytes) -> new HandlerRes(null, true, false));
@@ -134,9 +139,9 @@ public class Supermarket {
             return new HandlerRes(serializer.encode(res), false, true);
         });
 
-        handlers.put("getAvailability", (address, bytes) -> {
+        handlers.put("getAmount", (address, bytes) -> {
             String idProduct = serializer.decode(bytes);
-            int res = catalog.getAvailability(idProduct);
+            int res = catalog.getAmount(idProduct);
 
             return new HandlerRes(serializer.encode(res), false, true);
         });

@@ -34,6 +34,16 @@ public class Client {
     }
 
     /**
+     * Wait confirmation by user
+     * @throws IOException IOException
+     */
+    private static void waitConfirmation() throws IOException {
+        System.out.print("\nPress ENTER to continue ...");
+        System.out.flush();
+        stdin.readLine();
+    }
+
+    /**
      * readInt
      * @return User's option
      * @throws IOException IOException
@@ -77,7 +87,7 @@ public class Client {
                     StringBuilder prods = new StringBuilder();
                     prods.append("This cart has:\n");
                     for (Product p : productList) {
-                        prods.append("\t").append(p.getDescription()).append(" ").append(p.getQuantity());
+                        prods.append("\t").append(p.getDescription()).append(" ").append(p.getAmount());
                     }
 
                     clearTerminal();
@@ -88,7 +98,7 @@ public class Client {
                 case 2:
                     System.out.print("Please insert the product's code: ");
                     String idProduct = stdin.readLine();
-                    System.out.print("Specify a quantity to remove (press a to remove all): ");
+                    System.out.print("Specify an amount to remove (press a to remove all): ");
                     int amount = readInt();
                     cs.addProduct(idProduct, amount);
                     break;
@@ -96,7 +106,7 @@ public class Client {
                 case 3:
                     System.out.print("Please insert the product's code: ");
                     idProduct = stdin.readLine();
-                    System.out.print("Specify a quantity to remove (press a to remove all): ");
+                    System.out.print("Specify an amount to remove (press a to remove all): ");
                     String qtd = stdin.readLine();
                     if (qtd.equals("a"))
                         cs.removeProduct(idProduct, Integer.MAX_VALUE);
@@ -124,20 +134,20 @@ public class Client {
             String main = "Welcome to our supermarket. Choose an option:\n" +
                           "\t1 - Create a cart\n" +
                           "\t2 - Check/Update a cart\n" +
-                          "\t3 - Check a product's price\n" +
-                          "\t4 - Check a product's availability\n" +
-                          // TODO - add option to get the whole catalog
-                          "\t5 - Disconnect\n";
+                          "\t3 - See catalog\n" +
+                          "\t4 - Check a product's price\n" +
+                          "\t5 - Check a product's availability\n" +
+                          "\t6 - Exit\n";
             System.out.println(main);
 
             int choice;
             do {
                 choice = readInt();
-            } while (choice < 1 || choice > 5);
+            } while (choice < 1 || choice > 6);
 
+            clearTerminal();
             switch (choice) {
                 case 1:
-                    clearTerminal();
                     System.out.print("Choose a name for your cart: ");
                     String name = stdin.readLine();
                     CartStub cart = new CartStub(connection);
@@ -146,7 +156,6 @@ public class Client {
                     break;
 
                 case 2:
-                    clearTerminal();
                     System.out.println("Choose a cart to check/update: ");
                     for (String c : carts.keySet()) {
                         System.out.println("\t" + c);
@@ -156,23 +165,26 @@ public class Client {
                     break;
 
                 case 3:
-                    clearTerminal();
-                    System.out.print("Insert the product's code: ");
-                    String productId = stdin.readLine();
-                    float price = catalog.getPrice(productId);
-                    System.out.println("This product will cost you €" + price);
+                    String info = catalog.getCatalog();
+                    System.out.println(info);
+                    waitConfirmation();
                     break;
 
                 case 4:
-                    clearTerminal();
+                    System.out.print("Insert the product's code: ");
+                    String productId = stdin.readLine();
+                    float price = catalog.getPrice(productId);
+                    System.out.println("This product will cost you " + price + "€");
+                    break;
+
+                case 5:
                     System.out.print("Insert the product's code: ");
                     productId = stdin.readLine();
                     int amount = catalog.getAmount(productId);
                     System.out.println("We have " + amount + " available at the moment");
                     break;
 
-                case 5:
-                    clearTerminal();
+                case 6:
                     System.exit(1);
                     break;
             }

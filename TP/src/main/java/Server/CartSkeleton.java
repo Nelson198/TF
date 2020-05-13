@@ -88,7 +88,6 @@ public class CartSkeleton {
                              .append("\tINSERT INTO cart VALUES(").append(idProduct).append(", ").append(amount).append(");\n")
                              .append("END IF;")
                              .toString();
-            sb.setLength(0);
 
             ResultSet rs = stmt.executeQuery(query);
 
@@ -106,11 +105,11 @@ public class CartSkeleton {
      * @param idProduct Product identifier
      */
     public void removeProduct(String idProduct, int amount) {
-        StringBuilder sb = new StringBuilder();
         try {
             // Create and execute statement
             Statement stmt = this.connection.createStatement();
 
+            StringBuilder sb = new StringBuilder();
             String query = sb.append("EXISTS (SELECT * FROM cart WHERE id=").append(this.idCart).append(" AND idProduct=").append(idProduct).append(");").toString();
             sb.setLength(0);
 
@@ -122,9 +121,9 @@ public class CartSkeleton {
                 sb.setLength(0);
 
                 rs = stmt.executeQuery(query);
-                int quantity = rs.getInt("amount");
+                int cartAmount = rs.getInt("amount");
 
-                if (quantity > amount) {
+                if (cartAmount > amount) {
                     query = sb.append("UPDATE cart SET amount = amount - ").append(amount).append(" WHERE id=").append(this.idCart).append(" AND idProduct=").append(idProduct).toString();
                 } else {
                     query = sb.append("DELETE FROM cart WHERE id=").append(this.idCart).append(" AND idProduct=").append(idProduct).append(";").toString();

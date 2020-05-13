@@ -8,7 +8,7 @@ public class Product {
     private final String name;
     private final String description;
     private final float price;
-    private final int quantity;
+    private final int amount;
 
     /**
      * Parameterized constructor
@@ -16,14 +16,14 @@ public class Product {
      * @param name Product's name
      * @param description Product's description
      * @param price Product's price
-     * @param quantity Product's quantity
+     * @param amount Product's amount
      */
-    public Product(String id, String name, String description, float price, int quantity) {
+    public Product(String id, String name, String description, float price, int amount) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.price = price;
-        this.quantity = quantity;
+        this.amount = amount;
     }
 
     /**
@@ -59,10 +59,10 @@ public class Product {
     }
 
     /**
-     * Get the product's quantity
-     * @return Product's quantity
+     * Get the product's amount
+     * @return Product's amount
      */
-    public int getQuantity() {
-        return this.quantity;
+    public int getAmount() {
+        return this.amount;
     }
 }
