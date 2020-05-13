@@ -28,7 +28,7 @@ public class CatalogStub {
      * @return Catalog information
      */
     public String getCatalog() {
-        byte[] res = this.connection.sendAndReceive("getCatalog", null);
+        byte[] res = this.connection.sendAndReceive("getCatalog", this.serializer.encode(null));
         List<Product> catalog = this.serializer.decode(res);
 
         StringBuilder sb = new StringBuilder("Catalog:\n");

@@ -145,7 +145,7 @@ public class ServerConnection {
                         aux.pendingQueries.add(dbUpdate);
                     } else {
                         Object res = processDBUpdate.apply(dbUpdate, aux.dbConnection);
-                        if (dbUpdate.getServer().equals(aux.spreadConnection.getPrivateGroup().toString()))
+                        if (dbUpdate.getServer() != null && dbUpdate.getServer().equals(aux.spreadConnection.getPrivateGroup().toString()))
                             aux.ms.sendAsync(Address.from(dbUpdate.getClient()), "res", aux.serializer.encode(res));
                     }
                 }

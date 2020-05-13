@@ -26,9 +26,13 @@ public class CartSkeleton {
 
         try {
             Statement st = this.connection.createStatement();
-            int res = st.executeUpdate("INSERT INTO cart () VALUES ()"); // TODO : put the generated key in res
+            st.executeUpdate("INSERT INTO cart (id) VALUES (NULL)");
+            st.execute("CALL IDENTITY()");
 
-            this.idCart = Integer.toString(res);
+            ResultSet rs = st.getResultSet();
+            rs.next();
+
+            this.idCart = rs.getString(1);
         } catch (SQLException e) {
             e.printStackTrace();
             System.exit(1);

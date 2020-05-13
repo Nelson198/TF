@@ -89,7 +89,7 @@ public class Supermarket {
         ArrayList<String> tablesToCreate = new ArrayList<>();
         tablesToCreate.add("CREATE TABLE cart (id INT IDENTITY PRIMARY KEY)");
         tablesToCreate.add("CREATE TABLE product (id INT IDENTITY PRIMARY KEY, name VARCHAR(100), description VARCHAR(100), price FLOAT, amount INT)");
-        tablesToCreate.add("CREATE TABLE cartProduct (id INT IDENTITY PRIMARY KEY, idProduct INT, FOREIGN KEY (idProduct) REFERENCES product (id), amount INT)");
+        tablesToCreate.add("CREATE TABLE cartProduct (idCart INT, idProduct INT, amount INT, FOREIGN KEY (idCart) REFERENCES cart (id), FOREIGN KEY (idProduct) REFERENCES product (id))"); // TODO - fix (primary key should be (idCart, idProduct), which are foreign keys)
 
         Map<String, BiFunction<Address, byte[], HandlerRes>> handlers = new HashMap<>();
 
