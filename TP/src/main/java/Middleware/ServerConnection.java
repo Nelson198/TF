@@ -21,7 +21,6 @@ import spread.SpreadMessage;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.file.Files;
@@ -156,22 +155,23 @@ public class ServerConnection {
                             File directory = new File("clusterDB" + port + "/");
                             directory.mkdir();
 
-                            File file = new File("clusterDB" + port + "/backup.tar.gz");
-                            OutputStream os = new FileOutputStream(file);
+                            FileOutputStream os = new FileOutputStream("clusterDB" + port + "/backup.tar.gz");
                             os.write(backup);
+                            os.close();
 
                             Runtime rt = Runtime.getRuntime();
                             Process untar = rt.exec(new String[]{"tar", "-xvzf", "clusterDB" + port + "/backup.tar.gz", "-C", "clusterDB" + port + "/"});
                             untar.waitFor();
 
+                            File file = new File("clusterDB" + port + "/backup.tar.gz");
                             file.delete();
                         } else {
-                            System.out.println("Received full backup");
+                            System.out.println("Received incremental backup");
                             byte[] log = dbMsg.getBackup();
 
-                            File file = new File("clusterDB" + port + "/db.log");
-                            OutputStream os = new FileOutputStream(file);
+                            FileOutputStream os = new FileOutputStream("clusterDB" + port + "/db.log");
                             os.write(log);
+                            os.close();
                         }
 
                         aux.dbConnection = DriverManager.getConnection("jdbc:hsqldb:file:clusterDB" + port + "/db", "sa", "");
