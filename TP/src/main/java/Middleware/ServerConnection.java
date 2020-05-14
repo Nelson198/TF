@@ -30,6 +30,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -62,6 +63,9 @@ public class ServerConnection {
 
     // DBUpdate's that arrived between this server's connection and the reception of the DB
     List<DBUpdate> pendingQueries = new ArrayList<>();
+
+    // Last version of DB each server has
+    HashMap<String, Integer> lastDBVersion = new HashMap<>();
 
     /**
      * Parameterized constructor
@@ -144,20 +148,31 @@ public class ServerConnection {
                 if (ms.getType().equals("db")) {
                     try {
                         DBContent dbMsg = (DBContent) ms;
-                        byte[] backup = dbMsg.getBackup();
+                        aux.lastDBVersion = dbMsg.getLastDBVersion();
+                        if (dbMsg.getIsFullBackup()) {
+                            System.out.println("Received full backup");
+                            byte[] backup = dbMsg.getBackup();
 
-                        File directory = new File("clusterDB" + port + "/");
-                        directory.mkdir();
+                            File directory = new File("clusterDB" + port + "/");
+                            directory.mkdir();
 
-                        File file = new File("clusterDB" + port + "/backup.tar.gz");
-                        OutputStream os = new FileOutputStream(file);
-                        os.write(backup);
+                            File file = new File("clusterDB" + port + "/backup.tar.gz");
+                            OutputStream os = new FileOutputStream(file);
+                            os.write(backup);
 
-                        Runtime rt = Runtime.getRuntime();
-                        Process untar = rt.exec(new String[]{"tar", "-xvzf", "clusterDB" + port + "/backup.tar.gz", "-C", "clusterDB" + port + "/"});
-                        untar.waitFor();
+                            Runtime rt = Runtime.getRuntime();
+                            Process untar = rt.exec(new String[]{"tar", "-xvzf", "clusterDB" + port + "/backup.tar.gz", "-C", "clusterDB" + port + "/"});
+                            untar.waitFor();
 
-                        file.delete();
+                            file.delete();
+                        } else {
+                            System.out.println("Received full backup");
+                            byte[] log = dbMsg.getBackup();
+
+                            File file = new File("clusterDB" + port + "/db.log");
+                            OutputStream os = new FileOutputStream(file);
+                            os.write(log);
+                        }
 
                         aux.dbConnection = DriverManager.getConnection("jdbc:hsqldb:file:clusterDB" + port + "/db", "sa", "");
 
@@ -201,6 +216,8 @@ public class ServerConnection {
 
                                 afterDBStart.accept(aux.dbConnection);
 
+                                lastDBVersion.put(aux.spreadConnection.getPrivateGroup().toString(), 0);
+
                                 // Initialize the atomix connection
                                 initializeAtomix(handlers);
                             } catch (Exception e) {
@@ -215,17 +232,36 @@ public class ServerConnection {
                         }
                     } else {
                         try {
-                            // TODO - send only the .log if appropriate
-                            Statement stm = aux.dbConnection.createStatement();
-                            stm.executeUpdate("CHECKPOINT"); // Make a checkpoint in every member of the cluster to synchronize the DB's
-                            if (primaryAfter.size() == 0) {
-                                stm.executeUpdate("BACKUP DATABASE TO 'clusterDB" + port + "/backup.tar.gz' NOT BLOCKING");
+                            Integer joinedLastVersion = aux.lastDBVersion.get(info.getJoined().toString());
+                            Integer thisLastVersion = aux.lastDBVersion.get(spreadConnection.getPrivateGroup().toString());
+                            if (joinedLastVersion == null || !joinedLastVersion.equals(thisLastVersion)) {
+                                // Send full database
+                                Statement stm = aux.dbConnection.createStatement();
+                                stm.executeUpdate("CHECKPOINT"); // Make a checkpoint in every member of the cluster to synchronize the DB's
 
-                                byte[] backup = Files.readAllBytes(Paths.get("clusterDB" + port + "/backup.tar.gz"));
-                                sendServer(serializer.encode(new DBContent(backup)), info.getJoined());
+                                HashMap<String, Integer> aux = new HashMap<>();
+                                lastDBVersion.forEach((k, v) -> aux.put(k, v+1));
+                                lastDBVersion = aux;
 
-                                File file = new File("clusterDB" + port + "/backup.tar.gz");
-                                file.delete();
+                                lastDBVersion.put(info.getJoined().toString(), thisLastVersion+1);
+
+                                if (primaryAfter.size() == 0) {
+                                    stm.executeUpdate("BACKUP DATABASE TO 'clusterDB" + port + "/backup.tar.gz' NOT BLOCKING");
+
+                                    byte[] backup = Files.readAllBytes(Paths.get("clusterDB" + port + "/backup.tar.gz"));
+                                    sendServer(serializer.encode(new DBContent(backup, true, lastDBVersion)), info.getJoined());
+
+                                    File file = new File("clusterDB" + port + "/backup.tar.gz");
+                                    file.delete();
+                                }
+                            } else {
+                                lastDBVersion.put(info.getJoined().toString(), thisLastVersion+1);
+
+                                if (primaryAfter.size() == 0) {
+                                    lastDBVersion.put(info.getJoined().toString(), thisLastVersion);
+                                    byte[] backup = Files.readAllBytes(Paths.get("clusterDB" + port + "/db.log"));
+                                    sendServer(serializer.encode(new DBContent(backup, false, lastDBVersion)), info.getJoined());
+                                }
                             }
                         } catch (Exception exception) {
                             exception.printStackTrace();

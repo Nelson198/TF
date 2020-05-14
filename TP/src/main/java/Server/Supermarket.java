@@ -86,9 +86,9 @@ public class Supermarket {
         Consumer<Connection> afterDBStart = (dbConnection) -> this.catalog = new CatalogSkeleton(dbConnection);
 
         List<String> tablesToCreate = new ArrayList<>();
-        tablesToCreate.add("CREATE TABLE cart (id INT NOT NULL IDENTITY PRIMARY KEY)");
-        tablesToCreate.add("CREATE TABLE product (id INT NOT NULL IDENTITY PRIMARY KEY, name VARCHAR(100) NOT NULL, description VARCHAR(100) NOT NULL, price FLOAT NOT NULL, amount INT NOT NULL)");
-        tablesToCreate.add("CREATE TABLE cartProduct (idCart INT NOT NULL, idProduct INT NOT NULL, amount INT NULL, FOREIGN KEY (idCart) REFERENCES cart (id), FOREIGN KEY (idProduct) REFERENCES product (id), PRIMARY KEY (idCart, idProduct)");
+        tablesToCreate.add("CREATE TABLE cart (id INT NOT NULL IDENTITY)");
+        tablesToCreate.add("CREATE TABLE product (id INT NOT NULL IDENTITY, name VARCHAR(100) NOT NULL, description VARCHAR(100) NOT NULL, price FLOAT NOT NULL, amount INT NOT NULL)");
+        tablesToCreate.add("CREATE TABLE cartProduct (idCart INT NOT NULL, idProduct INT NOT NULL, amount INT NULL, FOREIGN KEY (idCart) REFERENCES cart (id), FOREIGN KEY (idProduct) REFERENCES product (id), PRIMARY KEY (idCart, idProduct))");
 
         Map<String, BiFunction<Address, byte[], HandlerRes>> handlers = new HashMap<>();
 
