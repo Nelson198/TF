@@ -4,7 +4,15 @@ package Messages;
  * DB Message
  */
 public class DBContent implements Message {
-    // TODO - contents of the database
+    private final byte[] backup;
+
+    public DBContent(byte[] backup) {
+        this.backup = backup;
+    }
+
+    public byte[] getBackup() {
+        return backup;
+    }
 
     /**
      * Get DB's message type

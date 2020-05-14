@@ -19,11 +19,15 @@ import spread.SpreadException;
 import spread.SpreadGroup;
 import spread.SpreadMessage;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
@@ -93,6 +97,23 @@ public class ServerConnection {
     }
 
     /**
+     * Unicast a message to a server
+     * @param message Message
+     */
+    public void sendServer(byte[] message, SpreadGroup server) {
+        SpreadMessage m = new SpreadMessage();
+        m.addGroup(server);
+        m.setData(message);
+        m.setSafe();
+        try {
+            this.spreadConnection.multicast(m);
+        } catch (SpreadException e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+    }
+
+    /**
      * Start a timer, after which a message is sent to the cluster
      * @param message Message
      */
@@ -121,10 +142,24 @@ public class ServerConnection {
             public void regularMessageReceived(SpreadMessage spreadMessage) {
                 Message ms = aux.serializer.decode(spreadMessage.getData());
                 if (ms.getType().equals("db")) {
-                    DBContent dbMsg = (DBContent) ms;
-                    // TODO - update the db file
                     try {
-                        aux.dbConnection = DriverManager.getConnection("jdbc:hsqldb:file:clusterDB" + port, "sa", "");
+                        DBContent dbMsg = (DBContent) ms;
+                        byte[] backup = dbMsg.getBackup();
+
+                        File directory = new File("clusterDB" + port + "/");
+                        directory.mkdir();
+
+                        File file = new File("clusterDB" + port + "/backup.tar.gz");
+                        OutputStream os = new FileOutputStream(file);
+                        os.write(backup);
+
+                        Runtime rt = Runtime.getRuntime();
+                        Process untar = rt.exec(new String[]{"tar", "-xvzf", "clusterDB" + port + "/backup.tar.gz", "-C", "clusterDB" + port + "/"});
+                        untar.waitFor();
+
+                        file.delete();
+
+                        aux.dbConnection = DriverManager.getConnection("jdbc:hsqldb:file:clusterDB" + port + "/db", "sa", "");
 
                         for (DBUpdate dbUpdate : aux.pendingQueries)
                             processDBUpdate.apply(dbUpdate, aux.dbConnection);
@@ -157,7 +192,7 @@ public class ServerConnection {
                     if (info.getJoined().equals(aux.spreadConnection.getPrivateGroup())) {
                         if (info.getMembers().length == 1) {
                             try {
-                                aux.dbConnection = DriverManager.getConnection("jdbc:hsqldb:file:clusterDB" + port, "SA", "");
+                                aux.dbConnection = DriverManager.getConnection("jdbc:hsqldb:file:clusterDB" + port + "/db", "SA", "");
 
                                 // Create the tables
                                 Statement stm = dbConnection.createStatement();
@@ -180,13 +215,19 @@ public class ServerConnection {
                         }
                     } else {
                         try {
+                            // TODO - send only the .log if appropriate
                             Statement stm = aux.dbConnection.createStatement();
                             stm.executeUpdate("CHECKPOINT"); // Make a checkpoint in every member of the cluster to synchronize the DB's
                             if (primaryAfter.size() == 0) {
-                                stm.executeUpdate("BACKUP DATABASE TO 'backup/' NOT BLOCKING AS FILES"); // TODO - review
-                                // TODO - send database (or updates) to new member
+                                stm.executeUpdate("BACKUP DATABASE TO 'clusterDB" + port + "/backup.tar.gz' NOT BLOCKING");
+
+                                byte[] backup = Files.readAllBytes(Paths.get("clusterDB" + port + "/backup.tar.gz"));
+                                sendServer(serializer.encode(new DBContent(backup)), info.getJoined());
+
+                                File file = new File("clusterDB" + port + "/backup.tar.gz");
+                                file.delete();
                             }
-                        } catch (SQLException exception) {
+                        } catch (Exception exception) {
                             exception.printStackTrace();
                             System.exit(1);
                         }
