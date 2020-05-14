@@ -18,7 +18,4 @@ target/
 
 # Spread
 Spread 5.0.1/
-*.lck
-*.properties
-*.script
-*.tmp/
+clusterDB*/

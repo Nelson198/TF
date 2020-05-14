@@ -4,9 +4,9 @@ package Server;
  * Handler Response
  */
 public class HandlerRes {
+    private final Object info;
     private final boolean sendToCluster;
     private final boolean sendToClient;
-    private final Object info;
 
     /**
      * Parameterized constructor

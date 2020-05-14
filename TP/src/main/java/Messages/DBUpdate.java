@@ -6,8 +6,8 @@ package Messages;
 public class DBUpdate implements Message {
     private final Object updateInfo;
 
-    private final String server; // TODO - should be SpreadGroup, but the serializer complains
     private final String client; // TODO - should be Address, but the serializer complains
+    private final String server; // TODO - should be SpreadGroup, but the serializer complains
 
     private final String secondaryType;
 
@@ -25,27 +25,19 @@ public class DBUpdate implements Message {
     }
 
     /**
-     * Get DB update message type
-     * @return Message type
-     */
-    public String getType() {
-        return "dbUpdate";
-    }
-
-    /**
-     * Get DB update message secondary type
-     * @return Message secondary type
-     */
-    public String getSecondaryType() {
-        return this.secondaryType;
-    }
-
-    /**
      * Get updateInfo
      * @return UpdateInfo
      */
     public Object getUpdateInfo() {
         return this.updateInfo;
+    }
+
+    /**
+     * Get the client to which to answer
+     * @return Client to answer to
+     */
+    public String getClient() {
+        return this.client;
     }
 
     /**
@@ -57,10 +49,18 @@ public class DBUpdate implements Message {
     }
 
     /**
-     * Get the client to which to answer
-     * @return Client to answer to
+     * Get DB update message secondary type
+     * @return Message secondary type
      */
-    public String getClient() {
-        return this.client;
+    public String getSecondaryType() {
+        return this.secondaryType;
+    }
+
+    /**
+     * Get DB update message type
+     * @return Message type
+     */
+    public String getType() {
+        return "dbUpdate";
     }
 }
