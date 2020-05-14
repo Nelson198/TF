@@ -4,7 +4,7 @@ package Helpers;
  * Product
  */
 public class Product {
-    private final String id;
+    private final int id;
     private final String name;
     private final String description;
     private final float price;
@@ -18,7 +18,7 @@ public class Product {
      * @param price Product's price
      * @param amount Product's amount
      */
-    public Product(String id, String name, String description, float price, int amount) {
+    public Product(int id, String name, String description, float price, int amount) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -30,7 +30,7 @@ public class Product {
      * Get the product's identifier
      * @return Product's identifier
      */
-    public String getId() {
+    public int getId() {
         return this.id;
     }
 

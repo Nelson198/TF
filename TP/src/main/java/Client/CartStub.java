@@ -13,7 +13,7 @@ import java.util.List;
  * Cart Stub
  */
 public class CartStub {
-    private final String idCart;
+    private final int idCart;
     private final ClientConnection connection;
     private final Serializer serializer = Serializers.clientSerializer;
 
@@ -32,7 +32,7 @@ public class CartStub {
      * @param idProduct Product's identifier
      * @param amount Product's amount
      */
-    public void updateProduct(String idProduct, int amount) {
+    public void updateProduct(int idProduct, int amount) {
         CartUpdate toSend = new CartUpdate(this.idCart, idProduct, amount);
         this.connection.sendAndReceive("updateProduct", this.serializer.encode(toSend));
     }

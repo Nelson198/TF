@@ -36,7 +36,7 @@ public class CatalogSkeleton {
 
             // Get result from query
             while(rs.next()) {
-                Product p = new Product(rs.getString("id"), rs.getString("name"), rs.getString("description"), rs.getFloat("price"), rs.getInt("amount"));
+                Product p = new Product(rs.getInt("id"), rs.getString("name"), rs.getString("description"), rs.getFloat("price"), rs.getInt("amount"));
                 res.add(p);
             }
 
@@ -55,7 +55,7 @@ public class CatalogSkeleton {
      * @param idProduct Product's identifier
      * @return Product info
      */
-    public Product getProduct(String idProduct) {
+    public Product getProduct(int idProduct) {
         Product res = null;
         try {
             // Create and execute statement
@@ -63,7 +63,7 @@ public class CatalogSkeleton {
             ResultSet rs = stmt.executeQuery("SELECT * FROM product WHERE id=" + idProduct);
 
             // Get result from query
-            res = new Product(rs.getString("id"), rs.getString("name"), rs.getString("description"), rs.getFloat("price"), rs.getInt("amount"));
+            res = new Product(rs.getInt("id"), rs.getString("name"), rs.getString("description"), rs.getFloat("price"), rs.getInt("amount"));
 
             // Clean up
             rs.close();
@@ -80,7 +80,7 @@ public class CatalogSkeleton {
      * @param idProduct Product's identifier
      * @return Product's price
      */
-    public float getPrice(String idProduct) {
+    public float getPrice(int idProduct) {
         float price = 0;
         try {
             // Create and execute statement
@@ -105,7 +105,7 @@ public class CatalogSkeleton {
      * @param idProduct Product's identifier
      * @return Product's amount
      */
-    public int getAmount(String idProduct) {
+    public int getAmount(int idProduct) {
         int amount = 0;
         try {
             // Create and execute statement

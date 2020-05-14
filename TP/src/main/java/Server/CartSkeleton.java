@@ -14,7 +14,7 @@ import java.util.ArrayList;
  * Cart Skeleton
  */
 public class CartSkeleton {
-    private String idCart;
+    private int idCart;
     private final Connection connection;
 
     /**
@@ -32,7 +32,7 @@ public class CartSkeleton {
             ResultSet rs = st.getResultSet();
             rs.next();
 
-            this.idCart = rs.getString(1);
+            this.idCart = rs.getInt(1);
         } catch (SQLException e) {
             e.printStackTrace();
             System.exit(1);
@@ -43,7 +43,7 @@ public class CartSkeleton {
      * Get the cart's identifier
      * @return Cart's identifier
      */
-    public String getIdCart() {
+    public int getIdCart() {
         return this.idCart;
     }
 
@@ -60,7 +60,7 @@ public class CartSkeleton {
 
             // Get result from query
             while(rs.next()) {
-                Product p = new Product(rs.getString("id"), rs.getString("name"), rs.getString("description"), rs.getFloat("price"), rs.getInt("amount"));
+                Product p = new Product(rs.getInt("id"), rs.getString("name"), rs.getString("description"), rs.getFloat("price"), rs.getInt("amount"));
                 res.add(p);
             }
 
@@ -79,7 +79,7 @@ public class CartSkeleton {
      * Update product in the cart
      * @param idProduct Product identifier
      */
-    public void updateProduct(String idProduct, int amount) {
+    public void updateProduct(int idProduct, int amount) {
         try {
             // Create and execute statement
             Statement stmt = this.connection.createStatement();

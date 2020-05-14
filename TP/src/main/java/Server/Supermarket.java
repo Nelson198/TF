@@ -2,7 +2,6 @@ package Server;
 
 import Helpers.CartUpdate;
 import Helpers.Product;
-import Helpers.ProductGet;
 import Helpers.Serializers;
 import Messages.DBUpdate;
 import Middleware.ServerConnection;
@@ -37,7 +36,7 @@ public class Supermarket {
     private CatalogSkeleton catalog;
 
     // Skeletons for the carts
-    private final Map<String, CartSkeleton> carts = new HashMap<>();
+    private final Map<Integer, CartSkeleton> carts = new HashMap<>();
 
     /**
      * Parameterized constructor
@@ -59,17 +58,17 @@ public class Supermarket {
                     CartSkeleton cs = new CartSkeleton(dbConnection);
                     this.carts.put(cs.getIdCart(), cs);
 
-                    this.connection.startTimer(cs.getIdCart(), "deleteCart", 30); // TODO - 30s for the moment
+                    this.connection.startTimer(cs.getIdCart(), "deleteCart", 60); // TODO - 60s for the moment
 
                     return cs.getIdCart();
                 case "deleteCart":
-                    String objectID = (String) dbUpdate.getUpdateInfo();
+                    int objectID = (int) dbUpdate.getUpdateInfo();
                     this.carts.get(objectID).delete();
                     this.carts.remove(objectID);
 
                     return null;
                 case "checkout":
-                    String objID = (String) dbUpdate.getUpdateInfo();
+                    int objID = (int) dbUpdate.getUpdateInfo();
                     boolean res = this.carts.get(objID).checkout();
                     this.carts.remove(objID);
 
@@ -109,7 +108,7 @@ public class Supermarket {
         });
 
         handlers.put("getProducts", (address, bytes) -> {
-            String idCart = serializer.decode(bytes);
+            int idCart = serializer.decode(bytes);
             List<Product> res = new ArrayList<>(carts.get(idCart).getProducts());
 
             return new HandlerRes(serializer.encode(res), false, true);
@@ -123,21 +122,21 @@ public class Supermarket {
         });
 
         handlers.put("getProduct", (address, bytes) -> {
-            ProductGet pg = serializer.decode(bytes);
-            Product res = catalog.getProduct(pg.getId());
+            int idProduct = serializer.decode(bytes);
+            Product res = catalog.getProduct(idProduct);
 
             return new HandlerRes(serializer.encode(res), false, true);
         });
 
         handlers.put("getPrice", (address, bytes) -> {
-            String idProduct = serializer.decode(bytes);
+            int idProduct = serializer.decode(bytes);
             float res = catalog.getPrice(idProduct);
 
             return new HandlerRes(serializer.encode(res), false, true);
         });
 
         handlers.put("getAmount", (address, bytes) -> {
-            String idProduct = serializer.decode(bytes);
+            int idProduct = serializer.decode(bytes);
             int res = catalog.getAmount(idProduct);
 
             return new HandlerRes(serializer.encode(res), false, true);

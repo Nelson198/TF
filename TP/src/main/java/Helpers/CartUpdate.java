@@ -4,8 +4,8 @@ package Helpers;
  * Cart Update
  */
 public class CartUpdate {
-    private final String idCart;
-    private final String idProduct;
+    private final int idCart;
+    private final int idProduct;
     private final int amount;
 
     /**
@@ -14,7 +14,7 @@ public class CartUpdate {
      * @param idProduct Product's identifier
      * @param amount Product's amount
      */
-    public CartUpdate(String idCart, String idProduct, int amount) {
+    public CartUpdate(int idCart, int idProduct, int amount) {
         this.idCart = idCart;
         this.idProduct = idProduct;
         this.amount = amount;
@@ -24,7 +24,7 @@ public class CartUpdate {
      * Get the cart's identifier
      * @return Cart's identifier
      */
-    public String getIdCart() {
+    public int getIdCart() {
         return this.idCart;
     }
 
@@ -32,7 +32,7 @@ public class CartUpdate {
      * Get the product's identifier
      * @return Product's identifier
      */
-    public String getIdProduct() {
+    public int getIdProduct() {
         return this.idProduct;
     }
 

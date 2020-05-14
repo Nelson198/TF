@@ -104,7 +104,7 @@ public class Client {
                     String idProduct = stdin.readLine();
                     System.out.print("\t--> Product's amount: ");
                     int amount = readInt();
-                    cs.updateProduct(idProduct, amount);
+                    cs.updateProduct(Integer.parseInt(idProduct), amount);
                     waitConfirmation();
                     break;
 
@@ -114,7 +114,7 @@ public class Client {
                     idProduct = stdin.readLine();
                     System.out.print("\t--> Product's amount: ");
                     int quantity = readInt();
-                    cs.updateProduct(idProduct, -quantity);
+                    cs.updateProduct(Integer.parseInt(idProduct), -quantity);
                     waitConfirmation();
                     break;
 
