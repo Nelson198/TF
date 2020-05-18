@@ -33,11 +33,11 @@ public class CatalogStub {
 
         StringBuilder sb = new StringBuilder("Catalog:\n");
         for (Product p : catalog) {
-            sb.append("\tProduct nº ").append(p.getId()).append("\n")
-              .append("\t\t--> Name: ").append(p.getName()).append("\n")
-              .append("\t\t--> Description: ").append(p.getDescription()).append("\n")
-              .append("\t\t--> Price: ").append(p.getPrice()).append(" €\n")
-              .append("\t\t--> Amount: ").append(p.getAmount()).append(" unit(s)\n");
+            sb.append("Product nº ").append(p.getId()).append("\n")
+              .append("\t--> Name: ").append(p.getName()).append("\n")
+              .append("\t--> Description: ").append(p.getDescription()).append("\n")
+              .append("\t--> Price: ").append(p.getPrice()).append(" €\n")
+              .append("\t--> Amount: ").append(p.getAmount()).append(" unit(s)\n");
         }
         return sb.toString();
     }
@@ -60,5 +60,13 @@ public class CatalogStub {
     public int getAmount(String idProduct) {
         byte[] res = this.connection.sendAndReceive("getAmount", this.serializer.encode(idProduct));
         return this.serializer.decode(res);
+    }
+
+    /**
+     * Add a product to the cart
+     * @param p Product
+     */
+    public void addProduct(Product p) {
+        this.connection.sendAndReceive("addProduct", this.serializer.encode(p));
     }
 }

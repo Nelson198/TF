@@ -58,7 +58,7 @@ public class Supermarket {
                     CartSkeleton cs = new CartSkeleton(dbConnection);
                     this.carts.put(cs.getIdCart(), cs);
 
-                    this.connection.startTimer(cs.getIdCart(), "deleteCart", 60); // TODO - 60s for the moment
+                    this.connection.startTimer(cs.getIdCart(), "deleteCart", 180); // TODO - 180s for the moment
 
                     return cs.getIdCart();
                 case "deleteCart":
@@ -141,6 +141,8 @@ public class Supermarket {
 
             return new HandlerRes(serializer.encode(res), false, true);
         });
+
+        handlers.put("addProduct", ((address, bytes) -> new HandlerRes(bytes, false, true) ));
 
         this.connection.initialize(processDBUpdate, afterDBStart, tablesToCreate, handlers);
     }
