@@ -127,7 +127,7 @@ public class ServerConnection {
      * @param message Message
      */
     public void startTimer(byte[] message, String type, int time) {
-        Thread timer = new TimerThread(message, type, time, this);
+        Thread timer = new TimerThread(this.serializer, message, type, time, this);
         timer.start();
     }
 

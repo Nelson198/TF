@@ -182,19 +182,15 @@ public class CatalogSkeleton {
                 query = sb.append("UPDATE product SET amount = amount + ").append(p.getAmount())
                           .append(" WHERE id=").append(p.getId())
                           .toString();
-                sb.setLength(0);
-
-                stmt.executeUpdate(query);
             } else {
                 query = sb.append("INSERT INTO product VALUES(").append(p.getName()).append(", ")
                         .append(p.getDescription()).append(", ")
                         .append(p.getPrice()).append(", ")
                         .append(p.getAmount()).append(")")
                         .toString();
-                sb.setLength(0);
-
-                stmt.executeUpdate(query);
             }
+            sb.setLength(0);
+            stmt.executeUpdate(query);
 
             // Clean up
             rs.close();
