@@ -1,8 +1,5 @@
 package Helpers;
 
-import Messages.DBContent;
-import Messages.DBUpdate;
-
 import io.atomix.utils.serializer.Serializer;
 import io.atomix.utils.serializer.SerializerBuilder;
 
@@ -16,5 +13,4 @@ public class Serializers {
                                                                        .addType(String.class)
                                                                        .addType(Product.class)
                                                                        .build();
-
 }

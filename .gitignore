@@ -12,10 +12,10 @@
 .idea
 .iml
 .DS_Store
-target/
 .classpath
 .project
 .settings
+target/
 
 # Spread
 Spread 5.0.1/

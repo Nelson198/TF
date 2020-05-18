@@ -40,7 +40,7 @@ public class CartSkeleton {
     }
 
     /**
-     * Get the cart's identifier
+     * Get cart's identifier
      * @return Cart's identifier
      */
     public int getIdCart() {
@@ -48,7 +48,7 @@ public class CartSkeleton {
     }
 
     /**
-     * Get the cart's products
+     * Get cart's products
      * @return Cart's products
      */
     public List<Product> getProducts() {

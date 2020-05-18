@@ -27,7 +27,7 @@ public class Product {
     }
 
     /**
-     * Get the product's identifier
+     * Get product's identifier
      * @return Product's identifier
      */
     public int getId() {
@@ -35,7 +35,7 @@ public class Product {
     }
 
     /**
-     * Get the product's name
+     * Get product's name
      * @return Product's name
      */
     public String getName() {
@@ -43,7 +43,7 @@ public class Product {
     }
 
     /**
-     * Get the product's description
+     * Get product's description
      * @return Product's description
      */
     public String getDescription() {
@@ -51,7 +51,7 @@ public class Product {
     }
 
     /**
-     * Get the product's price
+     * Get product's price
      * @return Product's price
      */
     public float getPrice() {
@@ -59,21 +59,33 @@ public class Product {
     }
 
     /**
-     * Get the product's amount
+     * Get product's amount
      * @return Product's amount
      */
     public int getAmount() {
         return this.amount;
     }
 
+    /**
+     * Set product's name
+     * @param name Product's name
+     */
     public void setName(String name) {
         this.name = name;
     }
 
+    /**
+     * Set product's description
+     * @param description Product's description
+     */
     public void setDescription(String description) {
         this.description = description;
     }
 
+    /**
+     * Set product's price
+     * @param price Product's price
+     */
     public void setPrice(float price) {
         this.price = price;
     }

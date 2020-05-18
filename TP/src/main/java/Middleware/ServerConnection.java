@@ -1,6 +1,5 @@
 package Middleware;
 
-import Helpers.Serializers;
 import Messages.DBContent;
 import Messages.DBUpdate;
 import Messages.Message;
@@ -10,8 +9,8 @@ import io.atomix.cluster.messaging.MessagingConfig;
 import io.atomix.cluster.messaging.impl.NettyMessagingService;
 import io.atomix.utils.net.Address;
 import io.atomix.utils.serializer.Serializer;
-
 import io.atomix.utils.serializer.SerializerBuilder;
+
 import spread.AdvancedMessageListener;
 import spread.MembershipInfo;
 import spread.SpreadConnection;
@@ -21,13 +20,17 @@ import spread.SpreadMessage;
 
 import java.io.File;
 import java.io.FileOutputStream;
+
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+
 import java.nio.file.Files;
 import java.nio.file.Paths;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -123,7 +126,7 @@ public class ServerConnection {
      * Start a timer, after which a message is sent to the cluster
      * @param message Message
      */
-    public void startTimer(Object message, String type, int time) {
+    public void startTimer(byte[] message, String type, int time) {
         Thread timer = new TimerThread(message, type, time, this);
         timer.start();
     }
@@ -337,7 +340,7 @@ public class ServerConnection {
                 if (res.getSendToCluster())
                     sendCluster(serializer.encode(new DBUpdate(res.getInfo(), address.toString(), spreadConnection.getPrivateGroup().toString(), k)));
                 else if (res.getSendToClient())
-                    ms.sendAsync(address, "res", (byte[]) res.getInfo());
+                    ms.sendAsync(address, "res", res.getInfo());
             }, executor);
         });
 

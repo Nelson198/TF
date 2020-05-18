@@ -8,6 +8,7 @@ import io.atomix.utils.net.Address;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -132,18 +133,18 @@ public class Client {
     }
 
     /**
-     * Auxiliar function to uddate a product
+     * Auxiliar function to update a product
      * @param  p product
      * @throws IOException IOException
      */
     private static Product updateProduct(Product p) throws IOException {
         while(true) {
             StringBuilder change = new StringBuilder();
-            change.append("What do you want to change?\n")
-                    .append("\t1 - Name\n")
-                    .append("\t2 - Description\n")
-                    .append("\t3 - Price\n")
-                    .append("\t4 - Submit changes\n");
+            change.append("What do you want to change ?\n")
+                  .append("\t1 - Name\n")
+                  .append("\t2 - Description\n")
+                  .append("\t3 - Price\n")
+                  .append("\t4 - Submit changes\n");
 
             clearTerminal();
             System.out.print(change);
@@ -185,7 +186,7 @@ public class Client {
     private static void menuAdmin() throws IOException {
         while (true) {
             StringBuilder admin = new StringBuilder();
-            admin.append("What action do you want you perform?\n")
+            admin.append("Welcome to administrator's menu. Please choose an option:\n")
                  .append("\t1 - Add a new product to the catalog\n")
                  .append("\t2 - Update a product's amount in the catalog\n")
                  .append("\t3 - Other updates on a product in the catalog\n")
@@ -217,7 +218,7 @@ public class Client {
 
                     Product newProduct = new Product(-1, productName, productDescription, productPrice, productAmount);
 
-                    catalog.addNewProduct(newProduct);
+                    catalog.addProduct(newProduct);
                     waitConfirmation();
                     break;
 
@@ -260,7 +261,7 @@ public class Client {
      * Main menu
      * @throws IOException IOException
      */
-    private static void menu() throws IOException, InterruptedException {
+    private static void menu() throws IOException {
         while (true) {
             clearTerminal();
             StringBuilder main = new StringBuilder();
@@ -322,8 +323,7 @@ public class Client {
                     break;
 
                 case 6:
-                    System.out.println("Changing to administrator mode... Authorized Personnel only!");
-                    Thread.sleep(1000);
+                    clearTerminal();
                     menuAdmin();
                     break;
 

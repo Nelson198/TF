@@ -6,6 +6,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -60,7 +61,7 @@ public class CatalogSkeleton {
         try {
             // Create and execute statement
             Statement stmt = this.connection.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT * FROM product WHERE id=" + idProduct);
+            ResultSet rs = stmt.executeQuery("SELECT * FROM product WHERE id = " + idProduct);
 
             // Get result from query
             res = new Product(rs.getInt("id"), rs.getString("name"), rs.getString("description"), rs.getFloat("price"), rs.getInt("amount"));
@@ -85,7 +86,7 @@ public class CatalogSkeleton {
         try {
             // Create and execute statement
             Statement stmt = this.connection.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT price FROM product WHERE id=" + idProduct);
+            ResultSet rs = stmt.executeQuery("SELECT price FROM product WHERE id = " + idProduct);
 
             // Get result from query
             price = rs.getFloat("price");
@@ -110,7 +111,7 @@ public class CatalogSkeleton {
         try {
             // Create and execute statement
             Statement stmt = this.connection.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT amount FROM product WHERE id=" + idProduct);
+            ResultSet rs = stmt.executeQuery("SELECT amount FROM product WHERE id = " + idProduct);
 
             // Get result from query
             amount = rs.getInt("amount");
@@ -126,6 +127,42 @@ public class CatalogSkeleton {
     }
 
     /**
+     * Update the amount of a product
+     * @param productId Product's identifier
+     * @param amount Product's amount
+     */
+    public void updateAmount(int productId, int amount) {
+        try {
+            // Create and execute statement
+            Statement stmt = this.connection.createStatement();
+
+            StringBuilder sb = new StringBuilder();
+            String query = sb.append("EXISTS (SELECT * FROM product WHERE id = ").append(productId).append(")").toString();
+            sb.setLength(0);
+
+            ResultSet rs = stmt.executeQuery(query);
+
+            // Get result from query
+            boolean exists = rs.getBoolean(1);
+
+            if (exists) {
+                query = sb.append("UPDATE product SET amount = amount + ").append(amount)
+                          .append(" WHERE id = ").append(productId)
+                          .toString();
+                sb.setLength(0);
+
+                stmt.executeUpdate(query);
+            }
+
+            // Clean up
+            rs.close();
+            stmt.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
      * Add a product to the catalog
      * @param p Product
      */
@@ -135,7 +172,7 @@ public class CatalogSkeleton {
             Statement stmt = this.connection.createStatement();
 
             StringBuilder sb = new StringBuilder();
-            String query = sb.append("EXISTS (SELECT * FROM product WHERE id=").append(p.getId()).append(")").toString();
+            String query = sb.append("EXISTS (SELECT * FROM product WHERE id = ").append(p.getId()).append(")").toString();
             sb.setLength(0);
 
             ResultSet rs = stmt.executeQuery(query);
@@ -143,18 +180,20 @@ public class CatalogSkeleton {
 
             if (exists) {
                 query = sb.append("UPDATE product SET amount = amount + ").append(p.getAmount())
-                                                                          .append(" WHERE id=").append(p.getId())
-                                                                          .toString();
+                          .append(" WHERE id=").append(p.getId())
+                          .toString();
                 sb.setLength(0);
+
                 stmt.executeUpdate(query);
             } else {
                 query = sb.append("INSERT INTO product VALUES(").append(p.getName()).append(", ")
-                                                                .append(p.getDescription()).append(", ")
-                                                                .append(p.getPrice()).append(", ")
-                                                                .append(p.getAmount()).append(")")
-                                                                .toString();
-                stmt.executeUpdate(query);
+                        .append(p.getDescription()).append(", ")
+                        .append(p.getPrice()).append(", ")
+                        .append(p.getAmount()).append(")")
+                        .toString();
                 sb.setLength(0);
+
+                stmt.executeUpdate(query);
             }
 
             // Clean up
@@ -166,60 +205,45 @@ public class CatalogSkeleton {
         }
     }
 
-    public void updateAmount(int productId, int amount) {
-        try {
-            // Create and execute statement
-            Statement stmt = this.connection.createStatement();
-
-            StringBuilder sb = new StringBuilder();
-            String query = sb.append("EXISTS (SELECT * FROM product WHERE id=").append(productId).append(")").toString();
-            sb.setLength(0);
-
-            ResultSet rs = stmt.executeQuery(query);
-            boolean exists = rs.getBoolean(1);
-
-            if(exists) {
-                query = sb.append("UPDATE product SET amount = amount + ").append(amount)
-                        .append(" WHERE id=").append(productId)
-                        .toString();
-                sb.setLength(0);
-                stmt.executeUpdate(query);
-            }
-
-        } catch(SQLException throwables){
-            throwables.printStackTrace();
-        }
-    }
-
+    /**
+     * Remove a product from the catalog
+     * @param productId Product's identifier
+     */
     public void removeProduct(int productId) {
         try {
             // Create and execute statement
             Statement stmt = this.connection.createStatement();
 
             StringBuilder sb = new StringBuilder();
-            String query = sb.append("DELETE FROM product WHERE id=").append(productId).toString();
+            String query = sb.append("DELETE FROM product WHERE id = ").append(productId).toString();
             sb.setLength(0);
 
             stmt.executeUpdate(query);
 
-        } catch(SQLException throwables){
-            throwables.printStackTrace();
+            // Clean up
+            stmt.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
+    /**
+     * Update a product's information in the catalog
+     * @param p Product
+     */
     public void updateProduct(Product p) {
         try {
             // Create and execute statement
             Statement stmt = this.connection.createStatement();
 
             StringBuilder sb = new StringBuilder();
-            String query = sb.append("UPDATE product SET name =").append(p.getName())
-                          .append(", description =").append(p.getDescription())
-                          .append(", price =").append(p.getPrice())
-                          .append(" WHERE id=").append(p.getId())
-                          .toString();
-
+            String query = sb.append("UPDATE product SET name = ").append(p.getName())
+                             .append(", description = ").append(p.getDescription())
+                             .append(", price = ").append(p.getPrice())
+                             .append(" WHERE id = ").append(p.getId())
+                             .toString();
             sb.setLength(0);
+
             stmt.executeUpdate(query);
 
             // Clean up

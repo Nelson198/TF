@@ -5,10 +5,8 @@ package Messages;
  */
 public class DBUpdate implements Message {
     private final byte[] updateInfo;
-
     private final String client;
     private final String server;
-
     private final String secondaryType;
 
     /**

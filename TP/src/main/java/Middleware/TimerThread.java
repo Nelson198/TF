@@ -9,18 +9,18 @@ import io.atomix.utils.serializer.Serializer;
  * Timer Thread
  */
 public class TimerThread extends Thread {
-    private final Object message;
+    private final byte[] message;
     private final String type;
     private final int time;
 
     private final ServerConnection connection;
-    private final Serializer serializer = Serializers.serverSerializer;
+    private final Serializer serializer = Serializers.clientSerializer;
 
     /**
      * Parameterized constructor
      * @param connection Supermarket's connection
      */
-    public TimerThread(Object message, String type, int time, ServerConnection connection) {
+    public TimerThread(byte[] message, String type, int time, ServerConnection connection) {
         this.message = message;
         this.type = type;
         this.time = time;

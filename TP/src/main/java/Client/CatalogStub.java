@@ -44,6 +44,16 @@ public class CatalogStub {
     }
 
     /**
+     * Get product from catalog
+     * @param productId Product's identifier
+     * @return Product
+     */
+    public Product getProduct(int productId) {
+        byte[] res = this.connection.sendAndReceive("getProduct", this.serializer.encode(productId));
+        return this.serializer.decode(res);
+    }
+
+    /**
      * Get product's price
      * @param idProduct Product's identifier
      * @return Product's price
@@ -63,25 +73,37 @@ public class CatalogStub {
         return this.serializer.decode(res);
     }
 
+    /**
+     * Update the amount of a product
+     * @param idProduct Product's identifier
+     * @param amount Product's amount
+     */
     public void updateAmount(int idProduct, int amount) {
         CartUpdate toSend = new CartUpdate(-1, idProduct, amount);
         this.connection.sendAndReceive("updateAmount", this.serializer.encode(toSend));
     }
 
-    public void addNewProduct(Product newProduct) {
-        this.connection.sendAndReceive("addProduct", this.serializer.encode(newProduct));
+    /**
+     * Add a new product to the catalog
+     * @param p Product
+     */
+    public void addProduct(Product p) {
+        this.connection.sendAndReceive("addProduct", this.serializer.encode(p));
     }
 
+    /**
+     * Remove a product from the catalog
+     * @param idProduct Product's identifier
+     */
     public void removeProduct(int idProduct) {
         this.connection.sendAndReceive("removeProduct", this.serializer.encode(idProduct));
     }
 
+    /**
+     * Update a product's information in the catalog
+     * @param p Product
+     */
     public void updateProduct(Product p) {
         this.connection.sendAndReceive("updateProduct", this.serializer.encode(p));
-    }
-
-    public Product getProduct(int productId) {
-        byte[] res = this.connection.sendAndReceive("getProduct", this.serializer.encode(productId));
-        return this.serializer.decode(res);
     }
 }

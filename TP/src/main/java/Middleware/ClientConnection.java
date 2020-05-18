@@ -64,7 +64,7 @@ public class ClientConnection {
                 System.out.println("Switching server ...");
                 this.currentServer = (this.currentServer + 1) % this.servers.size();
                 if (this.currentServer == initialServer) {
-                    System.out.println("No servers available. Try again later...");
+                    System.out.println("No servers available. Try again later ...");
                     System.exit(1);
                 }
             }
