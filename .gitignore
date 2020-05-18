@@ -10,6 +10,7 @@
 
 # IntelliJ
 .idea
+.iml
 .DS_Store
 target/
 .classpath

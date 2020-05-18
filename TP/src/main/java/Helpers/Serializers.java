@@ -17,9 +17,4 @@ public class Serializers {
                                                                        .addType(Product.class)
                                                                        .build();
 
-    public static Serializer serverSerializer = new SerializerBuilder().addType(DBUpdate.class)
-                                                                       .addType(DBContent.class)
-                                                                       .build();
-
-    // TODO - add a serializer just for the supermarket
 }

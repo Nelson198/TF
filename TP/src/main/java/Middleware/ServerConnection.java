@@ -4,7 +4,6 @@ import Helpers.Serializers;
 import Messages.DBContent;
 import Messages.DBUpdate;
 import Messages.Message;
-import Server.HandlerRes;
 
 import io.atomix.cluster.messaging.ManagedMessagingService;
 import io.atomix.cluster.messaging.MessagingConfig;
@@ -12,6 +11,7 @@ import io.atomix.cluster.messaging.impl.NettyMessagingService;
 import io.atomix.utils.net.Address;
 import io.atomix.utils.serializer.Serializer;
 
+import io.atomix.utils.serializer.SerializerBuilder;
 import spread.AdvancedMessageListener;
 import spread.MembershipInfo;
 import spread.SpreadConnection;
@@ -55,7 +55,9 @@ public class ServerConnection {
     ManagedMessagingService ms;
 
     // Serializer for the messages
-    private final Serializer serializer = Serializers.serverSerializer;
+    private final Serializer serializer = new SerializerBuilder().addType(DBUpdate.class)
+                                                                 .addType(DBContent.class)
+                                                                 .build();
 
     // DBUpdate's that arrived between this server's connection and the reception of the DB
     List<DBUpdate> pendingQueries = new ArrayList<>();

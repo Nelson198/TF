@@ -1,10 +1,10 @@
-package Server;
+package Middleware;
 
 /**
  * Handler Response
  */
 public class HandlerRes {
-    private final Object info;
+    private final byte[] info;
     private final boolean sendToCluster;
     private final boolean sendToClient;
 
@@ -14,7 +14,7 @@ public class HandlerRes {
      * @param sendToCluster sendToCluster
      * @param sendToClient sendToClient
      */
-    public HandlerRes(Object info, boolean sendToCluster, boolean sendToClient) {
+    public HandlerRes(byte[] info, boolean sendToCluster, boolean sendToClient) {
         this.info = info;
         this.sendToCluster = sendToCluster;
         this.sendToClient = sendToClient;
@@ -24,7 +24,7 @@ public class HandlerRes {
      * Get info
      * @return Info
      */
-    public Object getInfo() {
+    public byte[] getInfo() {
         return this.info;
     }
 

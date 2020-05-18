@@ -4,7 +4,7 @@ package Messages;
  * DB Update Message
  */
 public class DBUpdate implements Message {
-    private final Object updateInfo;
+    private final byte[] updateInfo;
 
     private final String client;
     private final String server;
@@ -17,7 +17,7 @@ public class DBUpdate implements Message {
      * @param server Server to answer from
      * @param client Client to answer to
      */
-    public DBUpdate(Object updateInfo, String client, String server, String secondaryType) {
+    public DBUpdate(byte[] updateInfo, String client, String server, String secondaryType) {
         this.updateInfo = updateInfo;
         this.client = client;
         this.server = server;
@@ -28,7 +28,7 @@ public class DBUpdate implements Message {
      * Get updateInfo
      * @return UpdateInfo
      */
-    public Object getUpdateInfo() {
+    public byte[] getUpdateInfo() {
         return this.updateInfo;
     }
 

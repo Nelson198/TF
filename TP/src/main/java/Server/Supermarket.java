@@ -4,6 +4,7 @@ import Helpers.CartUpdate;
 import Helpers.Product;
 import Helpers.Serializers;
 import Messages.DBUpdate;
+import Middleware.HandlerRes;
 import Middleware.ServerConnection;
 
 import io.atomix.utils.net.Address;
@@ -29,14 +30,14 @@ public class Supermarket {
     // Connection to the cluster
     private final ServerConnection connection;
 
-    // Serializer for the messages sent between servers
-    private final Serializer serializer = Serializers.serverSerializer;
-
     // Skeleton for the catalog
     private CatalogSkeleton catalog;
 
     // Skeletons for the carts
     private final Map<Integer, CartSkeleton> carts = new HashMap<>();
+
+    // Self use serializer
+    public static Serializer serializer = Serializers.clientSerializer;
 
     /**
      * Parameterized constructor
@@ -62,20 +63,23 @@ public class Supermarket {
                     this.connection.startTimer(cs.getIdCart(), "deleteCart", 180); // TODO - 180s for the moment
 
                     return cs.getIdCart();
+
                 case "deleteCart":
-                    int objectID = (int) dbUpdate.getUpdateInfo();
+                    int objectID = serializer.decode(dbUpdate.getUpdateInfo());
                     this.carts.get(objectID).delete();
                     this.carts.remove(objectID);
 
                     return null;
+
                 case "checkout":
-                    int objID = (int) dbUpdate.getUpdateInfo();
+                    int objID = serializer.decode(dbUpdate.getUpdateInfo());
                     boolean res = this.carts.get(objID).checkout();
                     this.carts.remove(objID);
 
                     return res;
+
                 case "updateCart":
-                    CartUpdate cartUpdate = (CartUpdate) dbUpdate.getUpdateInfo();
+                    CartUpdate cartUpdate = serializer.decode(dbUpdate.getUpdateInfo());
                     CartSkeleton cart = this.carts.get(cartUpdate.getIdCart());
                     cart.updateProduct(cartUpdate.getIdProduct(), cartUpdate.getAmount());
 
@@ -83,8 +87,26 @@ public class Supermarket {
 
                 // Catalog
                 case "addProduct":
-                    Product p = (Product) dbUpdate.getUpdateInfo();
+                    Product p = serializer.decode(dbUpdate.getUpdateInfo());
                     catalog.addProduct(p);
+
+                    return null;
+
+                case "removeProduct":
+                    int prodId = serializer.decode(dbUpdate.getUpdateInfo());
+                    catalog.removeProduct(prodId);
+
+                    return null;
+
+                case "updateAmount":
+                    CartUpdate ua = serializer.decode(dbUpdate.getUpdateInfo());
+                    catalog.updateAmount(ua.getIdProduct(), ua.getAmount());
+
+                    return null;
+
+                case "updateProduct":
+                    Product p4 = serializer.decode(dbUpdate.getUpdateInfo());
+                    catalog.updateProduct(p4);
 
                     return null;
             }
@@ -103,17 +125,9 @@ public class Supermarket {
         // Cart
         handlers.put("newCart", (address, bytes) -> new HandlerRes(null, true, false));
 
-        handlers.put("updateCart", (address, bytes) -> {
-            CartUpdate cu = serializer.decode(bytes);
+        handlers.put("updateCart", (address, bytes) -> new HandlerRes(bytes, true, false));
 
-            return new HandlerRes(cu, true, false);
-        });
-
-        handlers.put("checkout", (address, bytes) -> {
-            String cartID = serializer.decode(bytes);
-
-            return new HandlerRes(cartID, true, false);
-        });
+        handlers.put("checkout", (address, bytes) -> new HandlerRes(bytes, true, false));
 
         handlers.put("getProducts", (address, bytes) -> {
             int idCart = serializer.decode(bytes);
@@ -151,6 +165,12 @@ public class Supermarket {
         });
 
         handlers.put("addProduct", (address, bytes) -> new HandlerRes(bytes, true, false));
+
+        handlers.put("removeProduct", (address, bytes) -> new HandlerRes(bytes, true, false));
+
+        handlers.put("updateAmount", (address, bytes) -> new HandlerRes(bytes, true, false));
+
+        handlers.put("updateProduct", (address, bytes) -> new HandlerRes(bytes, true, false));
 
         this.connection.initialize(processDBUpdate, afterDBStart, tablesToCreate, handlers);
     }

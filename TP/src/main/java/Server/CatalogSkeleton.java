@@ -142,9 +142,9 @@ public class CatalogSkeleton {
             boolean exists = rs.getBoolean(1);
 
             if (exists) {
-                query = sb.append("UPDATE cart SET amount = amount + ").append(p.getAmount())
-                                                                       .append(" WHERE id=").append(p.getId())
-                                                                       .toString();
+                query = sb.append("UPDATE product SET amount = amount + ").append(p.getAmount())
+                                                                          .append(" WHERE id=").append(p.getId())
+                                                                          .toString();
                 sb.setLength(0);
                 stmt.executeUpdate(query);
             } else {
@@ -159,6 +159,70 @@ public class CatalogSkeleton {
 
             // Clean up
             rs.close();
+            stmt.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+    }
+
+    public void updateAmount(int productId, int amount) {
+        try {
+            // Create and execute statement
+            Statement stmt = this.connection.createStatement();
+
+            StringBuilder sb = new StringBuilder();
+            String query = sb.append("EXISTS (SELECT * FROM product WHERE id=").append(productId).append(")").toString();
+            sb.setLength(0);
+
+            ResultSet rs = stmt.executeQuery(query);
+            boolean exists = rs.getBoolean(1);
+
+            if(exists) {
+                query = sb.append("UPDATE product SET amount = amount + ").append(amount)
+                        .append(" WHERE id=").append(productId)
+                        .toString();
+                sb.setLength(0);
+                stmt.executeUpdate(query);
+            }
+
+        } catch(SQLException throwables){
+            throwables.printStackTrace();
+        }
+    }
+
+    public void removeProduct(int productId) {
+        try {
+            // Create and execute statement
+            Statement stmt = this.connection.createStatement();
+
+            StringBuilder sb = new StringBuilder();
+            String query = sb.append("DELETE FROM product WHERE id=").append(productId).toString();
+            sb.setLength(0);
+
+            stmt.executeUpdate(query);
+
+        } catch(SQLException throwables){
+            throwables.printStackTrace();
+        }
+    }
+
+    public void updateProduct(Product p) {
+        try {
+            // Create and execute statement
+            Statement stmt = this.connection.createStatement();
+
+            StringBuilder sb = new StringBuilder();
+            String query = sb.append("UPDATE product SET name =").append(p.getName())
+                          .append(", description =").append(p.getDescription())
+                          .append(", price =").append(p.getPrice())
+                          .append(" WHERE id=").append(p.getId())
+                          .toString();
+
+            sb.setLength(0);
+            stmt.executeUpdate(query);
+
+            // Clean up
             stmt.close();
         } catch (SQLException e) {
             e.printStackTrace();
