@@ -67,12 +67,14 @@ public class Client {
         CartStub cs = carts.get(cartName);
         while(true) {
             clearTerminal();
-            String cart = "Welcome to your cart. Please choose an option:\n" +
-                          "1 - Get products\n" +
-                          "2 - Add product\n" +
-                          "3 - Remove product\n" +
-                          "4 - Checkout\n" +
-                          "5 - Get back\n";
+            StringBuilder cart = new StringBuilder();
+            cart.append("Welcome to your cart. Please choose an option:\n")
+                .append("1 - Get products\n")
+                .append("2 - Add product\n")
+                .append("3 - Remove product\n")
+                .append("4 - Checkout\n")
+                .append("5 - Get back\n");
+
             System.out.println(cart);
 
             int choice;
@@ -88,33 +90,33 @@ public class Client {
                     StringBuilder sb = new StringBuilder();
                     sb.append("This cart has the following products:\n\n");
                     for (Product p : products) {
-                        sb.append("--> Product nº ").append(p.getId()).append(":\n")
+                        sb.append("--> Product nº").append(p.getId()).append(":\n")
                           .append("\t--> Name: ").append(p.getName()).append("\n")
                           .append("\t--> Description: ").append(p.getDescription()).append("\n")
                           .append("\t--> Price: ").append(p.getPrice()).append(" € (per unit)\n")
                           .append("\t--> Amount: ").append(p.getAmount()).append(" unit(s)\n");
                     }
-                    System.out.println(sb.toString());
+                    System.out.println(sb);
                     waitConfirmation();
                     break;
 
                 case 2:
                     System.out.println("Add product(s):");
                     System.out.print("\t--> Product's identifier: ");
-                    String idProduct = stdin.readLine();
+                    int idProduct = Integer.parseInt(stdin.readLine());
                     System.out.print("\t--> Product's amount: ");
                     int amount = readInt();
-                    cs.updateProduct(Integer.parseInt(idProduct), amount);
+                    cs.updateProduct(idProduct, amount);
                     waitConfirmation();
                     break;
 
                 case 3:
                     System.out.println("Remove product(s):");
                     System.out.print("\t--> Product's identifier: ");
-                    idProduct = stdin.readLine();
+                    int idProduct = Integer.parseInt(stdin.readLine());
                     System.out.print("\t--> Product's amount: ");
                     int quantity = readInt();
-                    cs.updateProduct(Integer.parseInt(idProduct), -quantity);
+                    cs.updateProduct(idProduct, -quantity);
                     waitConfirmation();
                     break;
 
@@ -124,7 +126,133 @@ public class Client {
                     break;
 
                 case 5:
-                    menu();
+                    return;
+            }
+        }
+    }
+
+    /**
+     * Auxiliar function to uddate a product
+     * @param  Product p
+     * @throws IOException IOException
+     */
+    private Product updateProduct(Product p) throws IOException {
+        while(true) {
+            StringBuilder change = new StringBuilder();
+            change.append("What do you want to change?\n")
+                    .append("\t1 - Name\n")
+                    .append("\t2 - Description\n")
+                    .append("\t3 - Price\n")
+                    .append("\t4 - Submit changes\n");
+
+            clearTerminal();
+            String.out.print(change);
+
+            int update;
+            do {
+                update = readInt();
+            } while (update < 1 || update > 4);
+
+            switch(update) {
+                case 1:
+                    System.out.print("Insert a new name: ");
+                    String productName = stdin.readLine();
+                    p.setName(productName);
+                    break;
+
+                case 2:
+                    System.out.print("Insert the new description: ");
+                    String productDescription = stdin.readLine();
+                    p.setDescription(productDescription);
+                    break;
+
+                case 3:
+                    System.out.print("Insert the new price: ");
+                    float productPrice = Float.parseFloat(stdin.readLine());
+                    p.setPrice(productPrice);
+                    break;
+
+                case 4:
+                    return p;
+            }
+        }
+        return p;
+    }
+
+    /**
+     * Admin's menu
+     * @throws IOException IOException
+     */
+    private static void menuAdmin() throws IOException {
+        while (true) {
+            clearTerminal();
+            StringBuilder admin = new StringBuilder();
+            admin.append("What action do you want you perform?\n")
+                 .append("\t1 - Add a new product to the catalog\n")
+                 .append("\t2 - Update a product's amount in the catalog\n")
+                 .append("\t3 - Other updates on a product in the catalog\n")
+                 .append("\t4 - Remove a product from the catalog\n")
+                 .append("\t5 - Go back\n");
+
+            clearTerminal();
+            System.out.println(admin);
+
+            int choice;
+            do {
+                choice = readInt();
+            } while (choice < 1 || choice > 5);
+
+            clearTerminal();
+            switch(choice) {
+                case 1:
+                    System.out.print("Insert the product's name: ");
+                    String productName = stdin.readLine();
+
+                    System.out.print("Insert a description to the product: ");
+                    String productDescription = stdin.readLine();
+
+                    System.out.print("Insert the product's price: ");
+                    float productPrice = Float.parseFloat(stdin.readLine());
+
+                    System.out.print("Insert the product's initial amount: ");
+                    int productAmount = Integer.parseInt(stdin.readLine());
+
+                    Product newProduct = new Product(null, productName, productDescription, productPrice, productAmount);
+
+                    catalog.addNewProduct(newProduct);
+                    waitConfirmation();
+                    break;
+
+                case 2:
+                    System.out.print("Insert the product's id: ");
+                    int productId = Integer.parseInt(stdin.readLine());
+
+                    System.out.print("Insert the product's name: ");
+                    int amount = Integer.parseInt(stdin.readLine());
+
+                    catalog.updateAmout(idProduct, amount);
+                    waitConfirmation();
+                    break;
+
+                case 3:
+                    System.out.print("Insert the product's id: ");
+                    int productId = Integer.parseInt(stdin.readLine());
+
+                    Product toUpdate = catalog.getProduct(productId);
+
+                    catalog.updateProduct(this.updateProduct(toUpdate));
+                    waitConfirmation();
+                    break;
+
+                case 4:
+                    System.out.print("Insert the product's id: ");
+                    int productId = Integer.parseInt(stdin.readLine());
+
+                    catalog.removeProduct(productId);
+                    waitConfirmation();
+                    break;
+
+                case 5:
                     return;
             }
         }
@@ -137,19 +265,22 @@ public class Client {
     private static void menu() throws IOException {
         while (true) {
             clearTerminal();
-            String main = "Welcome to our supermarket. Please choose an option:\n" +
-                          "\t1 - Create a cart\n" +
-                          "\t2 - Check/Update a cart\n" +
-                          "\t3 - See catalog\n" +
-                          "\t4 - Check a product's price\n" +
-                          "\t5 - Check a product's availability\n" +
-                          "\t6 - Exit\n";
+            StringBuilder main = new StringBuilder();
+            main.append("Welcome to our supermarket. Please choose an option:\n")
+                .append("\t1 - Create a cart\n")
+                .append("\t2 - Check/Update a cart\n")
+                .append("\t3 - See catalog\n")
+                .append("\t4 - Check a product's price\n")
+                .append("\t5 - Check a product's availability\n")
+                .append("\t6 - Login admin\n")
+                .append("\t7 - Exit\n");
+
             System.out.println(main);
 
             int choice;
             do {
                 choice = readInt();
-            } while (choice < 1 || choice > 6);
+            } while (choice < 1 || choice > 7);
 
             clearTerminal();
             switch (choice) {
@@ -193,6 +324,12 @@ public class Client {
                     break;
 
                 case 6:
+                    System.out.println("Changing to administrator mode... Authorized Personnel only!");
+                    Thread.sleep(1000);
+                    menuAdmin();
+                    break;
+
+                case 7:
                     System.exit(1);
                     break;
             }

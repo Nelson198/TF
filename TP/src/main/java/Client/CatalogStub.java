@@ -61,4 +61,26 @@ public class CatalogStub {
         byte[] res = this.connection.sendAndReceive("getAmount", this.serializer.encode(idProduct));
         return this.serializer.decode(res);
     }
+
+    public void updateAmount(String idProduct, int amount) {
+        CartUpdate toSend = new CartUpdate(null, idProduct, amount);
+        this.connection.sendAndReceive("updateAmount", this.serializer.encode(toSend));
+    }
+
+    public void addNewProduct(Product newProduct) {
+        this.connection.sendAndReceive("newProduct", this.serializer.encode(newProduct));
+    }
+
+    public void removeProduct(String idProduct) {
+        this.connection.sendAndReceive("removeProduct", this.serializer.encode(idProduct));
+    }
+
+    public void updateProduct(Product p) {
+        this.connection.sendAndReceive("updateProduct", this.serializer.encode(p));
+    }
+
+    public Product getProduct(productId) {
+        byte[] res = this.connection.sendAndReceive("getProduct", this.serializer.encode(idProduct));
+        return this.serializer.decode(res);
+    }
 }

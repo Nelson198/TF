@@ -65,4 +65,16 @@ public class Product {
     public int getAmount() {
         return this.amount;
     }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setPrice(String price) {
+        this.price = price;
+    }
 }
