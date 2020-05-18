@@ -54,11 +54,12 @@ public class Supermarket {
     public void initialize() throws SpreadException, UnknownHostException {
         BiFunction<DBUpdate, Connection, Object> processDBUpdate = (dbUpdate, dbConnection) -> {
             switch (dbUpdate.getSecondaryType()) {
+                // Cart
                 case "newCart":
                     CartSkeleton cs = new CartSkeleton(dbConnection);
                     this.carts.put(cs.getIdCart(), cs);
 
-                    this.connection.startTimer(cs.getIdCart(), "deleteCart", 60); // TODO - 60s for the moment
+                    this.connection.startTimer(cs.getIdCart(), "deleteCart", 180); // TODO - 180s for the moment
 
                     return cs.getIdCart();
                 case "deleteCart":
@@ -77,6 +78,13 @@ public class Supermarket {
                     CartUpdate cartUpdate = (CartUpdate) dbUpdate.getUpdateInfo();
                     CartSkeleton cart = this.carts.get(cartUpdate.getIdCart());
                     cart.updateProduct(cartUpdate.getIdProduct(), cartUpdate.getAmount());
+
+                    return null;
+
+                // Catalog
+                case "addProduct":
+                    Product p = (Product) dbUpdate.getUpdateInfo();
+                    catalog.addProduct(p);
 
                     return null;
             }
@@ -141,6 +149,8 @@ public class Supermarket {
 
             return new HandlerRes(serializer.encode(res), false, true);
         });
+
+        handlers.put("addProduct", (address, bytes) -> new HandlerRes(bytes, false, true));
 
         this.connection.initialize(processDBUpdate, afterDBStart, tablesToCreate, handlers);
     }

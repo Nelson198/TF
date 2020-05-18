@@ -1,6 +1,6 @@
 package Messages;
 
-import java.util.Map;
+import java.util.HashSet;
 
 /**
  * DB Message
@@ -8,18 +8,18 @@ import java.util.Map;
 public class DBContent implements Message {
     private final byte[] backup;
     private final boolean isFullBackup;
-    private final Map<String, Integer> lastDBVersion;
+    private final HashSet<String> latestDBServers;
 
     /**
      * Parameterized constructor
      * @param backup Backup
      * @param isFullBackup isFullBackup
-     * @param lastDBVersion lastDBVersion
+     * @param latestDBServers latestDBServers
      */
-    public DBContent(byte[] backup, boolean isFullBackup, Map<String, Integer> lastDBVersion) {
+    public DBContent(byte[] backup, boolean isFullBackup, HashSet<String> latestDBServers) {
         this.backup = backup;
         this.isFullBackup = isFullBackup;
-        this.lastDBVersion = lastDBVersion;
+        this.latestDBServers = latestDBServers;
     }
 
     /**
@@ -39,11 +39,11 @@ public class DBContent implements Message {
     }
 
     /**
-     * Get lastDBVersion
-     * @return lastDBVersion
+     * Get latestDBServers
+     * @return latestDBServers
      */
-    public Map<String, Integer> getLastDBVersion() {
-        return this.lastDBVersion;
+    public HashSet<String> getLatestDBServers() {
+        return this.latestDBServers;
     }
 
     /**

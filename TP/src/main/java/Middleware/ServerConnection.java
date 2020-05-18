@@ -28,10 +28,7 @@ import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -63,8 +60,8 @@ public class ServerConnection {
     // DBUpdate's that arrived between this server's connection and the reception of the DB
     List<DBUpdate> pendingQueries = new ArrayList<>();
 
-    // Last version of DB each server has
-    Map<String, Integer> lastDBVersion = new HashMap<>();
+    // Set of servers that are in the latest version of the database
+    HashSet<String> latestDBServers = new HashSet<>();
 
     /**
      * Parameterized constructor
@@ -147,7 +144,7 @@ public class ServerConnection {
                 if (ms.getType().equals("db")) {
                     try {
                         DBContent dbMsg = (DBContent) ms;
-                        aux.lastDBVersion = dbMsg.getLastDBVersion();
+                        aux.latestDBServers = dbMsg.getLatestDBServers();
                         if (dbMsg.getIsFullBackup()) {
                             System.out.println("Received full backup");
                             byte[] backup = dbMsg.getBackup();
@@ -165,16 +162,38 @@ public class ServerConnection {
 
                             File file = new File("clusterDB" + port + "/backup.tar.gz");
                             file.delete();
+
+                            // Save the log in memory and delete from the filesystem
+                            byte[] logFileContent = null;
+                            try {
+                                logFileContent = Files.readAllBytes(Paths.get("clusterDB" + port + "/db.log"));
+                            } catch (Exception ignored) {}
+
+                            File logFile = new File("clusterDB" + port + "/db.log");
+                            logFile.delete();
+
+                            aux.dbConnection = DriverManager.getConnection("jdbc:hsqldb:file:clusterDB" + port + "/db", "sa", "");
+
+                            // Write the log after starting the server, so that it isn't cleared
+                            if (logFileContent != null) {
+                                FileOutputStream logStream = new FileOutputStream("clusterDB" + port + "/db.log");
+                                logStream.write(logFileContent);
+                                logStream.close();
+                            }
                         } else {
                             System.out.println("Received incremental backup");
-                            byte[] log = dbMsg.getBackup();
 
+                            // Delete previous log from filesystem
+                            File logFile = new File("clusterDB" + port + "/db.log");
+                            logFile.delete();
+
+                            aux.dbConnection = DriverManager.getConnection("jdbc:hsqldb:file:clusterDB" + port + "/db", "sa", "");
+
+                            // Write the log after starting the server, so that it isn't cleared
                             FileOutputStream os = new FileOutputStream("clusterDB" + port + "/db.log");
-                            os.write(log);
+                            os.write(dbMsg.getBackup());
                             os.close();
                         }
-
-                        aux.dbConnection = DriverManager.getConnection("jdbc:hsqldb:file:clusterDB" + port + "/db", "sa", "");
 
                         for (DBUpdate dbUpdate : aux.pendingQueries)
                             processDBUpdate.apply(dbUpdate, aux.dbConnection);
@@ -216,7 +235,7 @@ public class ServerConnection {
 
                                 afterDBStart.accept(aux.dbConnection);
 
-                                lastDBVersion.put(aux.spreadConnection.getPrivateGroup().toString(), 0);
+                                latestDBServers.add(aux.spreadConnection.getPrivateGroup().toString());
 
                                 // Initialize the atomix connection
                                 initializeAtomix(handlers);
@@ -232,35 +251,38 @@ public class ServerConnection {
                         }
                     } else {
                         try {
-                            Integer joinedLastVersion = aux.lastDBVersion.get(info.getJoined().toString());
-                            Integer thisLastVersion = aux.lastDBVersion.get(spreadConnection.getPrivateGroup().toString());
-                            if (joinedLastVersion == null || !joinedLastVersion.equals(thisLastVersion)) {
-                                // Send full database
+                            if (!latestDBServers.contains(info.getJoined().toString())) {
+                                // Send full database backup
                                 Statement stm = aux.dbConnection.createStatement();
                                 stm.executeUpdate("CHECKPOINT"); // Make a checkpoint in every member of the cluster to synchronize the DB's
 
-                                HashMap<String, Integer> aux = new HashMap<>();
-                                lastDBVersion.forEach((k, v) -> aux.put(k, v+1));
-                                lastDBVersion = aux;
+                                HashSet<String> aux = new HashSet<>();
+                                latestDBServers.forEach((k) -> {
+                                    for (SpreadGroup member : info.getMembers()) {
+                                        if (k.equals(member.toString())) {
+                                            aux.add(k);
+                                            break;
+                                        }
+                                    }
+                                });
+                                latestDBServers = aux;
 
-                                lastDBVersion.put(info.getJoined().toString(), thisLastVersion+1);
+                                latestDBServers.add(info.getJoined().toString());
 
                                 if (primaryAfter.size() == 0) {
                                     stm.executeUpdate("BACKUP DATABASE TO 'clusterDB" + port + "/backup.tar.gz' NOT BLOCKING");
 
                                     byte[] backup = Files.readAllBytes(Paths.get("clusterDB" + port + "/backup.tar.gz"));
-                                    sendServer(serializer.encode(new DBContent(backup, true, lastDBVersion)), info.getJoined());
+                                    sendServer(serializer.encode(new DBContent(backup, true, latestDBServers)), info.getJoined());
 
                                     File file = new File("clusterDB" + port + "/backup.tar.gz");
                                     file.delete();
                                 }
                             } else {
-                                lastDBVersion.put(info.getJoined().toString(), thisLastVersion+1);
-
+                                // Send incremental database backup
                                 if (primaryAfter.size() == 0) {
-                                    lastDBVersion.put(info.getJoined().toString(), thisLastVersion);
                                     byte[] backup = Files.readAllBytes(Paths.get("clusterDB" + port + "/db.log"));
-                                    sendServer(serializer.encode(new DBContent(backup, false, lastDBVersion)), info.getJoined());
+                                    sendServer(serializer.encode(new DBContent(backup, false, latestDBServers)), info.getJoined());
                                 }
                             }
                         } catch (Exception exception) {
@@ -273,8 +295,18 @@ public class ServerConnection {
                 } else if (info.isCausedByLeave()) {
                     primaryAfter.remove(info.getLeft());
                 } else if (info.isCausedByNetwork()) {
-                    // TODO - deal with network partitions
-                    //        see info.getMyVirtualSynchronySet(), info.getStayed(), info.getVirtualSynchronySets()
+                    // TODO - review this (and test?)
+                    boolean inGroup = false;
+                    for (SpreadGroup member : info.getMyVirtualSynchronySet().getMembers()) {
+                        if (member.equals(spreadConnection.getPrivateGroup())) {
+                            inGroup = true;
+                            break;
+                        }
+                    }
+                    if (!inGroup) {
+                        System.out.println("Server is going to be disconnected due to a network partition");
+                        System.exit(1);
+                    }
                 }
             }
         });

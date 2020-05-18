@@ -20,7 +20,7 @@ import java.util.concurrent.Executors;
 public class ClientConnection {
     private final ManagedMessagingService ms;
     private final List<Address> servers;
-    private final Address currentServer;
+    private Address currentServer;
     private CompletableFuture<byte[]> res;
 
     /**
@@ -33,9 +33,7 @@ public class ClientConnection {
     public ClientConnection(Address address, List<Address> servers) throws ExecutionException, InterruptedException {
         this.servers = servers;
 
-        Random rand = new Random();
-        int server = rand.nextInt(servers.size());
-        this.currentServer = servers.get(server);
+        this.chooseServer();
 
         this.ms = new NettyMessagingService("cluster", address, new MessagingConfig());
 
@@ -47,6 +45,15 @@ public class ClientConnection {
     }
 
     /**
+     * Choose one of the available servers to the client
+     */
+    public void chooseServer() { // TODO - improve this so that we don't end up looping and repeating the same process in sendAndReceive
+        Random rand = new Random();
+        int server = rand.nextInt(servers.size());
+        this.currentServer = servers.get(server);
+    }
+
+    /**
      * Send and receive a message
      * @param type Message's type
      * @param message Message's content
@@ -55,14 +62,15 @@ public class ClientConnection {
     public byte[] sendAndReceive(String type, byte[] message) {
         this.res = new CompletableFuture<>();
 
-        this.ms.sendAsync(this.currentServer, type, message);
-
-        try {
-            return this.res.get(); // TODO - handle these exceptions better (switch servers)
-        } catch (Exception e) {
-            e.printStackTrace();
+        while (true) {
+            CompletableFuture<Void> x = this.ms.sendAsync(this.currentServer, type, message);
+            try {
+                x.get();
+                return this.res.get();
+            } catch (Exception e) {
+                System.out.println("Switching server ...");
+                this.chooseServer();
+            }
         }
-
-        return null;
     }
 }
