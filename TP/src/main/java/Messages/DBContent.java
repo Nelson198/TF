@@ -1,6 +1,6 @@
 package Messages;
 
-import java.util.HashSet;
+import java.util.Set;
 
 /**
  * DB Message
@@ -8,7 +8,7 @@ import java.util.HashSet;
 public class DBContent implements Message {
     private final byte[] backup;
     private final boolean isFullBackup;
-    private final HashSet<String> latestDBServers;
+    private final Set<String> latestDBServers;
 
     /**
      * Parameterized constructor
@@ -16,7 +16,7 @@ public class DBContent implements Message {
      * @param isFullBackup isFullBackup
      * @param latestDBServers latestDBServers
      */
-    public DBContent(byte[] backup, boolean isFullBackup, HashSet<String> latestDBServers) {
+    public DBContent(byte[] backup, boolean isFullBackup, Set<String> latestDBServers) {
         this.backup = backup;
         this.isFullBackup = isFullBackup;
         this.latestDBServers = latestDBServers;
@@ -42,7 +42,7 @@ public class DBContent implements Message {
      * Get latestDBServers
      * @return latestDBServers
      */
-    public HashSet<String> getLatestDBServers() {
+    public Set<String> getLatestDBServers() {
         return this.latestDBServers;
     }
 
