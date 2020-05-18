@@ -28,7 +28,11 @@ import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -63,7 +67,7 @@ public class ServerConnection {
     List<DBUpdate> pendingQueries = new ArrayList<>();
 
     // Set of servers that are in the latest version of the database
-    HashSet<String> latestDBServers = new HashSet<>();
+    Set<String> latestDBServers = new HashSet<>();
 
     /**
      * Parameterized constructor
