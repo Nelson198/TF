@@ -5,9 +5,9 @@ package Helpers;
  */
 public class Product {
     private final int id;
-    private final String name;
-    private final String description;
-    private final float price;
+    private String name;
+    private String description;
+    private float price;
     private final int amount;
 
     /**
@@ -74,7 +74,7 @@ public class Product {
         this.description = description;
     }
 
-    public void setPrice(String price) {
+    public void setPrice(float price) {
         this.price = price;
     }
 }

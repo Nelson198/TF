@@ -150,7 +150,7 @@ public class Supermarket {
             return new HandlerRes(serializer.encode(res), false, true);
         });
 
-        handlers.put("addProduct", (address, bytes) -> new HandlerRes(bytes, false, true));
+        handlers.put("addProduct", (address, bytes) -> new HandlerRes(bytes, true, false));
 
         this.connection.initialize(processDBUpdate, afterDBStart, tablesToCreate, handlers);
     }

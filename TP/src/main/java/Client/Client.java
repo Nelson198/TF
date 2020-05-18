@@ -113,10 +113,10 @@ public class Client {
                 case 3:
                     System.out.println("Remove product(s):");
                     System.out.print("\t--> Product's identifier: ");
-                    int idProduct = Integer.parseInt(stdin.readLine());
+                    int idProd = Integer.parseInt(stdin.readLine());
                     System.out.print("\t--> Product's amount: ");
                     int quantity = readInt();
-                    cs.updateProduct(idProduct, -quantity);
+                    cs.updateProduct(idProd, -quantity);
                     waitConfirmation();
                     break;
 
@@ -133,10 +133,10 @@ public class Client {
 
     /**
      * Auxiliar function to uddate a product
-     * @param  Product p
+     * @param  p product
      * @throws IOException IOException
      */
-    private Product updateProduct(Product p) throws IOException {
+    private static Product updateProduct(Product p) throws IOException {
         while(true) {
             StringBuilder change = new StringBuilder();
             change.append("What do you want to change?\n")
@@ -146,7 +146,7 @@ public class Client {
                     .append("\t4 - Submit changes\n");
 
             clearTerminal();
-            String.out.print(change);
+            System.out.print(change);
 
             int update;
             do {
@@ -176,7 +176,6 @@ public class Client {
                     return p;
             }
         }
-        return p;
     }
 
     /**
@@ -185,7 +184,6 @@ public class Client {
      */
     private static void menuAdmin() throws IOException {
         while (true) {
-            clearTerminal();
             StringBuilder admin = new StringBuilder();
             admin.append("What action do you want you perform?\n")
                  .append("\t1 - Add a new product to the catalog\n")
@@ -217,7 +215,7 @@ public class Client {
                     System.out.print("Insert the product's initial amount: ");
                     int productAmount = Integer.parseInt(stdin.readLine());
 
-                    Product newProduct = new Product(null, productName, productDescription, productPrice, productAmount);
+                    Product newProduct = new Product(-1, productName, productDescription, productPrice, productAmount);
 
                     catalog.addNewProduct(newProduct);
                     waitConfirmation();
@@ -230,25 +228,25 @@ public class Client {
                     System.out.print("Insert the product's name: ");
                     int amount = Integer.parseInt(stdin.readLine());
 
-                    catalog.updateAmout(idProduct, amount);
+                    catalog.updateAmount(productId, amount);
                     waitConfirmation();
                     break;
 
                 case 3:
                     System.out.print("Insert the product's id: ");
-                    int productId = Integer.parseInt(stdin.readLine());
+                    int prodId = Integer.parseInt(stdin.readLine());
 
-                    Product toUpdate = catalog.getProduct(productId);
+                    Product toUpdate = catalog.getProduct(prodId);
 
-                    catalog.updateProduct(this.updateProduct(toUpdate));
+                    catalog.updateProduct(updateProduct(toUpdate));
                     waitConfirmation();
                     break;
 
                 case 4:
                     System.out.print("Insert the product's id: ");
-                    int productId = Integer.parseInt(stdin.readLine());
+                    int idProduct = Integer.parseInt(stdin.readLine());
 
-                    catalog.removeProduct(productId);
+                    catalog.removeProduct(idProduct);
                     waitConfirmation();
                     break;
 
@@ -262,7 +260,7 @@ public class Client {
      * Main menu
      * @throws IOException IOException
      */
-    private static void menu() throws IOException {
+    private static void menu() throws IOException, InterruptedException {
         while (true) {
             clearTerminal();
             StringBuilder main = new StringBuilder();

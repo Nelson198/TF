@@ -1,5 +1,6 @@
 package Client;
 
+import Helpers.CartUpdate;
 import Helpers.Product;
 import Helpers.Serializers;
 import Middleware.ClientConnection;
@@ -62,16 +63,16 @@ public class CatalogStub {
         return this.serializer.decode(res);
     }
 
-    public void updateAmount(String idProduct, int amount) {
-        CartUpdate toSend = new CartUpdate(null, idProduct, amount);
+    public void updateAmount(int idProduct, int amount) {
+        CartUpdate toSend = new CartUpdate(-1, idProduct, amount);
         this.connection.sendAndReceive("updateAmount", this.serializer.encode(toSend));
     }
 
     public void addNewProduct(Product newProduct) {
-        this.connection.sendAndReceive("newProduct", this.serializer.encode(newProduct));
+        this.connection.sendAndReceive("addProduct", this.serializer.encode(newProduct));
     }
 
-    public void removeProduct(String idProduct) {
+    public void removeProduct(int idProduct) {
         this.connection.sendAndReceive("removeProduct", this.serializer.encode(idProduct));
     }
 
@@ -79,8 +80,8 @@ public class CatalogStub {
         this.connection.sendAndReceive("updateProduct", this.serializer.encode(p));
     }
 
-    public Product getProduct(productId) {
-        byte[] res = this.connection.sendAndReceive("getProduct", this.serializer.encode(idProduct));
+    public Product getProduct(int productId) {
+        byte[] res = this.connection.sendAndReceive("getProduct", this.serializer.encode(productId));
         return this.serializer.decode(res);
     }
 }

@@ -20,7 +20,7 @@ import java.util.concurrent.Executors;
 public class ClientConnection {
     private final ManagedMessagingService ms;
     private final List<Address> servers;
-    private Address currentServer;
+    private int currentServer;
     private CompletableFuture<byte[]> res;
 
     /**
@@ -33,7 +33,8 @@ public class ClientConnection {
     public ClientConnection(Address address, List<Address> servers) throws ExecutionException, InterruptedException {
         this.servers = servers;
 
-        this.chooseServer();
+        Random rand = new Random();
+        this.currentServer = rand.nextInt(servers.size());
 
         this.ms = new NettyMessagingService("cluster", address, new MessagingConfig());
 
@@ -45,15 +46,6 @@ public class ClientConnection {
     }
 
     /**
-     * Choose one of the available servers to the client
-     */
-    public void chooseServer() { // TODO - improve this so that we don't end up looping and repeating the same process in sendAndReceive
-        Random rand = new Random();
-        int server = rand.nextInt(servers.size());
-        this.currentServer = servers.get(server);
-    }
-
-    /**
      * Send and receive a message
      * @param type Message's type
      * @param message Message's content
@@ -62,14 +54,19 @@ public class ClientConnection {
     public byte[] sendAndReceive(String type, byte[] message) {
         this.res = new CompletableFuture<>();
 
+        int initialServer = this.currentServer;
         while (true) {
-            CompletableFuture<Void> x = this.ms.sendAsync(this.currentServer, type, message);
+            CompletableFuture<Void> x = this.ms.sendAsync(this.servers.get(this.currentServer), type, message);
             try {
                 x.get();
                 return this.res.get();
             } catch (Exception e) {
                 System.out.println("Switching server ...");
-                this.chooseServer();
+                this.currentServer = (this.currentServer + 1) % this.servers.size();
+                if (this.currentServer == initialServer) {
+                    System.out.println("No servers available. Try again later...");
+                    System.exit(1);
+                }
             }
         }
     }
