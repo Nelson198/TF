@@ -82,14 +82,15 @@ public class CatalogSkeleton {
      * @return Product's price
      */
     public float getPrice(int idProduct) {
-        float price = 0;
+        float price = -1;
         try {
             // Create and execute statement
             Statement stmt = this.connection.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT price FROM product WHERE id = " + idProduct);
 
             // Get result from query
-            price = rs.getFloat("price");
+            if (rs.next())
+                price = rs.getFloat("price");
 
             // Clean up
             rs.close();
@@ -107,14 +108,15 @@ public class CatalogSkeleton {
      * @return Product's amount
      */
     public int getAmount(int idProduct) {
-        int amount = 0;
+        int amount = -1;
         try {
             // Create and execute statement
             Statement stmt = this.connection.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT amount FROM product WHERE id = " + idProduct);
 
             // Get result from query
-            amount = rs.getInt("amount");
+            if (rs.next())
+                amount = rs.getInt("amount");
 
             // Clean up
             rs.close();

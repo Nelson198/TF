@@ -338,17 +338,23 @@ public class Client {
 
                 case 4:
                     System.out.print("Insert the product's identifier: ");
-                    String productId = stdin.readLine();
+                    int productId = readInt();
                     float price = catalog.getPrice(productId);
-                    System.out.println("This product will cost you " + price + "€ per unit.");
+                    if (price == -1)
+                        System.out.println("This product is not available.");
+                    else
+                        System.out.println("This product will cost you " + price + "€ per unit.");
                     waitConfirmation();
                     break;
 
                 case 5:
                     System.out.print("Insert the product's identifier: ");
-                    productId = stdin.readLine();
+                    productId = readInt();
                     int amount = catalog.getAmount(productId);
-                    System.out.println("We have " + amount + " units available at the moment");
+                    if (amount == -1)
+                        System.out.println("This product is not available.");
+                    else
+                        System.out.println("We have " + amount + " units available at the moment");
                     waitConfirmation();
                     break;
 
@@ -357,7 +363,7 @@ public class Client {
                     break;
 
                 case 7:
-                    System.exit(1);
+                    System.exit(0);
                     break;
             }
         }

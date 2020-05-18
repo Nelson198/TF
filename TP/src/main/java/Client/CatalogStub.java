@@ -62,7 +62,7 @@ public class CatalogStub {
      * @param idProduct Product's identifier
      * @return Product's price
      */
-    public float getPrice(String idProduct) {
+    public float getPrice(int idProduct) {
         byte[] res = this.connection.sendAndReceive("getPrice", this.serializer.encode(idProduct));
         return this.serializer.decode(res);
     }
@@ -72,7 +72,7 @@ public class CatalogStub {
      * @param idProduct Product's identifier
      * @return Product's amount
      */
-    public int getAmount(String idProduct) {
+    public int getAmount(int idProduct) {
         byte[] res = this.connection.sendAndReceive("getAmount", this.serializer.encode(idProduct));
         return this.serializer.decode(res);
     }
