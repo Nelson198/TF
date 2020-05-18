@@ -53,7 +53,7 @@ public class Supermarket {
      * @throws UnknownHostException UnknownHostException
      */
     public void initialize() throws SpreadException, UnknownHostException {
-        BiFunction<DBUpdate, Connection, Object> processDBUpdate = (dbUpdate, dbConnection) -> {
+        BiFunction<DBUpdate, Connection, byte[]> processDBUpdate = (dbUpdate, dbConnection) -> {
             switch (dbUpdate.getSecondaryType()) {
                 // Cart
                 case "newCart":
@@ -62,55 +62,55 @@ public class Supermarket {
 
                     this.connection.startTimer(serializer.encode(cs.getIdCart()), "deleteCart", 180); // TODO - 180s for the moment
 
-                    return cs.getIdCart();
+                    return serializer.encode(cs.getIdCart());
 
                 case "deleteCart":
                     int objectID = serializer.decode(dbUpdate.getUpdateInfo());
                     this.carts.get(objectID).delete();
                     this.carts.remove(objectID);
 
-                    return null;
+                    return serializer.encode(null);
 
                 case "checkout":
                     int objID = serializer.decode(dbUpdate.getUpdateInfo());
                     boolean res = this.carts.get(objID).checkout();
                     this.carts.remove(objID);
 
-                    return res;
+                    return serializer.encode(res);
 
                 case "updateCart":
                     CartUpdate cartUpdate = serializer.decode(dbUpdate.getUpdateInfo());
                     CartSkeleton cart = this.carts.get(cartUpdate.getIdCart());
                     cart.updateProduct(cartUpdate.getIdProduct(), cartUpdate.getAmount());
 
-                    return null;
+                    return serializer.encode(null);
 
                 // Catalog
                 case "addProduct":
                     Product p = serializer.decode(dbUpdate.getUpdateInfo());
                     catalog.addProduct(p);
 
-                    return null;
+                    return serializer.encode(null);
 
                 case "removeProduct":
                     int prodId = serializer.decode(dbUpdate.getUpdateInfo());
                     catalog.removeProduct(prodId);
 
-                    return null;
+                    return serializer.encode(null);
 
                 case "updateAmount":
                     CartUpdate ua = serializer.decode(dbUpdate.getUpdateInfo());
                     catalog.updateAmount(ua.getIdProduct(), ua.getAmount());
 
-                    return null;
+                    return serializer.encode(null);
 
                 case "updateProduct":
                     Product p4 = serializer.decode(dbUpdate.getUpdateInfo());
                     catalog.updateProduct(p4);
 
-                    return null;
+                    return serializer.encode(null);
             }
-            return null;
+            return serializer.encode(null);
         };
 
         Consumer<Connection> afterDBStart = (dbConnection) -> this.catalog = new CatalogSkeleton(dbConnection);

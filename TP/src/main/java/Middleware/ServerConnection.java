@@ -140,7 +140,7 @@ public class ServerConnection {
      * @throws SpreadException SpreadException
      * @throws UnknownHostException UnknownHostException
      */
-    public void initialize(BiFunction<DBUpdate, Connection, Object> processDBUpdate, Consumer<Connection> afterDBStart, List<String> tablesToCreate, Map<String, BiFunction<Address, byte[], HandlerRes>> handlers) throws SpreadException, UnknownHostException {
+    public void initialize(BiFunction<DBUpdate, Connection, byte[]> processDBUpdate, Consumer<Connection> afterDBStart, List<String> tablesToCreate, Map<String, BiFunction<Address, byte[], HandlerRes>> handlers) throws SpreadException, UnknownHostException {
         // Initialize the spread connection
         this.spreadConnection = new SpreadConnection();
         this.spreadConnection.connect(InetAddress.getByName("localhost"), 4803, this.port, false, true);
@@ -222,9 +222,9 @@ public class ServerConnection {
                     if (aux.dbConnection == null) {
                         aux.pendingQueries.add(dbUpdate);
                     } else {
-                        Object res = processDBUpdate.apply(dbUpdate, aux.dbConnection);
+                        byte[] res = processDBUpdate.apply(dbUpdate, aux.dbConnection);
                         if (dbUpdate.getServer() != null && dbUpdate.getServer().equals(aux.spreadConnection.getPrivateGroup().toString()))
-                            aux.ms.sendAsync(Address.from(dbUpdate.getClient()), "res", aux.serializer.encode(res));
+                            aux.ms.sendAsync(Address.from(dbUpdate.getClient()), "res", res);
                     }
                 }
             }
