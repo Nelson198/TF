@@ -273,8 +273,18 @@ public class ServerConnection {
                 } else if (info.isCausedByLeave()) {
                     primaryAfter.remove(info.getLeft());
                 } else if (info.isCausedByNetwork()) {
-                    // TODO - deal with network partitions
-                    //        see info.getMyVirtualSynchronySet(), info.getStayed(), info.getVirtualSynchronySets()
+                    // TODO - review this (and test?)
+                    boolean inGroup = false;
+                    for (SpreadGroup member : info.getMyVirtualSynchronySet().getMembers()) {
+                        if (member.equals(spreadConnection.getPrivateGroup())) {
+                            inGroup = true;
+                            break;
+                        }
+                    }
+                    if (!inGroup) {
+                        System.out.println("Server is going to be disconnected due to a network partition");
+                        System.exit(1);
+                    }
                 }
             }
         });

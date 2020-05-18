@@ -44,7 +44,7 @@ public class ClientConnection {
         this.ms.start().get();
     }
 
-    public void chooseServer() {
+    public void chooseServer() { // TODO - improve this so that we don't end up looping and repeating the same process in sendAndReceive
         Random rand = new Random();
         int server = rand.nextInt(servers.size());
         this.currentServer = servers.get(server);
