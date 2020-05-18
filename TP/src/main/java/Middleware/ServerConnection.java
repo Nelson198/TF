@@ -165,16 +165,38 @@ public class ServerConnection {
 
                             File file = new File("clusterDB" + port + "/backup.tar.gz");
                             file.delete();
+
+                            // Save the log in memory and delete from the filesystem
+                            byte[] logFileContent = null;
+                            try {
+                                logFileContent = Files.readAllBytes(Paths.get("clusterDB" + port + "/db.log"));
+                            } catch (Exception ignored) {}
+
+                            File logFile = new File("clusterDB" + port + "/db.log");
+                            logFile.delete();
+
+                            aux.dbConnection = DriverManager.getConnection("jdbc:hsqldb:file:clusterDB" + port + "/db", "sa", "");
+
+                            // Write the log after starting the server, so that it isn't cleared
+                            if (logFileContent != null) {
+                                FileOutputStream logStream = new FileOutputStream("clusterDB" + port + "/db.log");
+                                logStream.write(logFileContent);
+                                logStream.close();
+                            }
                         } else {
                             System.out.println("Received incremental backup");
-                            byte[] log = dbMsg.getBackup();
 
+                            // Delete previous log from filesystem
+                            File logFile = new File("clusterDB" + port + "/db.log");
+                            logFile.delete();
+
+                            aux.dbConnection = DriverManager.getConnection("jdbc:hsqldb:file:clusterDB" + port + "/db", "sa", "");
+
+                            // Write the log after starting the server, so that it isn't cleared
                             FileOutputStream os = new FileOutputStream("clusterDB" + port + "/db.log");
-                            os.write(log);
+                            os.write(dbMsg.getBackup());
                             os.close();
                         }
-
-                        aux.dbConnection = DriverManager.getConnection("jdbc:hsqldb:file:clusterDB" + port + "/db", "sa", "");
 
                         for (DBUpdate dbUpdate : aux.pendingQueries)
                             processDBUpdate.apply(dbUpdate, aux.dbConnection);

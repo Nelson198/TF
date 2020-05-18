@@ -6,8 +6,8 @@ package Messages;
 public class DBUpdate implements Message {
     private final Object updateInfo;
 
-    private final String client; // TODO - should be Address, but the serializer complains
-    private final String server; // TODO - should be SpreadGroup, but the serializer complains
+    private final String client;
+    private final String server;
 
     private final String secondaryType;
 
