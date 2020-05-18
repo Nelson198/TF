@@ -64,7 +64,7 @@ public class ServerConnection {
     List<DBUpdate> pendingQueries = new ArrayList<>();
 
     // Last version of DB each server has
-    HashMap<String, Integer> lastDBVersion = new HashMap<>();
+    Map<String, Integer> lastDBVersion = new HashMap<>();
 
     /**
      * Parameterized constructor
