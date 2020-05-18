@@ -14,6 +14,7 @@ public class Serializers {
                                                                        .addType(Float.class)
                                                                        .addType(Integer.class)
                                                                        .addType(String.class)
+                                                                       .addType(Product.class)
                                                                        .build();
 
     public static Serializer serverSerializer = new SerializerBuilder().addType(DBUpdate.class)

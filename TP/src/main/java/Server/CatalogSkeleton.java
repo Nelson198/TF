@@ -124,4 +124,45 @@ public class CatalogSkeleton {
         }
         return amount;
     }
+
+    /**
+     * Add a product to the catalog
+     * @param p Product
+     */
+    public void addProduct(Product p) {
+        try {
+            // Create and execute statement
+            Statement stmt = this.connection.createStatement();
+
+            StringBuilder sb = new StringBuilder();
+            String query = sb.append("EXISTS (SELECT * FROM product WHERE id=").append(p.getId()).append(")").toString();
+            sb.setLength(0);
+
+            ResultSet rs = stmt.executeQuery(query);
+            boolean exists = rs.getBoolean(1);
+
+            if (exists) {
+                query = sb.append("UPDATE cart SET amount = amount + ").append(p.getAmount())
+                                                                       .append(" WHERE id=").append(p.getId())
+                                                                       .toString();
+                sb.setLength(0);
+                stmt.executeUpdate(query);
+            } else {
+                query = sb.append("INSERT INTO product VALUES(").append(p.getName()).append(", ")
+                                                                .append(p.getDescription()).append(", ")
+                                                                .append(p.getPrice()).append(", ")
+                                                                .append(p.getAmount()).append(")")
+                                                                .toString();
+                stmt.executeUpdate(query);
+                sb.setLength(0);
+            }
+
+            // Clean up
+            rs.close();
+            stmt.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+    }
 }

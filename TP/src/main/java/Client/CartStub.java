@@ -34,7 +34,7 @@ public class CartStub {
      */
     public void updateProduct(int idProduct, int amount) {
         CartUpdate toSend = new CartUpdate(this.idCart, idProduct, amount);
-        this.connection.sendAndReceive("updateProduct", this.serializer.encode(toSend));
+        this.connection.sendAndReceive("updateCart", this.serializer.encode(toSend));
     }
 
     /**
