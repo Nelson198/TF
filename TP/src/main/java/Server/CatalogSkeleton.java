@@ -137,7 +137,7 @@ public class CatalogSkeleton {
             Statement stmt = this.connection.createStatement();
 
             StringBuilder sb = new StringBuilder();
-            String query = sb.append("EXISTS (SELECT * FROM product WHERE id = ").append(productId).append(")").toString();
+            String query = sb.append("SELECT EXISTS (SELECT * FROM product WHERE id = ").append(productId).append(")").toString();
             sb.setLength(0);
 
             ResultSet rs = stmt.executeQuery(query);
@@ -172,7 +172,7 @@ public class CatalogSkeleton {
             Statement stmt = this.connection.createStatement();
 
             StringBuilder sb = new StringBuilder();
-            String query = sb.append("EXISTS (SELECT * FROM product WHERE id = ").append(p.getId()).append(")").toString();
+            String query = sb.append("SELECT EXISTS (SELECT * FROM product WHERE id = ").append(p.getId()).append(")").toString();
             sb.setLength(0);
 
             ResultSet rs = stmt.executeQuery(query);
@@ -184,10 +184,10 @@ public class CatalogSkeleton {
                           .toString();
             } else {
                 query = sb.append("INSERT INTO product VALUES(").append(p.getName()).append(", ")
-                        .append(p.getDescription()).append(", ")
-                        .append(p.getPrice()).append(", ")
-                        .append(p.getAmount()).append(")")
-                        .toString();
+                          .append(p.getDescription()).append(", ")
+                          .append(p.getPrice()).append(", ")
+                          .append(p.getAmount()).append(")")
+                          .toString();
             }
             sb.setLength(0);
             stmt.executeUpdate(query);

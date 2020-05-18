@@ -85,7 +85,7 @@ public class CartSkeleton {
             Statement stmt = this.connection.createStatement();
 
             StringBuilder sb = new StringBuilder();
-            String query = sb.append("EXISTS (SELECT * FROM cart WHERE id=").append(this.idCart).append(" AND idProduct=").append(idProduct).append(")").toString();
+            String query = sb.append("SELECT EXISTS (SELECT * FROM cart WHERE id=").append(this.idCart).append(" AND idProduct=").append(idProduct).append(")").toString();
             sb.setLength(0);
 
             ResultSet rs = stmt.executeQuery(query);

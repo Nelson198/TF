@@ -45,16 +45,36 @@ public class Client {
     }
 
     /**
-     * readInt
+     * Read an integer value
      * @return User's option
      * @throws IOException IOException
      */
     private static int readInt() throws IOException {
         while (true) {
             try {
+                System.out.print("> ");
                 return Integer.parseInt(stdin.readLine());
             } catch (NumberFormatException exc) {
-                System.out.println("Please enter a number.");
+                System.out.println("Invalid number! Please enter a correct number.");
+            }
+        }
+    }
+
+    /**
+     * Read a string
+     * @return User's option
+     */
+    private static String readString() {
+        while (true) {
+            try {
+                System.out.print("> ");
+                String s = stdin.readLine();
+                if (s.isEmpty()) {
+                    continue;
+                }
+                return s;
+            } catch (Exception e) {
+                System.out.println("Invalid word(s)! Please enter a valid text.");
             }
         }
     }
@@ -69,7 +89,7 @@ public class Client {
         while(true) {
             clearTerminal();
             StringBuilder cart = new StringBuilder();
-            cart.append("Welcome to your cart. Please choose an option:\n")
+            cart.append("Welcome to your cart. Please choose an option:\n\n")
                 .append("1 - Get products\n")
                 .append("2 - Add product\n")
                 .append("3 - Remove product\n")
@@ -140,11 +160,11 @@ public class Client {
     private static Product updateProduct(Product p) throws IOException {
         while(true) {
             StringBuilder change = new StringBuilder();
-            change.append("What do you want to change ?\n")
-                  .append("\t1 - Name\n")
-                  .append("\t2 - Description\n")
-                  .append("\t3 - Price\n")
-                  .append("\t4 - Submit changes\n");
+            change.append("Welcome to product's menu. Please choose an option:\n\n")
+                  .append("1 - Change name\n")
+                  .append("2 - Change description\n")
+                  .append("3 - Change price\n")
+                  .append("4 - Submit changes\n");
 
             clearTerminal();
             System.out.print(change);
@@ -186,12 +206,12 @@ public class Client {
     private static void menuAdmin() throws IOException {
         while (true) {
             StringBuilder admin = new StringBuilder();
-            admin.append("Welcome to administrator's menu. Please choose an option:\n")
-                 .append("\t1 - Add a new product to the catalog\n")
-                 .append("\t2 - Update a product's amount in the catalog\n")
-                 .append("\t3 - Other updates on a product in the catalog\n")
-                 .append("\t4 - Remove a product from the catalog\n")
-                 .append("\t5 - Go back\n");
+            admin.append("Welcome to administrator's menu. Please choose an option:\n\n")
+                 .append("1 - Add a new product to the catalog\n")
+                 .append("2 - Update a product's amount in the catalog\n")
+                 .append("3 - Other updates on a product in the catalog\n")
+                 .append("4 - Remove a product from the catalog\n")
+                 .append("5 - Go back\n");
 
             clearTerminal();
             System.out.println(admin);
@@ -265,14 +285,14 @@ public class Client {
         while (true) {
             clearTerminal();
             StringBuilder main = new StringBuilder();
-            main.append("Welcome to our supermarket. Please choose an option:\n")
-                .append("\t1 - Create a cart\n")
-                .append("\t2 - Check/Update a cart\n")
-                .append("\t3 - See catalog\n")
-                .append("\t4 - Check a product's price\n")
-                .append("\t5 - Check a product's availability\n")
-                .append("\t6 - Login admin\n")
-                .append("\t7 - Exit\n");
+            main.append("Welcome to our supermarket. Please choose an option:\n\n")
+                .append("1 - Create a cart\n")
+                .append("2 - Check/Update a cart\n")
+                .append("3 - See catalog\n")
+                .append("4 - Check a product's price\n")
+                .append("5 - Check a product's availability\n")
+                .append("6 - Login admin\n")
+                .append("7 - Exit\n");
 
             System.out.println(main);
 
@@ -292,17 +312,27 @@ public class Client {
                     break;
 
                 case 2:
-                    System.out.println("Choose a cart to check/update: ");
-                    for (String c : carts.keySet()) {
-                        System.out.println("\t" + c);
+                    if (carts.keySet().size() == 0) {
+                        System.out.println("There is no cart created so far. Please create one.");
+                        waitConfirmation();
+                    } else {
+                        System.out.println("Please choose a cart to check / update:\n");
+                        for (String c : carts.keySet()) {
+                            System.out.println("--> " + c);
+                        }
+                        System.out.println();
+                        String cartName = readString();
+                        menuCart(cartName);
                     }
-                    String cartName = stdin.readLine();
-                    menuCart(cartName);
                     break;
 
                 case 3:
                     String info = catalog.getCatalog();
-                    System.out.println(info);
+                    if (info.isEmpty()) {
+                        System.out.println("There is no information in the catalog yet.");
+                    } else {
+                        System.out.println(info);
+                    }
                     waitConfirmation();
                     break;
 
@@ -323,7 +353,6 @@ public class Client {
                     break;
 
                 case 6:
-                    clearTerminal();
                     menuAdmin();
                     break;
 

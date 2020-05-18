@@ -32,14 +32,18 @@ public class CatalogStub {
         byte[] res = this.connection.sendAndReceive("getCatalog", this.serializer.encode(null));
         List<Product> catalog = this.serializer.decode(res);
 
-        StringBuilder sb = new StringBuilder("Catalog:\n");
-        for (Product p : catalog) {
-            sb.append("Product nº ").append(p.getId()).append("\n")
-              .append("\t--> Name: ").append(p.getName()).append("\n")
-              .append("\t--> Description: ").append(p.getDescription()).append("\n")
-              .append("\t--> Price: ").append(p.getPrice()).append(" €\n")
-              .append("\t--> Amount: ").append(p.getAmount()).append(" unit(s)\n");
+        StringBuilder sb = new StringBuilder();
+        if (catalog.size() != 0) {
+            for (Product p : catalog) {
+                sb.append("Catalog:\n")
+                  .append("Product nº ").append(p.getId()).append("\n")
+                  .append("\t--> Name: ").append(p.getName()).append("\n")
+                  .append("\t--> Description: ").append(p.getDescription()).append("\n")
+                  .append("\t--> Price: ").append(p.getPrice()).append(" €\n")
+                  .append("\t--> Amount: ").append(p.getAmount()).append(" unit(s)\n");
+            }
         }
+
         return sb.toString();
     }
 

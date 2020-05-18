@@ -175,7 +175,16 @@ public class Supermarket {
         this.connection.initialize(processDBUpdate, afterDBStart, tablesToCreate, handlers);
     }
 
+    /**
+     * clearTerminal
+     */
+    private static void clearTerminal() {
+        System.out.print("\033[H\033[2J");
+        System.out.flush();
+    }
+
     public static void main(String[] args) throws InterruptedException, SpreadException, ExecutionException, UnknownHostException {
+        clearTerminal();
         if (args.length != 1) {
             System.out.println("Please indicate the server port.");
             System.exit(1);
