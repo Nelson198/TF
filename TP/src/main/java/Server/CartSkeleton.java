@@ -85,14 +85,14 @@ public class CartSkeleton {
             Statement stmt = this.connection.createStatement();
 
             StringBuilder sb = new StringBuilder();
-            String query = sb.append("SELECT EXISTS (SELECT * FROM cart WHERE id=").append(this.idCart).append(" AND idProduct=").append(idProduct).append(")").toString();
+            String query = sb.append("SELECT COUNT(*) FROM cart WHERE id=").append(this.idCart).append(" AND idProduct=").append(idProduct).append(" LIMIT 1").toString(); // TODO - confirm query
             sb.setLength(0);
 
             ResultSet rs = stmt.executeQuery(query);
-            boolean exists = rs.getBoolean(1);
+            boolean exists = rs.getInt(1) == 1;
 
             if (exists && amount < 0) { // Remove product
-                query = sb.append("SELECT amount FROM cart WHERE id=").append(this.idCart).append(" AND idProduct=").append(idProduct).append(")").toString();
+                query = sb.append("SELECT amount FROM cart WHERE id=").append(this.idCart).append(" AND idProduct=").append(idProduct).toString();
                 sb.setLength(0);
 
                 rs = stmt.executeQuery(query);
