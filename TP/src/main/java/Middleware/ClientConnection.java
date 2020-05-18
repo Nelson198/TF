@@ -44,6 +44,9 @@ public class ClientConnection {
         this.ms.start().get();
     }
 
+    /**
+     * Choose one of the available servers to the client
+     */
     public void chooseServer() { // TODO - improve this so that we don't end up looping and repeating the same process in sendAndReceive
         Random rand = new Random();
         int server = rand.nextInt(servers.size());
@@ -65,7 +68,7 @@ public class ClientConnection {
                 x.get();
                 return this.res.get();
             } catch (Exception e) {
-                System.out.println("Switching server...");
+                System.out.println("Switching server ...");
                 this.chooseServer();
             }
         }
