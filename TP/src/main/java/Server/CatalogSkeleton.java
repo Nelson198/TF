@@ -140,7 +140,7 @@ public class CatalogSkeleton {
             Statement stmt = this.connection.createStatement();
 
             StringBuilder sb = new StringBuilder();
-            String query = sb.append("SELECT COUNT(*) FROM product WHERE id = ").append(productId).append(" LIMIT 1").toString(); // TODO - confirm query
+            String query = sb.append("SELECT COUNT(*) FROM product WHERE id=").append(productId).toString();
             sb.setLength(0);
 
             ResultSet rs = stmt.executeQuery(query);
@@ -148,7 +148,6 @@ public class CatalogSkeleton {
 
             // Get result from query
             boolean exists = rs.getInt(1) == 1;
-
             if (exists) {
                 query = sb.append("UPDATE product SET amount = amount + ").append(amount)
                           .append(" WHERE id = ").append(productId)
@@ -176,13 +175,12 @@ public class CatalogSkeleton {
             Statement stmt = this.connection.createStatement();
 
             StringBuilder sb = new StringBuilder();
-            String query = sb.append("SELECT COUNT(*) FROM product WHERE id = ").append(p.getId()).append(" LIMIT 1").toString(); // TODO - confirm query
+            String query = sb.append("SELECT COUNT(*) FROM product WHERE id = ").append(p.getId()).toString();
             sb.setLength(0);
 
             ResultSet rs = stmt.executeQuery(query);
             rs.next();
             boolean exists = rs.getInt(1) == 1;
-
             if (exists) {
                 query = sb.append("UPDATE product SET amount = amount + ").append(p.getAmount())
                           .append(" WHERE id=").append(p.getId())

@@ -60,7 +60,7 @@ public class Supermarket {
                     CartSkeleton cs = new CartSkeleton(dbConnection);
                     this.carts.put(cs.getIdCart(), cs);
 
-                    this.connection.startTimer(serializer.encode(cs.getIdCart()), "deleteCart", 180); // TODO - 180s for the moment
+                    this.connection.startTimer(serializer.encode(cs.getIdCart()), "deleteCart", 5*60); // 5min seems to be a good cart lifetime
 
                     return serializer.encode(cs.getIdCart());
 

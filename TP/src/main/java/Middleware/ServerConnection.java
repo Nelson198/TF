@@ -312,7 +312,7 @@ public class ServerConnection {
                             break;
                         }
                     }
-                    if (!inGroup) {
+                    if (!inGroup) { // TODO - figure out what to do if the server is no longer in the group
                         System.out.println("Server is going to be disconnected due to a network partition");
                         System.exit(1);
                     }
