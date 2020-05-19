@@ -66,8 +66,11 @@ public class Supermarket {
 
                 case "deleteCart":
                     int objectID = serializer.decode(dbUpdate.getUpdateInfo());
-                    this.carts.get(objectID).delete();
-                    this.carts.remove(objectID);
+                    CartSkeleton cartSkeleton = this.carts.get(objectID);
+                    if (cartSkeleton != null) {
+                        cartSkeleton.delete();
+                        this.carts.remove(objectID);
+                    }
 
                     return serializer.encode(null);
 

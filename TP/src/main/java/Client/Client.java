@@ -107,6 +107,11 @@ public class Client {
             switch (choice) {
                 case 1:
                     List<Product> products = cs.getProducts();
+                    if (products.size() == 0) {
+                        System.out.println("This cart has no products yet");
+                        waitConfirmation();
+                        break;
+                    }
 
                     StringBuilder sb = new StringBuilder();
                     sb.append("This cart has the following products:\n\n");
@@ -246,7 +251,7 @@ public class Client {
                     System.out.print("Insert the product's id: ");
                     int productId = Integer.parseInt(stdin.readLine());
 
-                    System.out.print("Insert the product's name: ");
+                    System.out.print("Insert the product's amount: ");
                     int amount = Integer.parseInt(stdin.readLine());
 
                     catalog.updateAmount(productId, amount);
@@ -258,6 +263,11 @@ public class Client {
                     int prodId = Integer.parseInt(stdin.readLine());
 
                     Product toUpdate = catalog.getProduct(prodId);
+                    if (toUpdate == null) {
+                        System.out.println("The product with id " + prodId + " does not exist");
+                        waitConfirmation();
+                        break;
+                    }
 
                     catalog.updateProduct(updateProduct(toUpdate));
                     waitConfirmation();
@@ -322,7 +332,12 @@ public class Client {
                         }
                         System.out.println();
                         String cartName = readString();
-                        menuCart(cartName);
+                        if (carts.containsKey(cartName))
+                            menuCart(cartName);
+                        else {
+                            System.out.println("That cart does not exist");
+                            waitConfirmation();
+                        }
                     }
                     break;
 

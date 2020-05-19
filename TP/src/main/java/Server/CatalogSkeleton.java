@@ -64,7 +64,8 @@ public class CatalogSkeleton {
             ResultSet rs = stmt.executeQuery("SELECT * FROM product WHERE id = " + idProduct);
 
             // Get result from query
-            res = new Product(rs.getInt("id"), rs.getString("name"), rs.getString("description"), rs.getFloat("price"), rs.getInt("amount"));
+            if (rs.next())
+                res = new Product(rs.getInt("id"), rs.getString("name"), rs.getString("description"), rs.getFloat("price"), rs.getInt("amount"));
 
             // Clean up
             rs.close();
@@ -143,6 +144,7 @@ public class CatalogSkeleton {
             sb.setLength(0);
 
             ResultSet rs = stmt.executeQuery(query);
+            rs.next();
 
             // Get result from query
             boolean exists = rs.getInt(1) == 1;
@@ -178,6 +180,7 @@ public class CatalogSkeleton {
             sb.setLength(0);
 
             ResultSet rs = stmt.executeQuery(query);
+            rs.next();
             boolean exists = rs.getInt(1) == 1;
 
             if (exists) {
@@ -185,8 +188,9 @@ public class CatalogSkeleton {
                           .append(" WHERE id=").append(p.getId())
                           .toString();
             } else {
-                query = sb.append("INSERT INTO product VALUES(").append(p.getName()).append(", ")
-                          .append(p.getDescription()).append(", ")
+                query = sb.append("INSERT INTO product (name, description, price, amount) VALUES('")
+                          .append(p.getName()).append("', '")
+                          .append(p.getDescription()).append("', ")
                           .append(p.getPrice()).append(", ")
                           .append(p.getAmount()).append(")")
                           .toString();
@@ -235,9 +239,9 @@ public class CatalogSkeleton {
             Statement stmt = this.connection.createStatement();
 
             StringBuilder sb = new StringBuilder();
-            String query = sb.append("UPDATE product SET name = ").append(p.getName())
-                             .append(", description = ").append(p.getDescription())
-                             .append(", price = ").append(p.getPrice())
+            String query = sb.append("UPDATE product SET name = '").append(p.getName())
+                             .append("', description = '").append(p.getDescription())
+                             .append("', price = ").append(p.getPrice())
                              .append(" WHERE id = ").append(p.getId())
                              .toString();
             sb.setLength(0);
