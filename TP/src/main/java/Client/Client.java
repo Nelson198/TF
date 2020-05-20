@@ -61,21 +61,33 @@ public class Client {
     }
 
     /**
-     * Read a string
+     * Read a float value
      * @return User's option
+     * @throws IOException IOException
      */
-    private static String readString() {
+    private static float readFloat() throws IOException {
         while (true) {
             try {
                 System.out.print("> ");
-                String s = stdin.readLine();
-                if (s.isEmpty()) {
-                    continue;
-                }
-                return s;
-            } catch (Exception e) {
-                System.out.println("Invalid word(s)! Please enter a valid text.");
+                return Float.parseFloat(stdin.readLine());
+            } catch (NumberFormatException exc) {
+                System.out.println("Invalid number! Please enter a correct number.");
             }
+        }
+    }
+
+    /**
+     * Read a string
+     * @return User's option
+     */
+    private static String readString() throws IOException {
+        while (true) {
+            System.out.print("> ");
+            String s = stdin.readLine();
+            if (s.isEmpty()) {
+                continue;
+            }
+            return s;
         }
     }
 
@@ -129,7 +141,7 @@ public class Client {
                 case 2:
                     System.out.println("Add product(s):");
                     System.out.print("\t--> Product's identifier: ");
-                    int idProduct = Integer.parseInt(stdin.readLine());
+                    int idProduct = readInt();
                     System.out.print("\t--> Product's amount: ");
                     int amount = readInt();
                     cs.updateProduct(idProduct, amount);
@@ -139,7 +151,7 @@ public class Client {
                 case 3:
                     System.out.println("Remove product(s):");
                     System.out.print("\t--> Product's identifier: ");
-                    int idProd = Integer.parseInt(stdin.readLine());
+                    int idProd = readInt();
                     System.out.print("\t--> Product's amount: ");
                     int quantity = readInt();
                     cs.updateProduct(idProd, -quantity);
@@ -182,19 +194,19 @@ public class Client {
             switch(update) {
                 case 1:
                     System.out.print("Insert a new name: ");
-                    String productName = stdin.readLine();
+                    String productName = readString();
                     p.setName(productName);
                     break;
 
                 case 2:
                     System.out.print("Insert the new description: ");
-                    String productDescription = stdin.readLine();
+                    String productDescription = readString();
                     p.setDescription(productDescription);
                     break;
 
                 case 3:
                     System.out.print("Insert the new price: ");
-                    float productPrice = Float.parseFloat(stdin.readLine());
+                    float productPrice = readFloat();
                     p.setPrice(productPrice);
                     break;
 
@@ -230,16 +242,16 @@ public class Client {
             switch(choice) {
                 case 1:
                     System.out.print("Insert the product's name: ");
-                    String productName = stdin.readLine();
+                    String productName = readString();
 
                     System.out.print("Insert a description to the product: ");
-                    String productDescription = stdin.readLine();
+                    String productDescription = readString();
 
                     System.out.print("Insert the product's price: ");
-                    float productPrice = Float.parseFloat(stdin.readLine());
+                    float productPrice = readFloat();
 
                     System.out.print("Insert the product's initial amount: ");
-                    int productAmount = Integer.parseInt(stdin.readLine());
+                    int productAmount = readInt();
 
                     Product newProduct = new Product(-1, productName, productDescription, productPrice, productAmount);
 
@@ -249,10 +261,10 @@ public class Client {
 
                 case 2:
                     System.out.print("Insert the product's id: ");
-                    int productId = Integer.parseInt(stdin.readLine());
+                    int productId = readInt();
 
                     System.out.print("Insert the product's amount: ");
-                    int amount = Integer.parseInt(stdin.readLine());
+                    int amount = readInt();
 
                     catalog.updateAmount(productId, amount);
                     waitConfirmation();
@@ -260,7 +272,7 @@ public class Client {
 
                 case 3:
                     System.out.print("Insert the product's id: ");
-                    int prodId = Integer.parseInt(stdin.readLine());
+                    int prodId = readInt();
 
                     Product toUpdate = catalog.getProduct(prodId);
                     if (toUpdate == null) {
@@ -275,7 +287,7 @@ public class Client {
 
                 case 4:
                     System.out.print("Insert the product's id: ");
-                    int idProduct = Integer.parseInt(stdin.readLine());
+                    int idProduct = readInt();
 
                     catalog.removeProduct(idProduct);
                     waitConfirmation();
@@ -315,7 +327,7 @@ public class Client {
             switch (choice) {
                 case 1:
                     System.out.print("Choose a name for your cart: ");
-                    String name = stdin.readLine();
+                    String name = readString();
                     CartStub cart = new CartStub(connection);
                     carts.put(name, cart);
                     menuCart(name);
