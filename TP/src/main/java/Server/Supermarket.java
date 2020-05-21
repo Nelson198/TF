@@ -76,15 +76,21 @@ public class Supermarket {
 
                 case "checkout":
                     int objID = serializer.decode(dbUpdate.getUpdateInfo());
-                    boolean res = this.carts.get(objID).checkout();
-                    this.carts.remove(objID);
+
+                    Boolean res = null;
+                    CartSkeleton cart = this.carts.get(objID);
+                    if (cart != null) {
+                        res = cart.checkout();
+                        this.carts.remove(objID);
+                    }
 
                     return serializer.encode(res);
 
                 case "updateCart":
                     CartUpdate cartUpdate = serializer.decode(dbUpdate.getUpdateInfo());
-                    CartSkeleton cart = this.carts.get(cartUpdate.getIdCart());
-                    cart.updateProduct(cartUpdate.getIdProduct(), cartUpdate.getAmount());
+                    CartSkeleton cartSkeleton1 = this.carts.get(cartUpdate.getIdCart());
+                    if (cartSkeleton1 != null)
+                        cartSkeleton1.updateProduct(cartUpdate.getIdProduct(), cartUpdate.getAmount());
 
                     return serializer.encode(null);
 
@@ -134,7 +140,11 @@ public class Supermarket {
 
         handlers.put("getProducts", (address, bytes) -> {
             int idCart = serializer.decode(bytes);
-            List<Product> res = new ArrayList<>(carts.get(idCart).getProducts());
+
+            List<Product> res = null;
+            CartSkeleton cart = carts.get(idCart);
+            if (cart != null)
+                res = new ArrayList<>(cart.getProducts());
 
             return new HandlerRes(serializer.encode(res), false, true);
         });
