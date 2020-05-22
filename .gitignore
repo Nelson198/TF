@@ -10,12 +10,12 @@
 
 # IntelliJ
 .idea
-.iml
 .DS_Store
 .classpath
 .project
 .settings
 target/
+*.iml
 
 # Spread
 Spread 5.0.1/
