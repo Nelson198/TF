@@ -56,7 +56,7 @@ public class CartSkeleton {
         try {
             // Create and execute statement
             Statement stmt = this.connection.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT product.id, product.name, product.description, product.price, cartProduct.amount  FROM product INNER JOIN cartProduct ON product.id=cartProduct.idProduct WHERE cartProduct.idCart=" + this.idCart);
+            ResultSet rs = stmt.executeQuery("SELECT product.id, product.name, product.description, product.price, cartProduct.amount FROM product INNER JOIN cartProduct ON product.id=cartProduct.idProduct WHERE cartProduct.idCart=" + this.idCart);
 
             // Get result from query
             while(rs.next()) {
@@ -185,6 +185,7 @@ public class CartSkeleton {
                     return false;
                 }
             }
+            stmt.executeQuery("DELETE FROM cartProduct WHERE idCart=" + this.idCart);
             stmt.executeQuery("COMMIT");
 
             // Delete cart
