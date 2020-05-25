@@ -186,16 +186,19 @@ public class CartSkeleton {
                 }
             }
             stmt.executeQuery("COMMIT");
+
+            // Delete cart
             this.delete();
 
             // Clean up
             stmt.close();
-            rs.close();
+            if (rs != null) {
+                rs.close();
+            }
         } catch (SQLException e) {
             e.printStackTrace();
             System.exit(1);
         }
-
         return true;
     }
 }
