@@ -29,6 +29,7 @@ import java.nio.file.Paths;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.sql.Statement;
 
 import java.util.ArrayList;
@@ -71,6 +72,9 @@ public class ServerConnection {
 
     // Set of servers that are in the latest version of the database
     Set<String> latestDBServers = new HashSet<>();
+
+    // Set of all servers in the cluster
+    Set<SpreadGroup> allServers = new HashSet<>();
 
     /**
      * Parameterized constructor
@@ -126,9 +130,30 @@ public class ServerConnection {
      * Start a timer, after which a message is sent to the cluster
      * @param message Message
      */
-    public void startTimer(byte[] message, String type, int time) {
-        Thread timer = new TimerThread(this.serializer, message, type, time, this);
+    public void startTimer(byte[] message, String type, int time, boolean loop) {
+        Thread timer = new TimerThread(this.serializer, message, type, time, this, loop);
         timer.start();
+    }
+
+    public void checkpoint() {
+        try {
+            Statement stm = this.dbConnection.createStatement();
+            stm.executeUpdate("CHECKPOINT"); // Make a checkpoint in every member of the cluster to synchronize the DB's
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+
+        HashSet<String> aux = new HashSet<>();
+        latestDBServers.forEach((k) -> {
+            for (SpreadGroup member : this.allServers) {
+                if (k.equals(member.toString())) {
+                    aux.add(k);
+                    break;
+                }
+            }
+        });
+        latestDBServers = aux;
     }
 
     /**
@@ -183,6 +208,8 @@ public class ServerConnection {
 
                             aux.dbConnection = DriverManager.getConnection("jdbc:hsqldb:file:clusterDB" + port + "/db", "sa", "");
 
+                            startTimer(aux.serializer.encode(null), "checkpoint", 60*60, true); // Make a CHECKPOINT every hour
+
                             // Write the log after starting the server, so that it isn't cleared
                             if (logFileContent != null) {
                                 FileOutputStream logStream = new FileOutputStream("clusterDB" + port + "/db.log");
@@ -198,14 +225,20 @@ public class ServerConnection {
 
                             aux.dbConnection = DriverManager.getConnection("jdbc:hsqldb:file:clusterDB" + port + "/db", "sa", "");
 
+                            startTimer(aux.serializer.encode(null), "checkpoint", 60*60, true); // Make a CHECKPOINT every hour
+
                             // Write the log after starting the server, so that it isn't cleared
                             FileOutputStream os = new FileOutputStream("clusterDB" + port + "/db.log");
                             os.write(dbMsg.getBackup());
                             os.close();
                         }
 
-                        for (DBUpdate dbUpdate : aux.pendingQueries)
-                            processDBUpdate.apply(dbUpdate, aux.dbConnection);
+                        for (DBUpdate dbUpdate : aux.pendingQueries) {
+                            if (dbUpdate.getSecondaryType().equals("checkpoint"))
+                                checkpoint();
+                            else
+                                processDBUpdate.apply(dbUpdate, aux.dbConnection);
+                        }
                         aux.pendingQueries = null;
 
                         afterDBStart.accept(aux.dbConnection);
@@ -222,9 +255,13 @@ public class ServerConnection {
                     if (aux.dbConnection == null) {
                         aux.pendingQueries.add(dbUpdate);
                     } else {
-                        byte[] res = processDBUpdate.apply(dbUpdate, aux.dbConnection);
-                        if (dbUpdate.getServer() != null && dbUpdate.getServer().equals(aux.spreadConnection.getPrivateGroup().toString()))
-                            aux.ms.sendAsync(Address.from(dbUpdate.getClient()), "res", res);
+                        if (dbUpdate.getSecondaryType().equals("checkpoint")) {
+                            checkpoint();
+                        } else {
+                            byte[] res = processDBUpdate.apply(dbUpdate, aux.dbConnection);
+                            if (dbUpdate.getServer() != null && dbUpdate.getServer().equals(aux.spreadConnection.getPrivateGroup().toString()))
+                                aux.ms.sendAsync(Address.from(dbUpdate.getClient()), "res", res);
+                        }
                     }
                 }
             }
@@ -232,10 +269,14 @@ public class ServerConnection {
             public void membershipMessageReceived(SpreadMessage spreadMessage) {
                 MembershipInfo info = spreadMessage.getMembershipInfo();
                 if (info.isCausedByJoin()) {
+                    aux.allServers.add(info.getJoined());
+
                     if (info.getJoined().equals(aux.spreadConnection.getPrivateGroup())) {
                         if (info.getMembers().length == 1) {
                             try {
                                 aux.dbConnection = DriverManager.getConnection("jdbc:hsqldb:file:clusterDB" + port + "/db", "SA", "");
+
+                                startTimer(aux.serializer.encode(null), "checkpoint", 60*60, true); // Make a CHECKPOINT every hour
 
                                 // Create the tables
                                 Statement stm = dbConnection.createStatement();
@@ -262,23 +303,12 @@ public class ServerConnection {
                         try {
                             if (!latestDBServers.contains(info.getJoined().toString())) {
                                 // Send full database backup
-                                Statement stm = aux.dbConnection.createStatement();
-                                stm.executeUpdate("CHECKPOINT"); // Make a checkpoint in every member of the cluster to synchronize the DB's
-
-                                HashSet<String> aux = new HashSet<>();
-                                latestDBServers.forEach((k) -> {
-                                    for (SpreadGroup member : info.getMembers()) {
-                                        if (k.equals(member.toString())) {
-                                            aux.add(k);
-                                            break;
-                                        }
-                                    }
-                                });
-                                latestDBServers = aux;
+                                checkpoint();
 
                                 latestDBServers.add(info.getJoined().toString());
 
-                                if (primaryAfter.size() == 0) {
+                                if (aux.isPrimary()) {
+                                    Statement stm = aux.dbConnection.createStatement();
                                     stm.executeUpdate("BACKUP DATABASE TO 'clusterDB" + port + "/backup.tar.gz' NOT BLOCKING");
 
                                     byte[] backup = Files.readAllBytes(Paths.get("clusterDB" + port + "/backup.tar.gz"));
@@ -300,13 +330,17 @@ public class ServerConnection {
                         }
                     }
                 } else if (info.isCausedByDisconnect()) {
+                    aux.allServers.remove(info.getJoined());
                     primaryAfter.remove(info.getDisconnected());
                 } else if (info.isCausedByLeave()) {
+                    aux.allServers.remove(info.getJoined());
                     primaryAfter.remove(info.getLeft());
                 } else if (info.isCausedByNetwork()) {
                     // TODO - review this (and test?)
+                    HashSet<SpreadGroup> newAllServers = new HashSet<>();
                     boolean inGroup = false;
                     for (SpreadGroup member : info.getMyVirtualSynchronySet().getMembers()) {
+                        newAllServers.add(member);
                         if (member.equals(spreadConnection.getPrivateGroup())) {
                             inGroup = true;
                             break;
@@ -316,6 +350,8 @@ public class ServerConnection {
                         System.out.println("Server is going to be disconnected due to a network partition");
                         System.exit(1);
                     }
+
+                    aux.allServers = newAllServers;
                 }
             }
         });

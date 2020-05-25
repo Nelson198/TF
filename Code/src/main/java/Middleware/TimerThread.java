@@ -13,6 +13,7 @@ public class TimerThread extends Thread {
     private final String type;
     private final int time;
     private final ServerConnection connection;
+    private final boolean loop;
 
     /**
      * Parameterized constructor
@@ -22,12 +23,13 @@ public class TimerThread extends Thread {
      * @param time Time
      * @param connection Supermarket's connection
      */
-    public TimerThread(Serializer serializer, byte[] message, String type, int time, ServerConnection connection) {
+    public TimerThread(Serializer serializer, byte[] message, String type, int time, ServerConnection connection, boolean loop) {
         this.serializer = serializer;
         this.message = message;
         this.type = type;
         this.time = time;
         this.connection = connection;
+        this.loop = loop;
     }
 
     /**
@@ -35,12 +37,14 @@ public class TimerThread extends Thread {
      */
     public void run() {
         try {
-            Thread.sleep(this.time * 1000);
+            do {
+                Thread.sleep(this.time * 1000);
 
-            if (this.connection.isPrimary()) {
-                DBUpdate dbu = new DBUpdate(this.message, null, null, this.type);
-                this.connection.sendCluster(this.serializer.encode(dbu));
-            }
+                if (this.connection.isPrimary()) {
+                    DBUpdate dbu = new DBUpdate(this.message, null, null, this.type);
+                    this.connection.sendCluster(this.serializer.encode(dbu));
+                }
+            } while (this.loop);
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(1);
