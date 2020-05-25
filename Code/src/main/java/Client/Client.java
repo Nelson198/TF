@@ -167,9 +167,16 @@ public class Client {
                     break;
 
                 case 4:
-                    cs.checkout();
-                    waitConfirmation();
-                    break;
+                    boolean res = cs.checkout();
+                    carts.remove(cs);
+                    if (res) {
+                        System.out.print("\nThank you for buying with us!\n");
+                    }
+                    else {
+                        System.out.print("\nSome of the products you required are no longer available.\n");
+                        System.out.print("We'll redirect you to the main menu and you can restart the buy.\n");
+                    }
+                    return;
 
                 case 5:
                     return;

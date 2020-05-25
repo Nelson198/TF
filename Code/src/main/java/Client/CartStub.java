@@ -40,8 +40,9 @@ public class CartStub {
     /**
      * Checkout
      */
-    public void checkout() {
-        this.connection.sendAndReceive("checkout", this.serializer.encode(this.idCart));
+    public boolean checkout() {
+        byte[] res = this.connection.sendAndReceive("checkout", this.serializer.encode(this.idCart));
+        return this.serializer.decode(res);
     }
 
     /**
