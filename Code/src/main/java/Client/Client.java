@@ -168,7 +168,7 @@ public class Client {
 
                 case 4:
                     boolean res = cs.checkout();
-                    carts.remove(cs);
+                    carts.remove(cartName);
                     if (res) {
                         System.out.print("\nThank you for buying with us!\n");
                     }
@@ -176,6 +176,7 @@ public class Client {
                         System.out.print("\nSome of the products you required are no longer available.\n");
                         System.out.print("We'll redirect you to the main menu and you can restart the buy.\n");
                     }
+                    waitConfirmation();
                     return;
 
                 case 5:
