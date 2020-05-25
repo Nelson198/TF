@@ -158,12 +158,35 @@ public class CartSkeleton {
      * Checkout cart
      * @return Status
      */
+    // TODO - remove the amounts in the cart from the product table if possible. Otherwise, fail the checkout process.
     public boolean checkout() {
+        StringBuilder sb = new StringBuilder();
+        String query;
+        ResultSet rs;
         try {
             // Create and execute statement
             Statement stmt = this.connection.createStatement();
-            stmt.executeUpdate("UPDATE cart SET ... WHERE id=" + this.idCart); // TODO - remove the amounts in the cart from the product table if possible. Otherwise, fail the checkout process.
-            stmt.executeUpdate("DELETE from cart WHERE id=" + this.idCart);
+            stmt.executeQuery("START TRANSACTION"); // Start transaction, rollback if fail
+
+            List<Product> products = this.getProducts();
+            for (Product p: products) {
+                query = sb.append("SELECT amount FROM product WHERE id=").append(p.getId()).toString();
+                sb.setLength(0);
+                rs = stmt.executeQuery(query);
+                rs.next();
+
+                int productAmount = rs.getInt("amount");
+                if (productAmount >= p.getAmount()) {
+                    query = sb.append("UPDATE product SET amount = amount - ").append(p.getAmount()).append(" WHERE id=").append(p.getId()).toString();
+                    rs = stmt.executeQuery(query);
+                    rs.next();
+                } else {
+                    stmt.executeQuery("ROLLBACK");
+                    return false;
+                }
+
+            }
+            stmt.executeQuery("COMMIT");
 
             // Clean up
             stmt.close();
