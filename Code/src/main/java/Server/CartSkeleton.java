@@ -157,12 +157,12 @@ public class CartSkeleton {
     /**
      * Checkout cart
      * @return Status
+     * Removes the amounts in the cart from the product table, if possible. Otherwise, fail the checkout process.
      */
-    // TODO - remove the amounts in the cart from the product table if possible. Otherwise, fail the checkout process.
     public boolean checkout() {
         StringBuilder sb = new StringBuilder();
         String query;
-        ResultSet rs;
+        ResultSet rs = null;
         try {
             // Create and execute statement
             Statement stmt = this.connection.createStatement();
@@ -178,23 +178,24 @@ public class CartSkeleton {
                 int productAmount = rs.getInt("amount");
                 if (productAmount >= p.getAmount()) {
                     query = sb.append("UPDATE product SET amount = amount - ").append(p.getAmount()).append(" WHERE id=").append(p.getId()).toString();
-                    rs = stmt.executeQuery(query);
-                    rs.next();
+                    sb.setLength(0);
+                    stmt.executeUpdate(query);
                 } else {
                     stmt.executeQuery("ROLLBACK");
                     return false;
                 }
-
             }
             stmt.executeQuery("COMMIT");
+            this.delete();
 
             // Clean up
             stmt.close();
+            rs.close();
         } catch (SQLException e) {
             e.printStackTrace();
             System.exit(1);
         }
 
-        return true; // TODO - return if the checkout was successful
+        return true;
     }
 }
