@@ -20,10 +20,8 @@ import java.util.concurrent.ExecutionException;
  */
 public class Client {
     private static final BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
-
     private static final Map<String, CartStub> carts = new HashMap<>();
     private static CatalogStub catalog;
-
     private static ClientConnection connection;
 
     /**
@@ -39,23 +37,26 @@ public class Client {
      * @throws IOException IOException
      */
     private static void waitConfirmation() throws IOException {
-        System.out.print("\nPress ENTER to continue ...");
+        System.out.print("Press ENTER to continue ...");
         System.out.flush();
         stdin.readLine();
     }
 
     /**
      * Read an integer value
+     * @param withPrompt Prompt option
      * @return User's option
-     * @throws IOException IOException
      */
-    private static int readInt() throws IOException {
+    private static int readInt(boolean withPrompt) {
         while (true) {
             try {
-                System.out.print("> ");
+                if (withPrompt)
+                    System.out.print("> ");
                 return Integer.parseInt(stdin.readLine());
-            } catch (NumberFormatException exc) {
-                System.out.println("Invalid number! Please enter a correct number.");
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid number! Please enter a correct number.\n");
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
     }
@@ -63,31 +64,38 @@ public class Client {
     /**
      * Read a float value
      * @return User's option
-     * @throws IOException IOException
      */
-    private static float readFloat() throws IOException {
+    private static float readFloat() {
         while (true) {
             try {
-                System.out.print("> ");
                 return Float.parseFloat(stdin.readLine());
-            } catch (NumberFormatException exc) {
-                System.out.println("Invalid number! Please enter a correct number.");
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid number! Please enter a correct number.\n");
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
     }
 
     /**
      * Read a string
+     * @param withPrompt Prompt option
      * @return User's option
      */
-    private static String readString() throws IOException {
+    private static String readString(boolean withPrompt) {
         while (true) {
-            System.out.print("> ");
-            String s = stdin.readLine();
-            if (s.isEmpty()) {
-                continue;
+            try {
+                if (withPrompt)
+                    System.out.print("> ");
+                String s = stdin.readLine();
+                if (s.isEmpty()) {
+                    System.out.println("Invalid information! Please enter correct information.\n");
+                    continue;
+                }
+                return s;
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-            return s;
         }
     }
 
@@ -112,7 +120,7 @@ public class Client {
 
             int choice;
             do {
-                choice = readInt();
+                choice = readInt(true);
             } while (choice < 1 || choice > 5);
 
             clearTerminal();
@@ -120,7 +128,7 @@ public class Client {
                 case 1:
                     List<Product> products = cs.getProducts();
                     if (products.size() == 0) {
-                        System.out.println("This cart has no products yet");
+                        System.out.println("This cart has no products yet.\n");
                         waitConfirmation();
                         break;
                     }
@@ -141,9 +149,9 @@ public class Client {
                 case 2:
                     System.out.println("Add product(s):");
                     System.out.print("\t--> Product's identifier: ");
-                    int idProduct = readInt();
+                    int idProduct = readInt(false);
                     System.out.print("\t--> Product's amount: ");
-                    int amount = readInt();
+                    int amount = readInt(false);
                     cs.updateProduct(idProduct, amount);
                     waitConfirmation();
                     break;
@@ -151,9 +159,9 @@ public class Client {
                 case 3:
                     System.out.println("Remove product(s):");
                     System.out.print("\t--> Product's identifier: ");
-                    int idProd = readInt();
+                    int idProd = readInt(false);
                     System.out.print("\t--> Product's amount: ");
-                    int quantity = readInt();
+                    int quantity = readInt(false);
                     cs.updateProduct(idProd, -quantity);
                     waitConfirmation();
                     break;
@@ -171,10 +179,9 @@ public class Client {
 
     /**
      * Auxiliar function to update a product
-     * @param  p product
-     * @throws IOException IOException
+     * @param p product
      */
-    private static Product updateProduct(Product p) throws IOException {
+    private static Product updateProduct(Product p) {
         while(true) {
             StringBuilder change = new StringBuilder();
             change.append("Welcome to product's menu. Please choose an option:\n\n")
@@ -188,19 +195,19 @@ public class Client {
 
             int update;
             do {
-                update = readInt();
+                update = readInt(true);
             } while (update < 1 || update > 4);
 
             switch(update) {
                 case 1:
                     System.out.print("Insert a new name: ");
-                    String productName = readString();
+                    String productName = readString(false);
                     p.setName(productName);
                     break;
 
                 case 2:
                     System.out.print("Insert the new description: ");
-                    String productDescription = readString();
+                    String productDescription = readString(false);
                     p.setDescription(productDescription);
                     break;
 
@@ -225,7 +232,7 @@ public class Client {
             StringBuilder admin = new StringBuilder();
             admin.append("Welcome to administrator's menu. Please choose an option:\n\n")
                  .append("1 - Add a new product to the catalog\n")
-                 .append("2 - Update a product's amount in the catalog\n")
+                 .append("2 - Update product's amount in the catalog\n")
                  .append("3 - Other updates on a product in the catalog\n")
                  .append("4 - Remove a product from the catalog\n")
                  .append("5 - Go back\n");
@@ -235,23 +242,24 @@ public class Client {
 
             int choice;
             do {
-                choice = readInt();
+                choice = readInt(true);
             } while (choice < 1 || choice > 5);
 
             clearTerminal();
             switch(choice) {
                 case 1:
-                    System.out.print("Insert the product's name: ");
-                    String productName = readString();
+                    System.out.println("Add product to the catalog:\n");
+                    System.out.print("Product's name: ");
+                    String productName = readString(false);
 
-                    System.out.print("Insert a description to the product: ");
-                    String productDescription = readString();
+                    System.out.print("Product's description: ");
+                    String productDescription = readString(false);
 
-                    System.out.print("Insert the product's price: ");
+                    System.out.print("Product's price: ");
                     float productPrice = readFloat();
 
-                    System.out.print("Insert the product's initial amount: ");
-                    int productAmount = readInt();
+                    System.out.print("Product's initial amount: ");
+                    int productAmount = readInt(false);
 
                     Product newProduct = new Product(-1, productName, productDescription, productPrice, productAmount);
 
@@ -260,23 +268,25 @@ public class Client {
                     break;
 
                 case 2:
-                    System.out.print("Insert the product's id: ");
-                    int productId = readInt();
+                    System.out.println("Update product's amount in the catalog:\n");
+                    System.out.print("Product's identifier: ");
+                    int productId = readInt(false);
 
-                    System.out.print("Insert the product's amount: ");
-                    int amount = readInt();
+                    System.out.print("Product's amount: ");
+                    int amount = readInt(false);
 
                     catalog.updateAmount(productId, amount);
                     waitConfirmation();
                     break;
 
                 case 3:
-                    System.out.print("Insert the product's id: ");
-                    int prodId = readInt();
+                    System.out.println("Update a product in the catalog:\n");
+                    System.out.print("Product's identifier: ");
+                    int prodId = readInt(false);
 
                     Product toUpdate = catalog.getProduct(prodId);
                     if (toUpdate == null) {
-                        System.out.println("The product with id " + prodId + " does not exist");
+                        System.out.println("The product with id " + prodId + " does not exist.\n");
                         waitConfirmation();
                         break;
                     }
@@ -286,8 +296,9 @@ public class Client {
                     break;
 
                 case 4:
-                    System.out.print("Insert the product's id: ");
-                    int idProduct = readInt();
+                    System.out.println("Remove a product from the catalog\n:");
+                    System.out.print("Product's identifier: ");
+                    int idProduct = readInt(false);
 
                     catalog.removeProduct(idProduct);
                     waitConfirmation();
@@ -320,14 +331,14 @@ public class Client {
 
             int choice;
             do {
-                choice = readInt();
+                choice = readInt(true);
             } while (choice < 1 || choice > 7);
 
             clearTerminal();
             switch (choice) {
                 case 1:
                     System.out.print("Choose a name for your cart: ");
-                    String name = readString();
+                    String name = readString(false);
                     CartStub cart = new CartStub(connection);
                     carts.put(name, cart);
                     menuCart(name);
@@ -335,7 +346,7 @@ public class Client {
 
                 case 2:
                     if (carts.keySet().size() == 0) {
-                        System.out.println("There is no cart created so far. Please create one.");
+                        System.out.println("There is no cart created so far. Please create one.\n");
                         waitConfirmation();
                     } else {
                         System.out.println("Please choose a cart to check / update:\n");
@@ -343,11 +354,12 @@ public class Client {
                             System.out.println("--> " + c);
                         }
                         System.out.println();
-                        String cartName = readString();
+
+                        String cartName = readString(true);
                         if (carts.containsKey(cartName))
                             menuCart(cartName);
                         else {
-                            System.out.println("That cart does not exist");
+                            System.out.println("That cart does not exist.\n");
                             waitConfirmation();
                         }
                     }
@@ -356,7 +368,7 @@ public class Client {
                 case 3:
                     String info = catalog.getCatalog();
                     if (info.isEmpty()) {
-                        System.out.println("There is no information in the catalog yet.");
+                        System.out.println("There is no information in the catalog yet.\n");
                     } else {
                         System.out.println(info);
                     }
@@ -365,10 +377,10 @@ public class Client {
 
                 case 4:
                     System.out.print("Insert the product's identifier: ");
-                    int productId = readInt();
+                    int productId = readInt(false);
                     float price = catalog.getPrice(productId);
                     if (price == -1)
-                        System.out.println("This product is not available.");
+                        System.out.println("This product is not available.\n");
                     else
                         System.out.println("This product will cost you " + price + "€ per unit.");
                     waitConfirmation();
@@ -376,12 +388,12 @@ public class Client {
 
                 case 5:
                     System.out.print("Insert the product's identifier: ");
-                    productId = readInt();
+                    productId = readInt(false);
                     int amount = catalog.getAmount(productId);
                     if (amount == -1)
-                        System.out.println("This product is not available.");
+                        System.out.println("This product is not available.\n");
                     else
-                        System.out.println("We have " + amount + " units available at the moment");
+                        System.out.println("We have " + amount + " units available at the moment.\n");
                     waitConfirmation();
                     break;
 

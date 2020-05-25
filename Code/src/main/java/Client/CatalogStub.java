@@ -34,9 +34,9 @@ public class CatalogStub {
 
         StringBuilder sb = new StringBuilder();
         if (catalog.size() != 0) {
+            sb.append("Catalog:\n");
             for (Product p : catalog) {
-                sb.append("Catalog:\n")
-                  .append("Product nº ").append(p.getId()).append("\n")
+                  sb.append("Product nº ").append(p.getId()).append("\n")
                   .append("\t--> Name: ").append(p.getName()).append("\n")
                   .append("\t--> Description: ").append(p.getDescription()).append("\n")
                   .append("\t--> Price: ").append(p.getPrice()).append(" €\n")
