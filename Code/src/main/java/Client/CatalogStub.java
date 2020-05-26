@@ -42,6 +42,7 @@ public class CatalogStub {
                   .append("\t--> Price: ").append(p.getPrice()).append(" €\n")
                   .append("\t--> Amount: ").append(p.getAmount()).append(" unit(s)\n");
             }
+            sb.append("\n");
         }
 
         return sb.toString();

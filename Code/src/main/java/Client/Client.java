@@ -189,7 +189,7 @@ public class Client {
      * Auxiliar function to update a product
      * @param p product
      */
-    private static Product updateProduct(Product p) {
+    private static Product updateProduct(Product p) throws IOException {
         while(true) {
             StringBuilder change = new StringBuilder();
             change.append("Welcome to product's menu. Please choose an option:\n\n")
@@ -206,26 +206,35 @@ public class Client {
                 update = readInt(true);
             } while (update < 1 || update > 4);
 
+            clearTerminal();
             switch(update) {
                 case 1:
-                    System.out.print("Insert a new name: ");
+                    System.out.println("Change product's name:");
+                    System.out.print("\t--> New name: ");
                     String productName = readString(false);
                     p.setName(productName);
+                    waitConfirmation();
                     break;
 
                 case 2:
-                    System.out.print("Insert the new description: ");
+                    System.out.println("Change product's description:");
+                    System.out.print("\t--> New description: ");
                     String productDescription = readString(false);
                     p.setDescription(productDescription);
+                    waitConfirmation();
                     break;
 
                 case 3:
-                    System.out.print("Insert the new price: ");
+                    System.out.println("Change product's price:");
+                    System.out.print("\t--> New price: ");
                     float productPrice = readFloat();
                     p.setPrice(productPrice);
+                    waitConfirmation();
                     break;
 
                 case 4:
+                    System.out.println("Changes have been successfully submitted.\n");
+                    waitConfirmation();
                     return p;
             }
         }
@@ -384,24 +393,26 @@ public class Client {
                     break;
 
                 case 4:
-                    System.out.print("Insert the product's identifier: ");
+                    System.out.println("Check a product's price:\n");
+                    System.out.print("\t--> Product's identifier: ");
                     int productId = readInt(false);
                     float price = catalog.getPrice(productId);
                     if (price == -1)
-                        System.out.println("This product is not available.\n");
+                        System.out.println("\nThis product is not available.\n");
                     else
-                        System.out.println("This product will cost you " + price + "€ per unit.");
+                        System.out.println("\nThis product will cost you " + price + "€ per unit.\n");
                     waitConfirmation();
                     break;
 
                 case 5:
-                    System.out.print("Insert the product's identifier: ");
+                    System.out.println("Check a product's availability:\n");
+                    System.out.print("\t--> Product's identifier: ");
                     productId = readInt(false);
                     int amount = catalog.getAmount(productId);
                     if (amount == -1)
-                        System.out.println("This product is not available.\n");
+                        System.out.println("\nThis product is not available.\n");
                     else
-                        System.out.println("We have " + amount + " units available at the moment.\n");
+                        System.out.println("\nWe have " + amount + " units available at the moment.\n");
                     waitConfirmation();
                     break;
 
