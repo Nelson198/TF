@@ -125,6 +125,11 @@
 		\subsection{\textit{ClientConnection}} \label{subsec:ClientConnection}
 	
 	\section{Servidor - \textit{Supermarket}} \label{sec:Server}
+		A classe \texttt{Supermarket} representa o comportamento de cada um dos servidores, sendo nesta classe que se estabelece as ligações à base de dados e aos outros servidores.
+		
+		A ligação à base de dados é feita de vários pontos e sempre através de \textit{skeletons}. Assim, existe um \textit{skeleton} para cada carrinho de compras e ainda um outro para o catálogo.
+		Desta forma, invoca-se apenas o \textit{skeleton} necessário a cada ação, sem que seja necessário ter total conhecimento dos seus atributos.
+
 		\subsection{Funcionamento} \label{subsec:ServerWorking}
 		\subsection{\textit{CartSkeleton}} \label{subsec:ServerCartSkeleton}
 		\subsection{\textit{CatalogSkeleton}} \label{subsec:ServerCatalogSkeleton}
