@@ -130,9 +130,24 @@
 		\subsection{\textit{CatalogSkeleton}} \label{subsec:ServerCatalogSkeleton}
 	
 	\section{Cliente} \label{sec:Client}
+		O cliente desta aplicação é responsável por interagir com o \textit{cluster} de servidores, invocando ao mesmo pedidos relacionados com operações do supermercado.
+		Esta entidade permite, de certa forma, testar o programa desenvolvido como um todo, verificando, desta forma, a validade das funcionalidades propostas neste projeto.
+		Para proceder à conceção e implementação do cliente, foram criados vários menus na aplicação por forma a cobrir todos os casos intrínsecos às funcionalidades da mesma.
+
 		\subsection{Funcionamento} \label{subsec:ClientWorking}
+		O cliente inicialmente, no momento da conexão ao \textit{cluster}, especifica as portas referentes ao próprio e, também, as relativas aos servidores, sendo necessário indicar pelo menos uma das portas destes últimos.
+		A informação relativa à porta de cada servidor é guardada numa lista para o caso de haver falhas no estabelecimento da conexão entre o cliente e este último. Assim, havendo a indisponibilidade momentânea de um dos servidores, é atribuído outro para o efeito.
+
+		Uma vez estabelecida a conexão entre o cliente e um dos servidores presentes no \textit{cluster}, é apresentado à primeira entidade um menu relativo ao supermercado. Nele estão contidas todas as opções indispensáveis para efetuar as operações descritas no enunciado deste trabalho prático.
+		Destas operações destacam-se a consulta do catálogo da aplicação, a criação de um carrinho de compras e ainda a verificação da disponibilidade de um determinado produto.
+		É de realçar também que existe um menu alusivo ao carrinho de compras onde se pode concretizar o \textit{checkout} dos produtos selecionados.
+		Para além destas, o grupo oferece uma opção extra relativa ao menu do administrador, onde se possibilita a invoção de métodos associados à atualização do catálogo do supermercado.
+
 		\subsection{\textit{CartStub}} \label{subsec:ClientCartStub}
+
+
 		\subsection{\textit{CatalogStub}} \label{subsec:ClientCatalogStub}
+
 }
 
 \chapter{Valorizações} \label{ch:ProblemDescription}
