@@ -152,10 +152,16 @@
 		Para além destas, o grupo oferece uma opção extra relativa ao menu do administrador, onde se possibilita a invoção de métodos associados à atualização do catálogo do supermercado.
 
 		\subsection{\textit{CartStub}} \label{subsec:ClientCartStub}
-
+		No que toca ao \textit{stub} do carrinho de compras do presente programa disponibilizam-se 3 métodos distintos, nomeadamente \textit{updateProduct}, \textit{checkout} e \textit{getProducts}.
+		Tal como os nomes dos mesmos transparecem, estas funções dizem respeito à atualização de um determinado produto, ao \textit{checkout} dos mesmos e, ainda, à obtenção dos produtos presentes no carrinho.
+		Todos estes partilham o mesmo objeto \textit{serializer}, responsável por serializar as mensagens enviadas para um dos servidores da aplicação.
+		Para além disso, estão também associados a esta classe \texttt{Java} um identificador referente ao carrinho de compras em causa e um objeto relativo à conexão do cliente ao \textit{cluster} de servidores (\hyperref[subsec:ClientConnection]{\textit{ClientConnection}}).
 
 		\subsection{\textit{CatalogStub}} \label{subsec:ClientCatalogStub}
-
+		Quanto ao \textit{stub} do catálogo, este assemelha-se ao do carrinho de compras a nível de variáveis de instância. Esta classe contém igualmente o serializador de mensagens referido na \hyperref[subsec:ClientCartStub]{secção anterior} e, ainda, o objeto correlacionado à conexão do cliente ao conjunto de servidores.
+		Contudo, apesar destas semelhanças, esta classe \texttt{Java} possui, obviamente, funções distintas da mencionada anteriormente.
+		O \textit{stub} do catálogo apresenta métodos inerentes não só à sua consulta como também à observação de informações intrínsecas aos produto contidos no próprio (como por exemplo, o preço e a quantidade).
+		Mais, por forma a atualizar os dados dos produtos em questão, existe também a possibilidade de invocar métodos alusivos à adição e remoção dos mesmos.
 }
 
 \chapter{Valorizações} \label{ch:ProblemDescription}
