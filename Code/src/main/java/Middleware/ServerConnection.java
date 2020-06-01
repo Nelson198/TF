@@ -336,7 +336,6 @@ public class ServerConnection {
                     aux.allServers.remove(info.getJoined());
                     primaryAfter.remove(info.getLeft());
                 } else if (info.isCausedByNetwork()) {
-                    // TODO - review this (and test?)
                     HashSet<SpreadGroup> newAllServers = new HashSet<>();
                     boolean inGroup = false;
                     for (SpreadGroup member : info.getMyVirtualSynchronySet().getMembers()) {
@@ -346,7 +345,7 @@ public class ServerConnection {
                             break;
                         }
                     }
-                    if (!inGroup) { // TODO - figure out what to do if the server is no longer in the group
+                    if (!inGroup) {
                         System.out.println("Server is going to be disconnected due to a network partition");
                         System.exit(1);
                     }
