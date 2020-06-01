@@ -116,7 +116,15 @@
 
 \chapter{Implementação} \label{ch:Implementation}
 \large{
+	De seguida serão abordadas a forma adotada para implementar várias vertentes deste trabalho. Será apresentado o middleware genérico desenvolvido para servir de base para este trabalho, bem como o uso deste num par cliente/servidor que atinge os objetivos cumpridos.
+
 	\section{\textit{Middleware} genérico} \label{sec:Middleware}
+		Se for excluída a lógica de negócio relacionada com o funcionamento do supermercado, temos na essência deste trabalho um conjunto de servidores ligados entre si que gerem uma base de dados em HSQLDB (por recomendação do enunciado). Para além disto, todos os servidores são réplicas perfeitas uns dos outros, ou seja, todos aplicam as mesma alterações às suas bases de dados, o que significa que, na prática, é obtida uma base de dados distribuída por eles. Os papéis dos servidores são simétricos, sendo que qualquer um deles poderá receber pedidos de clientes interessados no serviço disponibilizado.
+
+		Posto isto, foi tomada a decisão de implementar esta arquitetura genérica em classes independentes da lógica de negócio propriamente dita, dando origem a duas classes: ServerConnection e ClientConnection. A primeira é responsável por gerir o conjunto de servidores, sendo iniciada uma instância desta em cada um destes. A segunda é utilizada por clientes para interagir com os servidores de forma transparente.
+
+		Seguidamente, será detalhada cada uma destas classes.
+
 		\subsection{\textit{ServerConnection}} \label{subsec:ServerConnection}
 			\subsubsection{Replicação} \label{sssec:Replication}
 			\subsubsection{Temporizadores} \label{sssec:Timers}
