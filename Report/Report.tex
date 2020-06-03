@@ -153,8 +153,16 @@
 				Como referido acima, os servidores efetuam checkpoints periódicos. Para isso, necessitam de uma primitiva que lhes permita enviar uma mensagem atomicamente para o servidor ao fim de um determinado período de tempo. Para isso, é criada uma thread em cada servidor, que no final do tempo indicado pelo utilizador, envia uma mensagem para todos os membros do cluster. Note-se que isto é apenas feito pelo servidor primário, ou seja, é garantido que ocorre apenas uma vez. Há ainda a possibilidade fazer isto repetidamente, como é o caso dos checkpoints.
 
 			\subsubsection{Comunicação entre servidores} \label{sssec:ServerCommunication}
-			\subsubsection{Comunicação com clientes} \label{sssec:ClientCommunication}
+				Apesar de já ter sido bastante explicado nas secções anteriores, expõe-se agora a framework utilizada para efetuar a comunicação entre os servidores. Esta comunicação é essencial para o funcionamento correto do sistema, visto que, por um lado, é necessário o envio da base de dados quando um servidor novo se junta ao cluster (ou, no caso de desconexão, volta a conectar). Por outro, é a razão pela qual a vista global do sistema é consistente em todos os servidores, dado que todos efetuam as operações dos clientes pela mesma ordem.
+				
+				Para permitir isto, recorremos à framework Spread, que foi extensivamente utilizada nas aulas. Esta permite a formação de grupos de servidores, aos quais podem ser enviadas mensagens, tendo a garantia, através das configurações corretas, que as mensagens são entregues pela mesma ordem a todos. Para além disto, existe um tipo especial de mensagens, as mensagens de membership. Quando são recebidas, tal como as anteriores, a sua entrega é logicamente simultânea em todos os servidores. As informações que trazem são, por exemplo, a junção de um servidor a um grupo (o que ajuda no envio da base de dados a este), a saída de um servidor de um grupo e a ocorrência de uma partição (o que ajudará a resolver uma das valorizações).
+
 		\subsection{\textit{ClientConnection}} \label{subsec:ClientConnection}
+			À semelhança da comunicação entre servidores, a framework utilizada, o Atomix, foi extensivamente vista nas aulas. Esta permite o envio de mensagens entre dois utilizadores. O recetor de uma mensagem tem de registar um handler para um certo tipo de mensagem, caraterizado por uma string. Quem envia, necessita de especificar o destino da mensagem e o tipo da mesma. Quando a mensagem é enviada, esta tem de ser serializada pelo emissor e, aquando da receção, desserializada pelo recetor.
+			
+			Uma das funcionalidades mais importantes desta framework é a possibilidade de enviar mensagens assincronamente. Isto permite o envio de uma mensagem assincronamente, adiando a sua receção para uma altura posterior. No caso específico deste trabalho, criámos um método auxiliar que permite enviar uma mensagem e retornar apenas quando é recebida uma resposta. Apesar de já existir um método semelhante na framework, os nossos requisitos não eram compatíveis com o que este nos fornecia.
+			
+			Assim, para inicializar um objeto desta classe, ou seja, para comunicar com um cluster de servidores, é necessário passar um endereço onde o cliente estará à escuta e os endereços dos servidores disponíveis no cluster. Apenas um método é exposto para o utilizador desta classe, aquele referido acima que envia uma mensagem e recebe uma resposta. Para utilizá-lo, é apenas necessário fornecer o tipo da mensagem (uma string, como já foi dito) e a mensagem serializada, isto é, sob a forma de uma array de bytes. Quando a resposta é recebida, o método retorna, também, um array de bytes que terá de ser desserializado. Para obtermos este comportamento, fizemos uso da primitiva CompletableFuture. Uma última caraterística deste método é a resiliência à falha de servidores. Para isso, se o envio de uma mensagem falhar, é feito o seu envio para outro servidor. Se nenhum estiver ativo, a execução é terminada com um erro.
 	
 	\section{Servidor - \textit{Supermarket}} \label{sec:Server}
 		\subsection{Funcionamento} \label{subsec:ServerWorking}
@@ -191,14 +199,36 @@
 \chapter{Valorizações} \label{ch:ProblemDescription}
 \large{
 	Relativamente ao que é referido no enunciado deste trabalho, são recomendadas algumas valorizações que beneficiam a nota final do mesmo.
-	Das valorizações mencionadas, os elementos que compõem este grupo optaram por realizar as seguintes:
+	Das valorizações mencionadas, os elementos que compõem este grupo realizaram todas as que foram propostas:
 	\begin{enumerate}
 		\item separação do código relativo ao \textit{middleware} genérico de replicação do código alusivo à aplicação;
+		
+		Esta valorização foi atingida pela criação das duas classes ServerConnection e ClientConnection, que podem ser utilizadas por qualquer aplicação que necessite de um cluster de servidores capaz de gerir uma base de dados consistente e capaz de responder a um elevado número de clientes. Para o caso específico deste trabalho, implementámos as classes Supermarket e Client que fazem uso destas.
+		
 		\item garantia do tratamento concorrente de varias operações;
+		
+		Ao ser permitido que vários clientes enviem pedidos aos servidores concorrentemente, sendo que os GETs são  respondidos imediatamente e apenas as operações que alteram a base de dados terem a necessidade de ser sincronizadas entre servidores (para mantermos a consistência da base de dados), esta valorização parece ter sido atingida.
+		
 		\item suporte de partições do grupo na ferramenta computacional \textit{Spread};
+		
+		Através do tratamento das mensagens de membership emitidas pela framework Spread, mais especificamente as relativas à ocorrência de partições na rede, temos que este objetivo foi concluído. De uma forma resumida, quando uma destas mensagens é recebida, é verificado, em cada um dos servidores, se este ainda faz parte da partição maioritária. No caso de isto não ser verdade, o servidor é desconectado.
+		
 		\item realização de uma análise de desempenho;
+		
+		--------------------------------------------------------------------------
+		TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+		--------------------------------------------------------------------------
+		
 		\item minimização das encomendas canceladas como consequência de faltas ou do funcionamento do mecanismo de replicação;
+		
+		Resultado dos testes efetuados e do conhecimento da implementação deste trabalho, temos muita confiança de que as encomendas nunca serão canceladas unilateralmente pelo sistema devido a faltas ou ao funcionamento do mecanismo de replicação. Temos esta confiança, pela forma como é feita a replicação. Sendo que todos os servidores têm a mesma informação e, no nosso caso, todos executam os temporizadores relativos ao fim das encomendas (enviando uma mensagem de fim do tempo ao cluster), as encomendas são apenas canceladas ao fim do tempo previsto, TMAX. A única forma de uma encomenda ser cancelada será se todos os servidores do cluster forem desconectados, mas isto já é um problema intratável.
+		
 		\item atualização oportuna do estado dos servidores com recurso ao sistema de base de dados, diminuindo, sempre que possível, o volume da informação copiada.
+		
+		Quanto às atualizações dos servidores, optamos por serializar o objeto correspondente pela atualização e enviá-lo a todos os servidores. Na altura de executar esta alteração, é escrita a query SQL responsável pela alteração.
+		
+		No caso de um servidor se conectar pela primeira vez, efetuamos um CHECKPOINT e enviámos-lhe toda a base de dados. No caso de o servidor já ter feito parte do cluster e a sua informação for minimamente recente, é apenas enviado o log de alterações, que será muito menor em termos de espaço ocupado (isto para bases de dados de grande dimensão).
+		
 	\end{enumerate}
 }
 
