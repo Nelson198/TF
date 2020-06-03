@@ -1,0 +1,35 @@
+Apple	Pink Lady Apples	4.99	40
+Apple	Fuji Apples	4.49	60
+Avocado	Hass Avocados	7.99	4
+Avocado	Organic Hass Avocados	8.99	8
+Banana	Banana	2.79	50
+Blueberry	Blueberry	7.99	11
+Strawberry	Strawberry	3.99	16
+Orange	Orange	7.99	12
+Tangerine	Tangerine	6.99	10
+Grape	Green Seedless Grapes	4.49	25
+Grape	Black Seedless Grapes	5.99	25
+Watermelon	Watermelon	7.99	17
+Pear	Organic Pear	1.49	30
+Peach	White Peach	2.99	19
+Peach	Yellow Peach	4.99	12
+Pineapple	Golden Pineapple	4.99	5
+Mango	Mango	1.99	16
+Carrot	Carrot	2.99	62
+Broccoli	Broccoli	2.99	39
+Lettuce	Lettuce	3.99	40
+Mushroom	Organic Mushrooms	3.99	50
+Onion	Yellow Onions	3.99	21
+Onion	Red Onions	1.99	10
+Pepper	Green Pepper	2.29	65
+Pepper	Red Pepper	2.49	38
+Potato	Golden Potatoes	4.99	200
+Tomato	Organic Tomatoes	6.99	250
+Chicken	Chicken	6.99	120
+Turkey	Turkey	3.99	155
+Salmon	Wild King Salmon	38.99	43
+Shrimp	Shrimp	13.99	80
+Crab	Crab	22.99	15
+Bread	Bread	1.99	145
+Cupcake	Cupcake	12.99	24
+Pizza	Pizza	4.89	76
