@@ -232,7 +232,7 @@
 		
 		Quanto às atualizações dos servidores, optamos por serializar o objeto correspondente pela atualização e enviá-lo a todos os servidores. Na altura de executar esta alteração, é escrita a query SQL responsável pela alteração.
 		
-		No caso de um servidor se conectar pela primeira vez, efetuamos um CHECKPOINT e enviámos-lhe toda a base de dados. No caso de o servidor já ter feito parte do cluster e a sua informação for minimamente recente, é apenas enviado o log de alterações, que será muito menor em termos de espaço ocupado (isto para bases de dados de grande dimensão).
+		No caso de um servidor se conectar pela primeira vez, efetuamos um CHECKPOINT e enviámos-lhe toda a base de dados. No caso de o servidor já ter feito parte do cluster e a sua informação for minimamente recente, é apenas enviado o log de alterações, que será muito menor em termos de espaço ocupado (isto para bases de dados de grande dimensão). Temos ainda a efetuação de CHECKPOINTs periódicos, de forma a diminuir ainda mais a informação enviada no caso de um servidor se desconectar e voltar a ligar.
 		
 	\end{enumerate}
 }
