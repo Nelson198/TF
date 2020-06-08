@@ -36,6 +36,8 @@ public class ClientConnection {
         Random rand = new Random();
         this.currentServer = rand.nextInt(servers.size());
 
+        System.out.println("Intitial server " + this.servers.get(this.currentServer));
+
         this.ms = new NettyMessagingService("cluster", address, new MessagingConfig());
 
         this.ms.registerHandler("res", (address1, bytes) -> {
@@ -61,8 +63,8 @@ public class ClientConnection {
                 x.get();
                 return this.res.get();
             } catch (Exception e) {
-                System.out.println("Switching server ...");
                 this.currentServer = (this.currentServer + 1) % this.servers.size();
+                System.out.println("Switching server to " + this.servers.get(this.currentServer));
                 if (this.currentServer == initialServer) {
                     System.out.println("No servers available. Try again later.");
                     System.exit(1);

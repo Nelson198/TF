@@ -38,7 +38,7 @@ public class PopulateCatalog {
 
     public static void main(String[] args) throws ExecutionException, InterruptedException, IOException {
         if (args.length < 2) {
-            System.out.println("Please indicate the your port and the ports of at least one server.");
+            System.out.println("Please indicate your port and the ports of at least one server.");
             System.exit(1);
         }
 
