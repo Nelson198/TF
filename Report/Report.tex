@@ -164,14 +164,46 @@
 			Assim, para inicializar um objeto desta classe, ou seja, para comunicar com um \textit{cluster} de servidores, é necessário passar um endereço onde o cliente estará à escuta e os endereços dos servidores disponíveis no \textit{cluster}. Apenas um método é exposto para o utilizador desta classe, aquele referido acima que envia uma mensagem e recebe uma resposta. Para utilizá-lo, é apenas necessário fornecer o tipo da mensagem e a mensagem serializada, isto é, sob a forma de uma \textit{array} de \textit{bytes}. Quando a resposta é recebida, o método retorna, também, um \textit{array} de \textit{bytes} que terá de ser desserializado. Para obtermos este comportamento, fizemos uso da primitiva \textit{CompletableFuture}. Uma última caraterística deste método é a resiliência à falha de servidores. Para isso, se o envio de uma mensagem falhar, é feito o seu envio para outro servidor. Se nenhum estiver ativo, a execução é terminada com um erro.
 	
 	\section{Servidor - \textit{Supermarket}} \label{sec:Server}
-		A classe \texttt{Supermarket} representa o comportamento de cada um dos servidores, sendo nesta classe que se estabelece as ligações à base de dados e aos outros servidores.
+		A classe \texttt{Supermarket} representa o comportamento de cada um dos servidores, sendo nesta classe que se estabelece as ligações à base de dados e aos outros servidores, através do \textit{middleware}.
 		
 		A ligação à base de dados é feita de vários pontos e sempre através de \textit{skeletons}. Assim, existe um \textit{skeleton} para cada carrinho de compras e ainda um outro para o catálogo.
 		Desta forma, invoca-se apenas o \textit{skeleton} necessário a cada ação, sem que seja necessário ter total conhecimento dos seus atributos.
 
 		\subsection{Funcionamento} \label{subsec:ServerWorking}
-		\subsection{\textit{CartSkeleton}} \label{subsec:ServerCartSkeleton}
-		\subsection{\textit{CatalogSkeleton}} \label{subsec:ServerCatalogSkeleton}
+			A classe \texttt{Supermarket} é responsável pela criação inicial da base de dados, pelo que cria sempre três tabelas:
+			\begin{itemize}
+				\item \texttt{cart} - tabela com todos os carrinhos de compras, identificados unicamente.
+				\item \texttt{product} - tabela com todos os produtos disponíveis; cada produto tem um identificador, nome, descrição, preço e quantidade.
+				\item \texttt{cartProduct} - tabela com os produtos num carrinho; cada entrada é identificada pelo par (idCart, idProduct), sendo que cada uma destas componentes é uma referência para uma das outras tabelas; para além disto, contém ainda a quantidade do produto naquele carrinho.
+			\end{itemize}
+			
+			Esta classe recebe ainda todas as comunicações dos clientes e, por isso, tem registados todos os \textit{handlers} necessários, sendo que, a cada pedido, o servidor dirige o mesmo para o \textit{skeleton} respetivo (de um carrinho ou do catálogo).
+
+			Dependendo do tipo de pedido que recebe, o servidor envia as informações para o \textit{cluster}, em caso de necessidade.
+
+		\subsection{\texttt{CartSkeleton}} \label{subsec:ServerCartSkeleton}
+			Esta classe é uma das pontes entre o servidor e a base de dados, modificando, maioritariamente, as tabelas \texttt{cart} e \texttt{cartProduct}. De realçar que é criado um \textit{skeleton} por cada carrinho de compras criado.
+
+			O \texttt{CartSkeleton} implementa as \textit{queries} necessárias para responder aos pedidos que envolvam um carrinho de compras:
+			\begin{itemize}
+				\item consultar os produtos num carrinho;
+				\item adicionar/remover um produto a/de um carrinho;
+				\item apagar um carrinho;
+				\item realizar o \textit{checkout} - retirar, se possível, os produtos do carrinho em \textit{checkout} da tabela \texttt{product} e, de seguida, apagar o carrinho.
+			\end{itemize}
+
+		\subsection{\texttt{CatalogSkeleton}} \label{subsec:ServerCatalogSkeleton}
+			Esta classe é a outra ponte entre o servidor e a base de dados, modificando, exclusivamente, a tabela \texttt{product}.
+
+			O \texttt{CatalogSkeleton} implementa as \textit{queries} necessárias para responder aos pedidos que envolvam alterações a um produto:
+			\begin{itemize}
+				\item consultar todos os produtos existentes;
+				\item consultar as informações de um produto do catálogo - nome, descrição, preço e quantidade;
+				\item consultar o preço ou quantidade de um produto;
+				\item adicionar/remover um produto do catálogo disponível;
+				\item adicionar uma quantidade a um produto do catálogo (reposição de stock);
+				\item retificar/atualizar as informações de um produto do catálogo - nome, descrição ou preço;
+			\end{itemize}
 	
 	\section{Cliente} \label{sec:Client}
 		O cliente desta aplicação é responsável por interagir com o \textit{cluster} de servidores, invocando ao mesmo pedidos relacionados com operações do supermercado.
@@ -250,7 +282,14 @@
 
 \chapter{Conclusão} \label{ch:Conclusion}
 \large{
-	
+	Este trabalho permitiu a aplicação dos conhecimentos adquiridos ao longo desta unidade curricular.
+
+	No geral, os objetivos foram atingidos, uma vez que foram aplicados todos os requisitos do enunciado inicial.
+	A implementação foi pensada no sentido de simplificar todos os processos, sem descurar a robustez exigida, nomeadamente no que toca a tolerância a faltas.
+
+	A análise de desempenho e restantes testes levados a cabo indicam que o sistema é eficiente, para além de resiliente, cumprindo os dois principais objetivos à partida.
+
+	No conto geral, os resultados são satisfatórios e a evolução do grupo de trabalho evidente.
 }
 
 \appendix
