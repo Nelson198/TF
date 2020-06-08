@@ -120,12 +120,12 @@
 	\section{\textit{Middleware} genérico} \label{sec:Middleware}
 		Se for excluída a lógica de negócio relacionada com o funcionamento do supermercado, temos na essência deste trabalho um conjunto de servidores ligados entre si que gerem uma base de dados em \textit{HSQLDB} (por recomendação do enunciado). Para além disto, todos os servidores são réplicas perfeitas uns dos outros, ou seja, todos aplicam as mesma alterações às suas bases de dados, o que significa que, na prática, é obtida uma base de dados distribuída por eles. Os papéis dos servidores são simétricos, sendo que qualquer um deles poderá receber pedidos de clientes interessados no serviço disponibilizado.
 
-		Posto isto, foi tomada a decisão de implementar esta arquitetura genérica em classes independentes da lógica de negócio propriamente dita, dando origem a duas classes: \textit{ServerConnection} e \textit{ClientConnection}. A primeira é responsável por gerir o conjunto de servidores, sendo iniciada uma instância desta em cada um destes. A segunda é utilizada por clientes para interagir com os servidores de forma transparente.
+		Posto isto, foi tomada a decisão de implementar esta arquitetura genérica em classes independentes da lógica de negócio propriamente dita, dando origem a duas classes: \texttt{ServerConnection} e \texttt{ClientConnection}. A primeira é responsável por gerir o conjunto de servidores, sendo iniciada uma instância desta em cada um destes. A segunda é utilizada por clientes para interagir com os servidores de forma transparente.
 
 		Seguidamente, será detalhada cada uma destas classes.
 
 		\subsection{\textit{ServerConnection}} \label{subsec:ServerConnection}
-			Como referido atrás, a classe \textit{ServerConnection} é responsável pela coordenação entre os servidores, gerindo a base de dados de cada um deles e recebendo pedidos de clientes. Para iniciar um destes servidores é necessário indicar a porta onde este estará à espera de pedidos de clientes, o que fazer após ser estabelecida a ligação à base de dados, uma lista de tabelas a ser criada na base de dados, os \textit{handlers} para lidar com pedidos do cliente e o processamento das atualizações à base de dados.
+			Como referido atrás, a classe \texttt{ServerConnection} é responsável pela coordenação entre os servidores, gerindo a base de dados de cada um deles e recebendo pedidos de clientes. Para iniciar um destes servidores é necessário indicar a porta onde este estará à espera de pedidos de clientes, o que fazer após ser estabelecida a ligação à base de dados, uma lista de tabelas a ser criada na base de dados, os \textit{handlers} para lidar com pedidos do cliente e o processamento das atualizações à base de dados.
 			
 			Quando é iniciado, o servidor conecta-se ao \textit{daemon Spread} e prepara-se para a receção de mensagens vindas dos restantes servidores do \textit{cluster}. Após isto, coloca-se num de estado de espera, o qual pode ser interrompido de duas formas:
 			\begin{itemize}
@@ -142,7 +142,7 @@
 
 				Quanto à implementação em si, é necessário que o utilizador do \textit{middleware} forneça os \textit{handlers} que serão chamados quando chega um pedido do cliente e o que fazer quando chega uma atualização para a base de dados. 
 				
-				Quando chega um pedido de um cliente, é chamado o respetivo \textit{handler} e é devolvido um \textit{HandlerRes} pelo utilizador, que informa o \textit{middleware} se a informação é para ser enviada diretamente para o cliente (por exemplo, no caso de um \texttt{GET}) ou, no caso de ser necessário fazer alterações à base de dados, se é para passar pelo mecanismo de replicação, isto é, enviada a todos os membros do \textit{cluster} atomicamente, utilizando o \textit{Spread}.
+				Quando chega um pedido de um cliente, é chamado o respetivo \textit{handler} e é devolvido um \texttt{HandlerRes} pelo utilizador, que informa o \textit{middleware} se a informação é para ser enviada diretamente para o cliente (por exemplo, no caso de um \texttt{Get}) ou, no caso de ser necessário fazer alterações à base de dados, se é para passar pelo mecanismo de replicação, isto é, enviada a todos os membros do \textit{cluster} atomicamente, utilizando o \textit{Spread}.
 				
 				Depois disto, quando esta informação é entregue aos servidores, é invocada a função fornecida pelo utilizador correspondente àquele pedido. Esta função poderá efetuar qualquer operação, mas o mais normal será enviar uma atualização para a base de dados. Pelo uso do \textit{Spread}, é garantido que esta atualização ocorrerá "em simultâneo" em todos os servidores.
 				
@@ -174,14 +174,14 @@
 			\begin{itemize}
 				\item \texttt{cart} - tabela com todos os carrinhos de compras, identificados unicamente.
 				\item \texttt{product} - tabela com todos os produtos disponíveis; cada produto tem um identificador, nome, descrição, preço e quantidade.
-				\item \texttt{cartProduct} - tabela com os produtos num carrinho; cada entrada é identificada pelo par (idCart, idProduct), sendo que cada uma destas componentes é uma referência para uma das outras tabelas; para além disto, contém ainda a quantidade do produto naquele carrinho.
+				\item \texttt{cartProduct} - tabela com os produtos num carrinho; cada entrada é identificada pelo par (\textit{idCart}, \textit{idProduct}), sendo que cada uma destas componentes é uma referência para uma das outras tabelas; para além disto, contém ainda a quantidade do produto naquele carrinho.
 			\end{itemize}
 			
 			Esta classe recebe ainda todas as comunicações dos clientes e, por isso, tem registados todos os \textit{handlers} necessários, sendo que, a cada pedido, o servidor dirige o mesmo para o \textit{skeleton} respetivo (de um carrinho ou do catálogo).
 
-			Dependendo do tipo de pedido que recebe, o servidor envia as informações para o \textit{cluster}, em caso de necessidade.
+			Dependendo do tipo de pedido recebido, o servidor envia as informações para o \textit{cluster}, em caso de necessidade.
 
-		\subsection{\texttt{CartSkeleton}} \label{subsec:ServerCartSkeleton}
+		\subsection{\textit{CartSkeleton}} \label{subsec:ServerCartSkeleton}
 			Esta classe é uma das pontes entre o servidor e a base de dados, modificando, maioritariamente, as tabelas \texttt{cart} e \texttt{cartProduct}. De realçar que é criado um \textit{skeleton} por cada carrinho de compras criado.
 
 			O \texttt{CartSkeleton} implementa as \textit{queries} necessárias para responder aos pedidos que envolvam um carrinho de compras:
@@ -192,7 +192,7 @@
 				\item realizar o \textit{checkout} - retirar, se possível, os produtos do carrinho em \textit{checkout} da tabela \texttt{product} e, de seguida, apagar o carrinho.
 			\end{itemize}
 
-		\subsection{\texttt{CatalogSkeleton}} \label{subsec:ServerCatalogSkeleton}
+		\subsection{\textit{CatalogSkeleton}} \label{subsec:ServerCatalogSkeleton}
 			Esta classe é a outra ponte entre o servidor e a base de dados, modificando, exclusivamente, a tabela \texttt{product}.
 
 			O \texttt{CatalogSkeleton} implementa as \textit{queries} necessárias para responder aos pedidos que envolvam alterações a um produto:
@@ -201,7 +201,7 @@
 				\item consultar as informações de um produto do catálogo - nome, descrição, preço e quantidade;
 				\item consultar o preço ou quantidade de um produto;
 				\item adicionar/remover um produto do catálogo disponível;
-				\item adicionar uma quantidade a um produto do catálogo (reposição de stock);
+				\item adicionar uma quantidade a um produto do catálogo (reposição de \textit{stock});
 				\item retificar/atualizar as informações de um produto do catálogo - nome, descrição ou preço;
 			\end{itemize}
 	
@@ -223,12 +223,12 @@
 		No que toca ao \textit{stub} do carrinho de compras do presente programa disponibilizam-se 3 métodos distintos, nomeadamente \textit{updateProduct}, \textit{checkout} e \textit{getProducts}.
 		Tal como os nomes dos mesmos transparecem, estas funções dizem respeito à atualização de um determinado produto, ao \textit{checkout} dos mesmos e, ainda, à obtenção dos produtos presentes no carrinho.
 		Todos estes partilham o mesmo objeto \textit{serializer}, responsável por serializar as mensagens enviadas para um dos servidores da aplicação.
-		Para além disso, estão também associados a esta classe \texttt{Java} um identificador referente ao carrinho de compras em causa e um objeto relativo à conexão do cliente ao \textit{cluster} de servidores (\hyperref[subsec:ClientConnection]{\textit{ClientConnection}}).
+		Para além disso, estão também associados a esta classe \texttt{Java} um identificador referente ao carrinho de compras em causa e um objeto relativo à conexão do cliente ao \textit{cluster} de servidores (\hyperref[subsec:ClientConnection]{\texttt{ClientConnection}}).
 
 		\subsection{\textit{CatalogStub}} \label{subsec:ClientCatalogStub}
 		Quanto ao \textit{stub} do catálogo, este assemelha-se ao do carrinho de compras a nível de variáveis de instância. Esta classe contém igualmente o serializador de mensagens referido na \hyperref[subsec:ClientCartStub]{secção anterior} e, ainda, o objeto correlacionado à conexão do cliente ao conjunto de servidores.
 		Contudo, apesar destas semelhanças, esta classe \texttt{Java} possui, obviamente, funções distintas da mencionada anteriormente.
-		O \textit{stub} do catálogo apresenta métodos inerentes não só à sua consulta como também à observação de informações intrínsecas aos produto contidos no próprio (como por exemplo, o preço e a quantidade).
+		O \textit{stub} do catálogo apresenta métodos inerentes não só à sua consulta como também à observação de informações intrínsecas aos produtos contidos no próprio (como por exemplo, o preço e a quantidade).
 		Mais, por forma a atualizar os dados dos produtos em questão, existe também a possibilidade de invocar métodos alusivos à adição e remoção dos mesmos.
 }
 
@@ -239,11 +239,11 @@
 	\begin{enumerate}
 		\item separação do código relativo ao \textit{middleware} genérico de replicação do código alusivo à aplicação;
 		
-		Esta valorização foi atingida pela criação das duas classes \textit{ServerConnection} e \textit{ClientConnection}, que podem ser utilizadas por qualquer aplicação que necessite de um \textit{cluster} de servidores capaz de gerir uma base de dados consistente e capaz de responder a um elevado número de clientes. Para o caso específico deste trabalho, implementámos as classes \textit{Supermarket} e \textit{Client} que fazem uso destas.
+		Esta valorização foi atingida pela criação das duas classes \texttt{ServerConnection} e \texttt{ClientConnection}, que podem ser utilizadas por qualquer aplicação que necessite de um \textit{cluster} de servidores capaz de gerir uma base de dados consistente e capaz de responder a um elevado número de clientes. Para o caso específico deste trabalho, implementámos as classes \texttt{Supermarket} e \texttt{Client} que fazem uso destas.
 		
 		\item garantia do tratamento concorrente de varias operações;
 		
-		Ao ser permitido que vários clientes enviem pedidos aos servidores concorrentemente, sendo que os \texttt{GET} são respondidos imediatamente e apenas as operações que alteram a base de dados terem a necessidade de ser sincronizadas entre servidores (para mantermos a consistência da base de dados), esta valorização foi atingida.
+		Ao ser permitido que vários clientes enviem pedidos aos servidores concorrentemente, sendo que os \texttt{Get} são respondidos imediatamente e apenas as operações que alteram a base de dados terem a necessidade de ser sincronizadas entre servidores (para mantermos a consistência da base de dados), esta valorização foi atingida.
 		
 		\item suporte de partições do grupo na ferramenta computacional \textit{Spread};
 		
@@ -251,7 +251,7 @@
 		
 		\item realização de uma análise de desempenho;
 		
-		A análise de desempenho foi feita numa única máquina virtual, com 4 cores (processador i7-8565U) e 8 GB de memória.
+		A análise de desempenho foi feita numa única máquina virtual, com 4 \textit{cores} (processador i7-8565U) e 8 \textit{GB} de memória.
 		Por isto, não existe a latência que existiria numa situação real em que existiriam várias máquinas diferentes, separadas fisicamente.
 		De qualquer das formas, esta análise tem como objetivo perceber qual o máximo de pedidos a que um servidor consegue responder.
 
@@ -262,9 +262,9 @@
 		Pelo grande objetivo deste trabalho ser a resiliência a faltas, faz sentido testar o sistema com mais do que um servidor. Por isso, foram feitos testes para um \textit{cluster} de 3 servidores.
 		Para pedidos de \texttt{Update}, o cluster estabilizou em cerca de 3300 pedidos por segundo.
 		A quebra em relação aos testes com apenas um servidor pode ser explicada pelo facto de ser necessária a comunicação entre servidores.
-		Para pedidos de \texttt{Get}, a intuição é a de que, como este tipo de pedidos não implica a comunicação entre servidores, o limite de pedidos deve ser individual a cada servidor, pelo que neste caso, o limite deverão ser 27000 pedidos por segundo (9000 \times 3).
+		Para pedidos de \texttt{Get}, a intuição é a de que, como este tipo de pedidos não implica a comunicação entre servidores, o limite de pedidos deve ser individual a cada servidor, pelo que neste caso, o limite deverão ser 27000 pedidos por segundo (9000 $\times$ 3).
 
-		A limitação de 4 processos disponíveis não permitiu o teste a um \textit{cluster} com 5 servidores, uma vez que a necessidade de partilhar CPU entre os mesmos terá impacto (significativo) na performance individual de cada servidor e coletiva do sistema.
+		A limitação de 4 processos disponíveis não permitiu o teste a um \textit{cluster} com 5 servidores, uma vez que a necessidade de partilhar \textit{CPU} entre os mesmos terá impacto (significativo) na performance individual de cada servidor e coletiva do sistema.
 		Apesar disto, a expectativa é que um \textit{cluster} com mais servidores não apresentará quebras muito significativas quando comparado com um de 3 servidores.
 		
 		\item minimização das encomendas canceladas como consequência de faltas ou do funcionamento do mecanismo de replicação;
