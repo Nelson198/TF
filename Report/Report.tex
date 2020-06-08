@@ -219,13 +219,25 @@
 		
 		\item realização de uma análise de desempenho;
 		
-		%--------------------------------------------------------------------------
-		%TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
-		%--------------------------------------------------------------------------
+		A análise de desempenho foi feita numa única máquina virtual, com 4 cores (processador i7-8565U) e 8 GB de memória.
+		Por isto, não existe a latência que existiria numa situação real em que existiriam várias máquinas diferentes, separadas fisicamente.
+		De qualquer das formas, esta análise tem como objetivo perceber qual o máximo de pedidos a que um servidor consegue responder.
+
+		Foram feitos testes com apenas um servidor, de forma a perceber os limites do sistema.
+		Para pedidos de \texttt{Update}, o servidor estabilizou na resposta a cerca de 4000 pedidos por segundo.
+		Para pedidos de \texttt{Get}, o servidor estabilizou na resposta a cerca de 9000 pedidos por segundo.
+
+		Pelo grande objetivo deste trabalho ser a resiliência a faltas, faz sentido testar o sistema com mais do que um servidor. Por isso, foram feitos testes para um \textit{cluster} de 3 servidores.
+		Para pedidos de \texttt{Update}, o cluster estabilizou em cerca de 3300 pedidos por segundo.
+		A quebra em relação aos testes com apenas um servidor pode ser explicada pelo facto de ser necessária a comunicação entre servidores.
+		Para pedidos de \texttt{Get}, a intuição é a de que, como este tipo de pedidos não implica a comunicação entre servidores, o limite de pedidos deve ser individual a cada servidor, pelo que neste caso, o limite deverão ser 27000 pedidos por segundo (9000 \times 3).
+
+		A limitação de 4 processos disponíveis não permitiu o teste a um \textit{cluster} com 5 servidores, uma vez que a necessidade de partilhar CPU entre os mesmos terá impacto (significativo) na performance individual de cada servidor e coletiva do sistema.
+		Apesar disto, a expectativa é que um \textit{cluster} com mais servidores não apresentará quebras muito significativas quando comparado com um de 3 servidores.
 		
 		\item minimização das encomendas canceladas como consequência de faltas ou do funcionamento do mecanismo de replicação;
 		
-		Resultado dos testes efetuados e do conhecimento da implementação deste trabalho, temos muita confiança de que as encomendas nunca serão canceladas unilateralmente pelo sistema devido a faltas ou ao funcionamento do mecanismo de replicação. Temos esta confiança, pela forma como é feita a replicação. Sendo que todos os servidores têm a mesma informação e, no nosso caso, todos executam os temporizadores relativos ao fim das encomendas (enviando uma mensagem de fim do tempo ao \textit{cluster}), as encomendas são apenas canceladas ao fim do tempo previsto, \texttt{TMAX}. A única forma de uma encomenda ser cancelada será se todos os servidores do \textit{cluster} forem desconectados, mas isto já é um problema intratável.
+		Como resultado dos testes efetuados e do conhecimento da implementação deste trabalho, temos muita confiança de que as encomendas nunca serão canceladas unilateralmente pelo sistema devido a faltas ou ao funcionamento do mecanismo de replicação. Temos esta confiança, pela forma como é feita a replicação. Sendo que todos os servidores têm a mesma informação e, no nosso caso, todos executam os temporizadores relativos ao fim das encomendas (enviando uma mensagem de fim do tempo ao \textit{cluster}), as encomendas são apenas canceladas ao fim do tempo previsto, \texttt{TMAX}. A única forma de uma encomenda ser cancelada será se todos os servidores do \textit{cluster} forem desconectados, mas isto já é um problema intratável.
 		
 		\item atualização oportuna do estado dos servidores com recurso ao sistema de base de dados, diminuindo, sempre que possível, o volume da informação copiada.
 		
