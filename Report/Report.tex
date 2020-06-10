@@ -79,7 +79,7 @@
 
 	Posto isto, é-nos proposta a implementação, em \texttt{Java}, de uma versão simplificada de um supermercado \textit{online} distribuído por vários servidores, que por sua vez seja o mais tolerante a faltas possível. Para isso, entre outras ferramentas, será utilizado o protocolo \textit{Spread} para comunicação em grupo, à semelhança do que se sucedeu ao longo das aulas da componente prática desta unidade curricular.
 
-	Relativamente à estrutura do presente documento, é descrito de forma mais detalhada a proposta deste projeto, fazendo-se referência aos requisitos intrínsecos à mesma.
+	Relativamente à estrutura do presente documento, é descrita de forma mais detalhada a proposta deste projeto, fazendo-se referência aos requisitos intrínsecos à mesma.
 	De seguida, são exibidos todos os aspetos referentes à implementação deste trabalho. Nesta fase, são especificados todos os tópicos alusivos ao cliente, servidor e, ainda, ao \textit{middleware} genérico da aplicação.
 	Posteriormente, são evidenciadas todas as valorizações tomadas em consideração no desenvolvimento do mesmo.
 	Por fim, são extraídas algumas conclusões da realização deste trabalho, sumariando, globalmente, os objetivos alcançados.
@@ -100,9 +100,9 @@
 
 	O serviço guarda um catálogo contendo uma descrição de cada produto e a quantidade disponível.
 	Cada encomenda inclui um ou mais produtos, sendo que só pode ser concretizada com sucesso se todos os produtos estiverem disponíveis.
-	Admite-se que existe um tempo limite \texttt{TMAX} para a concretização de uma encomenda. Caso esse tempo seja esgotado e a encomenda ainda não tenha sido efetuada, é cancelada.  Embora seja indesejável, admite-se também que uma encomenda pode ser cancelada unilateralmente pelo sistema.
+	Admite-se que existe um tempo limite \texttt{TMAX} para a concretização de uma encomenda. Caso esse tempo seja esgotado e a encomenda ainda não tenha sido efetuada, é cancelada. Embora seja indesejável, admite-se também que uma encomenda pode ser cancelada unilateralmente pelo sistema.
 
-	Quanto aos requisitos da aplicação são impostos os seguintes:
+	Quanto aos requisitos da aplicação, são impostos os seguintes:
 	\begin{itemize}
 		\item par cliente/servidor da interface descrita, replicado para tolerância a faltas;
 		\item permitir o armazenamento persistente do estado dos servidores na base de dados \textit{HSQLDB};
@@ -130,7 +130,7 @@
 			Quando é iniciado, o servidor conecta-se ao \textit{daemon Spread} e prepara-se para a receção de mensagens vindas dos restantes servidores do \textit{cluster}. Após isto, coloca-se num de estado de espera, o qual pode ser interrompido de duas formas:
 			\begin{itemize}
 				\item se for o primeiro servidor a juntar-se ao \textit{cluster}, inicializa a base de dados e cria as tabelas especificadas pelo utilizador do \textit{middleware}. Depois, executa uma função que é fornecida pelo utilizador, dando-lhe oportunidade de inicializar objetos que dependam de uma ligação à base de dados;
-				\item caso contrário, fica à espera de receber uma vista da base de dados de um dos servidores que já estão no \textit{cluster}, o que será detalhado posteriormente. Este servidor não é escolhido ao acaso, dado que é assumida a noção de um servidor primário que, na prática, é o mais antigo do \textit{cluster}. Enquanto não recebe esta informação, vai acumulando todos os pedidos enviados pelos outros servidores, de forma a poder quando esta é recebida.
+				\item caso contrário, fica à espera de receber uma vista da base de dados de um dos servidores que já estão no \textit{cluster}, o que será detalhado posteriormente. Este servidor não é escolhido ao acaso, dado que é assumida a noção de um servidor primário que, na prática, é o mais antigo do \textit{cluster}. Enquanto não recebe esta informação, vai acumulando todos os pedidos enviados pelos outros servidores, de forma a poder processá-los quando esta é recebida.
 			\end{itemize}
 		
 			Em ambos os casos é inicializada a forma de comunicação com os clientes que, no nosso caso, recorre à \textit{framework Atomix}, à qual são passados os \textit{handlers} fornecidos pelo utilizador, os quais estão relacionados com a lógica de negócio.
@@ -149,7 +149,7 @@
 				Por fim, é enviada uma resposta ao servidor, se o utilizador assim pretender, e esta resposta será enviada pelo servidor que recebeu o pedido correspondente àquela atualização.
 
 			\subsubsection{Temporizadores} \label{sssec:Timers}
-				Como referido acima, os servidores efetuam \textit{checkpoints} periódicos. Para isso, necessitam de uma primitiva que lhes permita enviar uma mensagem atomicamente para o servidor ao fim de um determinado período de tempo. Para isso, é criada uma \textit{thread} em cada servidor, que no final do tempo indicado pelo utilizador, envia uma mensagem para todos os membros do \textit{cluster}. Note-se que isto é apenas feito pelo servidor primário, ou seja, é garantido que ocorre apenas uma vez. Há ainda a possibilidade fazer isto repetidamente, como é o caso dos \textit{checkpoints}.
+				Como referido acima, os servidores efetuam \textit{checkpoints} periódicos. Para isso, necessitam de uma primitiva que lhes permita enviar uma mensagem atomicamente para o servidor ao fim de um determinado período de tempo. Para isso, é criada uma \textit{thread} em cada servidor, que no final do tempo indicado pelo utilizador, envia uma mensagem para todos os membros do \textit{cluster}. Note-se que isto é apenas feito pelo servidor primário, ou seja, é garantido que ocorre apenas uma vez. Há ainda a possibilidade de fazer isto repetidamente, como é o caso dos \textit{checkpoints}.
 
 			\subsubsection{Comunicação entre servidores} \label{sssec:ServerCommunication}
 				Apesar de já ter sido bastante explicado nas secções anteriores, expõe-se agora a \textit{framework} utilizada para efetuar a comunicação entre os servidores. Esta comunicação é essencial para o funcionamento correto do sistema, visto que, por um lado, é necessário o envio da base de dados quando um servidor novo se junta ao \textit{cluster} (ou, no caso de desconexão, volta a conectar). Por outro, é a razão pela qual a vista global do sistema é consistente em todos os servidores, dado que todos efetuam as operações dos clientes pela mesma ordem.
@@ -157,7 +157,7 @@
 				Para permitir isto, recorremos à \textit{framework Spread}, que foi extensivamente utilizada nas aulas. Esta permite a formação de grupos de servidores, aos quais podem ser enviadas mensagens, tendo a garantia, através das configurações corretas, que as mensagens são entregues pela mesma ordem a todos. Para além disto, existe um tipo especial de mensagens, as mensagens de \textit{membership}. Quando são recebidas, tal como as anteriores, a sua entrega é logicamente simultânea em todos os servidores. As informações que trazem são, por exemplo, a junção de um servidor a um grupo (o que ajuda no envio da base de dados a este), a saída de um servidor de um grupo e a ocorrência de uma partição (o que ajudará a resolver uma das valorizações).
 
 		\subsection{\textit{ClientConnection}} \label{subsec:ClientConnection}
-			À semelhança da comunicação entre servidores, a \textit{framework Atomix} foi utilizada, neste caso, para o estabelecimento das comunicações dos clientes. Esta permite o envio de mensagens entre dois utilizadores. O recetor de uma mensagem tem de registar um \textit{handler} para um certo tipo de mensagem, caraterizado por uma palavra. Quem envia, necessita de especificar o destino da mensagem e o tipo da mesma. Quando a mensagem é enviada, esta tem de ser serializada pelo emissor e, aquando da sua receção, desserializada pelo recetor.
+			Para o estabelecimento de ligações aos servidores por parte dos clientes foi utilizada a \textit{framework Atomix}. Esta permite o envio de mensagens entre dois utilizadores. O recetor de uma mensagem tem de registar um \textit{handler} para um certo tipo de mensagem, caraterizado por uma palavra. Quem envia, necessita de especificar o destino da mensagem e o tipo da mesma. Quando a mensagem é enviada, esta tem de ser serializada pelo emissor e, aquando da sua receção, desserializada pelo recetor.
 			
 			Uma das funcionalidades mais importantes desta \textit{framework} é a possibilidade de enviar mensagens assincronamente. Isto permite o envio de uma mensagem assincronamente, adiando a sua receção para uma altura posterior. No caso específico deste trabalho, criámos um método auxiliar que permite enviar uma mensagem e retornar apenas quando é recebida uma resposta. Apesar de já existir um método semelhante na \textit{framework}, os nossos requisitos não eram compatíveis com o que este nos fornecia.
 			
@@ -282,10 +282,9 @@
 
 \chapter{Conclusão} \label{ch:Conclusion}
 \large{
-	Este trabalho permitiu a aplicação dos conhecimentos adquiridos ao longo desta unidade curricular.
+	Este trabalho permitiu a aplicação dos conhecimentos adquiridos ao longo desta unidade curricular relativos à implementação de um sistema distribuído tolerante a faltas.
 
-	No geral, os objetivos foram atingidos, uma vez que foram aplicados todos os requisitos do enunciado inicial.
-	A implementação foi pensada no sentido de simplificar todos os processos, sem descurar a robustez exigida, nomeadamente no que toca a tolerância a faltas.
+	No geral, os objetivos foram atingidos, uma vez que foram aplicados todos os requisitos do enunciado inicial, para além de terem sido implmentadas todas as valorizações propostas no enunciado. A implementação foi pensada no sentido de simplificar todos os processos, sem descurar a robustez exigida, nomeadamente no que toca a tolerância a faltas. Desta forma, temos um sistema muito robusto que permite a sua auditoria por qualquer pessoa interessada.
 
 	A análise de desempenho e restantes testes levados a cabo indicam que o sistema é eficiente, para além de resiliente, cumprindo os dois principais objetivos à partida.
 
