@@ -51,7 +51,7 @@
 	\vspace{1cm}
 	}
 	
-\date{\today}
+\date{10 de Junho de 2020}
 
 \titlepic{
 	\vspace{2cm}
@@ -264,7 +264,7 @@
 		A quebra em relação aos testes com apenas um servidor pode ser explicada pelo facto de ser necessária a comunicação entre servidores.
 		Para pedidos de \texttt{Get}, a intuição é a de que, como este tipo de pedidos não implica a comunicação entre servidores, o limite de pedidos deve ser individual a cada servidor, pelo que neste caso, o limite deverão ser 27000 pedidos por segundo (9000 $\times$ 3).
 
-		A limitação de 4 processos disponíveis não permitiu o teste a um \textit{cluster} com 5 servidores, uma vez que a necessidade de partilhar \textit{CPU} entre os mesmos terá impacto (significativo) na performance individual de cada servidor e coletiva do sistema.
+		A limitação de 4 processos disponíveis não permitiu o teste a um \textit{cluster} com 5 servidores, uma vez que a necessidade de partilhar \textit{CPU} entre os mesmos terá impacto (significativo) na \textit{performance} individual de cada servidor e coletiva do sistema.
 		Apesar disto, a expectativa é que um \textit{cluster} com mais servidores não apresentará quebras muito significativas quando comparado com um de 3 servidores.
 		
 		\item minimização das encomendas canceladas como consequência de faltas ou do funcionamento do mecanismo de replicação;
